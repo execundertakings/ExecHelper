@@ -305,8 +305,6 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		# NOTE: When "--strip-native-commands" is used, ONLY the parent app needs the Hardened Runtime Exception Entitlements, NOT anything within the "Java.runtime".
 		# BUT, when the "java" binary is left in place (as we are now doing to run the the "Keyboard_Test.jar" with), that binary also NEEDS the Hardened Runtime Exception Entitlements to be able to launch independently (but the "Java.runtime" itself nor anything else within it needs them).
 
-		codesign_entitlements_plist_path="${TMPDIR}/QAHelper_codesign_entitlements.plist"
-		rm -rf "${codesign_entitlements_plist_path}"
 
 		# Java Default Entitlements:
 		# {
@@ -329,14 +327,13 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		PlistBuddy \
 			-c "Add :$([[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && echo 'com.apple.security.cs.allow-jit' || echo 'com.apple.security.cs.allow-unsigned-executable-memory') bool true" \
 			-c 'Add :com.apple.security.device.audio-input bool true' \
-			"${codesign_entitlements_plist_path}"
 		# NOTE: Apparently DO NOT need "com.apple.security.automation.apple-events" since QuickTime automation is done via "osascript" rather than directly.
 
 		while IFS='' read -rd '' this_java_bin_path; do
 			if [[ "${this_java_bin_path}" == *'/java' ]]; then # Only need to keep the "java" binary, and can delete any others, such as "keytool".
 				if lipo -archs "${this_java_bin_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 					echo "  Code Signing: ${this_java_bin_path#*/dist/}"
-					codesign -fs 'Developer ID Application' -o runtime --entitlements "${codesign_entitlements_plist_path}" --prefix "${jre_bundle_id}." --strict "${this_java_bin_path}"
+					codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app"
 				fi
 			else
 				echo "  Deleting: ${this_java_bin_path#*/dist/}"
@@ -347,12 +344,12 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		while IFS='' read -rd '' this_java_lib_path; do
 			if lipo -archs "${this_java_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 				echo "  Code Signing: ${this_java_lib_path#*/dist/}"
-				codesign -fs 'Developer ID Application' -o runtime --prefix "${jre_bundle_id}." --strict "${this_java_lib_path}"
+				codesign -fs - "${this_java_lib_path}"
 			fi
 		done < <(find "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/lib" -type f -print0)
 
 		echo '  Code Signing: QA Helper.app/Contents/Frameworks/Java.runtime'
-		codesign -fs 'Developer ID Application' -o runtime --strict "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime"
+		codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime"
 
 		# Starting with FlatLaf 3.3, there are native libraries within the JAR that must be signed for Notarization to work: https://github.com/JFormDesigner/FlatLaf/releases/tag/3.3 & https://github.com/JFormDesigner/FlatLaf/issues/800
 		# If the FlatLaf native libraries are NOT signed, Notarization will fail with an error stating that "The binary is not signed with a valid Developer ID certificate." for "QAHelper-mac-universal-NOTARIZATION-SUBMISSION.zip/QA Helper.app/Contents/Java/QA_Helper.jar/com/formdev/flatlaf/natives/libflatlaf-macos-x86_64.dylib" (and also the "libflatlaf-macos-arm64.dylib" file).
@@ -369,7 +366,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			while IFS='' read -rd '' this_jar_lib_path; do
 				if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 					echo "  Code Signing: QA Helper.app/Contents/Java/QA_Helper.jar/Resources/Keyboard_Test.jar/${this_jar_lib_path#*/Keyboard_Test-JAR/}"
-					codesign -fs 'Developer ID Application' -o runtime --prefix "${qa_helper_app_id}." --strict "${this_jar_lib_path}"
+					codesign -fs - "${this_java_lib_path}"
 					did_sign_jar_libs=true
 				fi
 			done < <(find "${TMPDIR}/Keyboard_Test-JAR" -type f -print0)
@@ -382,7 +379,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		while IFS='' read -rd '' this_jar_lib_path; do
 			if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 				echo "  Code Signing: QA Helper.app/Contents/Java/QA_Helper.jar/${this_jar_lib_path#*/QA_Helper-JAR/}"
-				codesign -fs 'Developer ID Application' -o runtime --prefix "${qa_helper_app_id}." --strict "${this_jar_lib_path}"
+				codesign -fs - "${this_java_lib_path}"
 				did_sign_jar_libs=true
 			fi
 		done < <(find "${TMPDIR}/QA_Helper-JAR" -type f -print0)
@@ -393,11 +390,10 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		rm -rf "${TMPDIR}/QA_Helper-JAR"
 
 		echo '  Code Signing: QA Helper.app'
-		codesign -fs 'Developer ID Application' -o runtime --entitlements "${codesign_entitlements_plist_path}" --strict "${PROJECT_PATH}/dist/QA Helper.app"
+		codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app"
 
-		rm -f "${codesign_entitlements_plist_path}"
 
-		if $should_notarize && osascript -e 'activate' -e "display dialog \"Notarize QA Helper\nversion ${app_version_and_type_display}?\" buttons {\"No\", \"Yes\"} cancel button 1 default button 2 with title \"Notarize QA Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+		if false; then # notarization skipped (no Developer ID cert)
 			# Setting up "notarytool": https://scriptingosx.com/2021/07/notarize-a-command-line-tool-with-notarytool/ & https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow
 
 			qa_helper_mac_zip_path_for_notarization="${PROJECT_PATH}/dist/${qa_helper_mac_zip_name/.zip/-NOTARIZATION-SUBMISSION.zip}"

@@ -45,7 +45,7 @@ import org.json.JSONObject;
 public class StatusHistoryWindow extends javax.swing.JFrame {
 
     private final ArrayList<HashMap<String, String>> historyData;
-    private final PrivateStrings privateStrings = new PrivateStrings();
+    private final CustomStrings privateStrings = new CustomStrings();
     private final String[] displayColumnNames = privateStrings.getPCsCRMStatusHistoryDisplayColumnNames();
     private PCsCRMManager PCsCRMManager;
     private boolean isTestMode = false;

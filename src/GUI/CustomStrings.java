@@ -195,4 +195,23 @@ public class CustomStrings {
     public String getFreeGeekWiFiPassword() {
         return "";
     }
+
+    // -------------------------------------------------------------------------
+    // CRM STATUS HISTORY COLUMN NAMES
+    // Display names shown as table headers in the Status History window.
+    // Raw names are the JSON field keys returned by the CRM API.
+    // Since CRM is stubbed, these values are placeholders — the window will
+    // show "UNKNOWN DATE / STATUS / TECH" when no real data is available.
+    // -------------------------------------------------------------------------
+
+    /** Returns column display names for the status history table. */
+    public String[] getPCsCRMStatusHistoryDisplayColumnNames() {
+        return new String[]{"Date", "Status", "Technician"};
+    }
+
+    /** Returns raw JSON field names used to parse CRM status history responses. */
+    public String[] getPCsCRMStatusHistoryRawColumnNames() {
+        return new String[]{"date", "status", "username"};
+    }
+
 }
