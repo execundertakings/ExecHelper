@@ -102,7 +102,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			qa_helper_mac_zip_name='QAHelper-mac-ElCapitan.zip' # Build with Java 16.0.2 to create an El Capitan version (that will be Intel only).
 		fi
 
-		qa_helper_app_id='com.execundertakings.QA-Helper'
+		qa_helper_app_id='com.execundertakings.ExecHelper'
 
 		osascript -e "tell application id \"${qa_helper_app_id}\" to quit" &> /dev/null
 
@@ -143,7 +143,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		jpackage_args=(
 			--type 'app-image'
 			--verbose
-			--name 'QA Helper'
+			--name 'ExecHelper'
 			--app-version "${app_version_for_jpackage}"
 			--mac-package-identifier "${qa_helper_app_id}"
 			--input "${PROJECT_PATH}/dist/JAR for macOS"

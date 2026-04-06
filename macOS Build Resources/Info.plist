@@ -9,17 +9,17 @@
 	<key>CFBundleAllowMixedLocalizations</key>
 	<true/>
 	<key>CFBundleExecutable</key>
-	<string>QA Helper</string>
+	<string>ExecHelper</string>
 	<key>CFBundleIconFile</key>
-	<string>QA Helper</string>
+	<string>ExecHelper</string>
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.execundertakings.QA-Helper</string>
+	<string>com.execundertakings.ExecHelper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>QA Helper</string>
+	<string>ExecHelper</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

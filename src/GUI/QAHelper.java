@@ -2123,7 +2123,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 // may be excessive because that code had app name flexibility that isn't necessary here.
                                 // But, I didn't want to change the code a lot since it will be easier to share back and forth if I make a valuable changes in the future. - Pico
 
-                                String nameOfMe = "QA Helper";
+                                String nameOfMe = "ExecHelper";
                                 String updatedAppFileName = nameOfMe + ".app";
 
                                 // If is macOS Sierra or newer, allow to update to QA Helper built with Java 17 or newer (and is a Universal Binary).
