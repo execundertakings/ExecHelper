@@ -8,7 +8,7 @@
  * Original: https://github.com/freegeek-pdx/Java-QA-Helper
  *
  * This file replaces the proprietary PrivateStrings class with a custom
- * configuration pointing to executiveundertakings.com for updates.
+ * configuration pointing to files.executiveundertakings.com for updates.
  * Free Geek-specific integrations (production log, CRM, email API,
  * WiFi auto-connect) are stubbed out to return empty/no-op values.
  *
@@ -22,11 +22,11 @@ public class CustomStrings {
 
     // -------------------------------------------------------------------------
     // UPDATE SERVER
-    // All update checks and downloads are served from executiveundertakings.com
+    // All update checks and downloads are served from files.executiveundertakings.com
     // -------------------------------------------------------------------------
 
     /** Base URL for the update server. Must end with a trailing slash. */
-    public static final String UPDATE_BASE_URL = "https://executiveundertakings.com/qa-updates/";
+    public static final String UPDATE_BASE_URL = "https://files.executiveundertakings.com/qa-updates/";
 
     /** URL to a plain-text file containing just the latest version string, e.g. "2026.1.7-1" */
     public static final String LATEST_VERSION_URL = UPDATE_BASE_URL + "latest-version.txt";
