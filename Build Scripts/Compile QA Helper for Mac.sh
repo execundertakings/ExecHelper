@@ -102,7 +102,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			qa_helper_mac_zip_name='QAHelper-mac-ElCapitan.zip' # Build with Java 16.0.2 to create an El Capitan version (that will be Intel only).
 		fi
 
-		qa_helper_app_id='org.freegeek.QA-Helper'
+		qa_helper_app_id='com.execundertakings.QA-Helper'
 
 		osascript -e "tell application id \"${qa_helper_app_id}\" to quit" &> /dev/null
 
@@ -454,11 +454,6 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 			echo -e "\nZipping Notarized QA Helper Version ${app_version_and_type_display}..."
 			ditto -ck --keepParent --sequesterRsrc --zlibCompressionLevel 9 "${PROJECT_PATH}/dist/QA Helper.app" "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
-
-			if [[ "${qa_helper_mac_zip_name}" != 'QAHelper-mac-ElCapitan.zip' && -d "${fgMIB_USERAPPS_PATH}" ]]; then
-				rm -f "${fgMIB_USERAPPS_PATH}/${qa_helper_mac_zip_name}"
-				ditto "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}" "${fgMIB_USERAPPS_PATH}"
-			fi
 
 			open -R "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
 

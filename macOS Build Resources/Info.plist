@@ -15,7 +15,7 @@
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.freegeek.QA-Helper</string>
+	<string>com.execundertakings.QA-Helper</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -29,7 +29,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2025 PCs for People &amp; Free Geek
+	<string>Copyright © 2024 Executive Undertakings — Forked from Java-QA-Helper by PCs for People &amp; Free Geek (MIT License)
 
 App Icon is “Robot Face” from Twemoji by Twitter licensed under CC-BY 4.0</string>
 	<key>NSHighResolutionCapable</key>

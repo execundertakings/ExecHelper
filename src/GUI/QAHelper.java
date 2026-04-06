@@ -184,7 +184,7 @@ public class QAHelper extends javax.swing.JFrame {
     QACreditsWindow creditsWindow = new QACreditsWindow();
     PCsCRMManager PCsCRMManager = new PCsCRMManager();
 
-    private PrivateStrings privateStrings = new PrivateStrings();
+    private CustomStrings privateStrings = new CustomStrings();
     String configPassword = privateStrings.getConfigPassword();
     LinkedHashMap<String, String> fgConditionGradesAndDescriptions = privateStrings.getFreeGeekConditionGradesAndDescriptions();
 
@@ -1901,7 +1901,7 @@ public class QAHelper extends javax.swing.JFrame {
                     LinkedHashMap<String, String> getLatestVersionParameters = new LinkedHashMap<>();
                     getLatestVersionParameters.put("os", osFromJava);
                     getLatestVersionParameters.put("version", appVersion);
-                    String latestVersion = new WebReader("https://apps.freegeek.org/qa-helper/download/latest-version.php", getLatestVersionParameters, 15).getFirstOutputLine();
+                    String latestVersion = new WebReader(CustomStrings.LATEST_VERSION_URL, getLatestVersionParameters, 5).getFirstOutputLine();
 
                     if (compareAppVersions(appVersion, latestVersion) == 1) {
                         loadingWindow.setLoadingTextAndDisplay("QA Helper is Updating Itself", "Updating", "CounterclockwiseArrowsButton");
@@ -1942,7 +1942,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
                                     "$ProgressPreference = 'SilentlyContinue';" // Not showing progress makes "Invoke-WebRequest" downloads MUCH faster: https://stackoverflow.com/a/43477248
                                     + "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3;"
-                                    + "Invoke-WebRequest https://apps.freegeek.org/qa-helper/download/" + appUpdateZipFilename + " -OutFile '" + appUpdateZipFilePath + "';" // TODO: Do in Java. Eventually.
+                                    + "Invoke-WebRequest " + CustomStrings.UPDATE_BASE_URL + appUpdateZipFilename + " -OutFile '" + appUpdateZipFilePath + "';" // TODO: Do in Java. Eventually.
                                     + "Expand-Archive '" + appUpdateZipFilePath + "' -DestinationPath " + tempDirectory + " -Force;"
                                 }).waitFor();
                             } else {
@@ -1953,7 +1953,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/bin/rm -f '" + appUpdateJarTempFilePath.replace("'", "'\\''") + "'"}).waitFor();
                                 }
 
-                                Runtime.getRuntime().exec(new String[]{"/usr/bin/curl", "--connect-timeout", "5", "-sfL", "https://apps.freegeek.org/qa-helper/download/" + appUpdateZipFilename, "-o", appUpdateZipFilePath}).waitFor(); // TODO: Do in Java. Eventually.
+                                Runtime.getRuntime().exec(new String[]{"/usr/bin/curl", "--connect-timeout", "5", "-sfL", CustomStrings.UPDATE_BASE_URL + appUpdateZipFilename, "-o", appUpdateZipFilePath}).waitFor(); // TODO: Do in Java. Eventually.
                                 Runtime.getRuntime().exec(new String[]{"/usr/bin/unzip", "-o", "-j", appUpdateZipFilePath, appUpdateJarFilename, "-d", tempDirectory}).waitFor();
                             }
 
@@ -2035,25 +2035,25 @@ public class QAHelper extends javax.swing.JFrame {
                                     loadingWindow.closeWindow();
                                     playAlertSound("error");
                                     sendErrorEmail("App Update Error");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>You must re-download and re-install QA Helper.</i><br/><br/>Click \"OK\" to go to \"https://apps.freegeek.org/qa-helper/download\" to re-download QA Helper.</html>", "QA Helper  —  Update Error", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>You must re-download and re-install QA Helper.</i><br/><br/>Click \"OK\" to go to \"" + CustomStrings.UPDATE_BASE_URL + "\" to re-download QA Helper.</html>", "QA Helper  —  Update Error", JOptionPane.ERROR_MESSAGE);
 
                                     if (isLinux) {
                                         try {
-                                            Runtime.getRuntime().exec(new String[]{"/usr/bin/google-chrome-stable", "--password-store=basic", "--start-maximized", "--incognito", "https://apps.freegeek.org/qa-helper/download"});
+                                            Runtime.getRuntime().exec(new String[]{"/usr/bin/google-chrome-stable", "--password-store=basic", "--start-maximized", "--incognito", CustomStrings.UPDATE_BASE_URL});
                                         } catch (IOException chromeException) {
                                             if (isTestMode) {
                                                 System.out.println("chromeException: " + chromeException);
                                             }
 
                                             try {
-                                                Runtime.getRuntime().exec(new String[]{"/usr/bin/firefox", "-private", "https://apps.freegeek.org/qa-helper/download"});
+                                                Runtime.getRuntime().exec(new String[]{"/usr/bin/firefox", "-private", CustomStrings.UPDATE_BASE_URL});
                                             } catch (IOException firefoxException) {
                                                 if (isTestMode) {
                                                     System.out.println("firefoxException: " + firefoxException);
                                                 }
 
                                                 try {
-                                                    Desktop.getDesktop().browse(new URI("https://apps.freegeek.org/qa-helper/download"));
+                                                    Desktop.getDesktop().browse(new URI(CustomStrings.UPDATE_BASE_URL));
                                                 } catch (IOException | URISyntaxException openQAHelperDownloadException) {
                                                     if (isTestMode) {
                                                         System.out.println("openQAHelperDownloadException: " + openQAHelperDownloadException);
@@ -2063,7 +2063,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         }
                                     } else {
                                         try {
-                                            Desktop.getDesktop().browse(new URI("https://apps.freegeek.org/qa-helper/download"));
+                                            Desktop.getDesktop().browse(new URI(CustomStrings.UPDATE_BASE_URL));
                                         } catch (IOException | URISyntaxException openQAHelperDownloadException) {
                                             if (isTestMode) {
                                                 System.out.println("openQAHelperDownloadException: " + openQAHelperDownloadException);
@@ -2135,7 +2135,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 new File(appUpdateZipFilePath).delete();
                                 Runtime.getRuntime().exec(new String[]{"/bin/rm", "-rf", appUpdateTempFilePath}).waitFor();
 
-                                Runtime.getRuntime().exec(new String[]{"/usr/bin/curl", "--connect-timeout", "5", "-sfL", "https://apps.freegeek.org/qa-helper/download/" + appUpdateZipFilename, "-o", appUpdateZipFilePath}).waitFor(); // TODO: Do in Java. Eventually.
+                                Runtime.getRuntime().exec(new String[]{"/usr/bin/curl", "--connect-timeout", "5", "-sfL", CustomStrings.UPDATE_BASE_URL + appUpdateZipFilename, "-o", appUpdateZipFilePath}).waitFor(); // TODO: Do in Java. Eventually.
                                 Runtime.getRuntime().exec(new String[]{"/usr/bin/ditto", "-x", "-k", "--noqtn", appUpdateZipFilePath, tempDirectory}).waitFor();
 
                                 new File(appUpdateZipFilePath).delete();
@@ -2274,7 +2274,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         "-e", "activate",
                                         "-e", "beep",
                                         "-e", "display alert \"Error Launching “" + nameOfMe.replace("\\", "\\\\").replace("\"", "\\\"") + "” After Update\" message launchError buttons {\"Quit\", \"Re-Download “" + nameOfMe.replace("\\", "\\\\").replace("\"", "\\\"") + "”\"} cancel button 1 default button 2 as critical",
-                                        "-e", "do shell script \"/usr/bin/open 'https://apps.freegeek.org/qa-helper/download'\"",
+                                        "-e", "do shell script \"/usr/bin/open '" + CustomStrings.UPDATE_BASE_URL + "'\"",
                                         "-e", "end try",
                                         "-e", "end try",
                                         "-e", "end try",
