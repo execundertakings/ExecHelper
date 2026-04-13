@@ -49,11 +49,51 @@ public class CustomStrings {
 
     public LinkedHashMap<String, String> getFreeGeekConditionGradesAndDescriptions() {
         LinkedHashMap<String, String> grades = new LinkedHashMap<>();
-        grades.put("A", "Excellent — minimal wear");
-        grades.put("B", "Good — minor cosmetic wear");
-        grades.put("C", "Fair — visible wear, fully functional");
-        grades.put("D", "Poor — heavy wear or cosmetic damage");
+        grades.put("A", "New");
+        grades.put("B", "Used without defects");
+        grades.put("C", "Minor defects");
+        grades.put("D", "Major defects");
         return grades;
+    }
+
+    // -------------------------------------------------------------------------
+    // TECH NAMES
+    // Names shown in the tech selector dropdown on the login screen.
+    // First entry is the default. Add more entries for additional techs.
+    // -------------------------------------------------------------------------
+
+    public java.util.List<String> getTechNames() {
+        return java.util.List.of("Greg");
+    }
+
+    // -------------------------------------------------------------------------
+    // COMMAND CENTER INTEGRATION
+    // Set these two values to enable ExecHelper to push QA results directly
+    // into the Computers tab of Clarkes Command Center.
+    // Leave both empty to run the app without inventory sync.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Base URL of Clarkes Command Center — use the LAN IP so any Mac on the
+     * bench network can reach it.  The Cloudflare tunnel URL also works.
+     *
+     * Examples:
+     *   "https://ebay.executiveundertakings.com"   ← LAN (recommended for bench Macs)
+     *   "https://your-tunnel.trycloudflare.com"  ← remote / Tailscale
+     */
+    public String getCommandCenterURL() {
+        return "https://ebay.executiveundertakings.com";
+    }
+
+    /**
+     * API key for ExecHelper → Command Center communication.
+     * Set EXECHELPER_API_KEY=<value> in the Command Center .env file,
+     * then paste the same value here.  Choose any long random string.
+     *
+     * Generate one with:  python3 -c "import secrets; print(secrets.token_hex(32))"
+     */
+    public String getCommandCenterAPIKey() {
+        return "d9056eb6a43eecc7b1795f76966ef7e2c59580810b7899bc5b8d84201b61e9bb";
     }
 
     // -------------------------------------------------------------------------

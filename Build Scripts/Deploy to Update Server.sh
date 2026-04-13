@@ -73,6 +73,17 @@ for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip' \
     fi
 done
 
+# Extract app into qa-updates/ for direct access
+for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
+    if [[ -f "${QA_UPDATES_DIR}/${zip_name}" ]]; then
+        extracted_name="${zip_name%.zip}"
+        rm -rf "${QA_UPDATES_DIR}/${extracted_name}"
+        ditto -xk "${QA_UPDATES_DIR}/${zip_name}" "${QA_UPDATES_DIR}/${extracted_name}"
+        echo "  ✓ Extracted ${extracted_name}/ExecHelper.app"
+    fi
+done
+
+
 echo ""
 echo "✓ Files copied to qa-updates/."
 echo "  The deploy agent will publish them to files.executiveundertakings.com within ~2 minutes."

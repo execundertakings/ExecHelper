@@ -117,6 +117,12 @@ public class QAHelper extends javax.swing.JFrame {
     String pid = "N/A";
     String currentConditionGrade = "N/A";
     boolean allowSettingConditionGrade = false;
+    javax.swing.JComboBox<String> execGradeCombo;
+    javax.swing.JTextField execNotesField;
+    javax.swing.JCheckBox execChkGlassGood;
+    javax.swing.JCheckBox execChkChips;
+    javax.swing.JCheckBox execChkCracks;
+    javax.swing.JPanel execInputPanel;
     String currentNotes = "";
     boolean conditionAndNotesUpdated = false;
     boolean lastConditionAndNotesSaveFailed = false;
@@ -390,7 +396,7 @@ public class QAHelper extends javax.swing.JFrame {
                 if (multipleInstancesRunning) {
                     if (isMacOS) {
                         // Show alert instead of focusing on macOS because it's better when I'm debugging and it's also more complicated to focus the running instance when it may not be a .app
-                        JOptionPane.showMessageDialog(null, "<html><b>Only one instance of <i>QA Helper</i> is allowed to run at a time.</b></html>", "QA Helper  —  Launch Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "<html><b>Only one instance of <i>QA Helper</i> is allowed to run at a time.</b></html>", "ExecHelper  -  Launch Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         try {
                             Runtime.getRuntime().exec((isWindows
@@ -449,7 +455,7 @@ public class QAHelper extends javax.swing.JFrame {
                 //System.out.println("Printing loadAppException Stack Trace:");
                 //loadAppException.printStackTrace();
 
-                JOptionPane.showMessageDialog(null, "<html><b>Error Loading <i>QA Helper</i></b></html>", "QA Helper  —  Load Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "<html><b>Error Loading <i>QA Helper</i></b></html>", "ExecHelper  -  Load Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
         });
@@ -759,7 +765,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (!linuxReleaseDescription.startsWith("Linux Mint") || ((desktopSession != null) && !desktopSession.equals("cinnamon") && !desktopSession.equals("mate"))) {
                 playAlertSound("error");
                 String[] linuxWarningDialogButtons = new String[]{"Continue", "Quit"};
-                int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> only supports <i>Linux Mint</i> with either the <u>Cinnamon</u> or <u>MATE</u> desktop environment.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "QA Helper  —  Linux Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, linuxWarningDialogButtons, linuxWarningDialogButtons[0]);
+                int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> only supports <i>Linux Mint</i> with either the <u>Cinnamon</u> or <u>MATE</u> desktop environment.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Linux Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, linuxWarningDialogButtons, linuxWarningDialogButtons[0]);
                 if (linuxWarningDialogReturn == JOptionPane.NO_OPTION || linuxWarningDialogReturn == -1) {
                     System.exit(0);
                 }
@@ -860,7 +866,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (!isWindows11 && !osName.startsWith("Windows 10")) {
                 playAlertSound("error");
                 String[] windowsWarningDialogButtons = new String[]{"Continue", "Quit"};
-                int windowsWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> does not support versions of <i>Windows</i> other than <u>Windows 10</u> or <u>Windows 11</u>.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "QA Helper  —  Windows Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, windowsWarningDialogButtons, windowsWarningDialogButtons[0]);
+                int windowsWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> does not support versions of <i>Windows</i> other than <u>Windows 10</u> or <u>Windows 11</u>.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Windows Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, windowsWarningDialogButtons, windowsWarningDialogButtons[0]);
                 if (windowsWarningDialogReturn == JOptionPane.NO_OPTION || windowsWarningDialogReturn == -1) {
                     System.exit(0);
                 }
@@ -885,6 +891,96 @@ public class QAHelper extends javax.swing.JFrame {
         }
 
         initComponents();
+
+        // --- ExecHelper: Login simplification ---
+        {
+            java.util.List<String> execTechNames = privateStrings.getTechNames();
+            lblUsername.setText("Tech:");
+            String defaultTech = execTechNames.isEmpty() ? "Greg" : execTechNames.get(0);
+            txtUsername.setText(defaultTech);
+            txtUsername.setEditable(execTechNames.size() > 1);
+            // Pre-fill dummy password so login button condition passes; field stays hidden
+            pswPassword.setText("exec");
+            lblPassword.setVisible(false);
+            java.awt.Dimension zeroDim = new java.awt.Dimension(0, 0);
+            lblPassword.setPreferredSize(zeroDim);
+            lblPassword.setMinimumSize(zeroDim);
+            lblPassword.setMaximumSize(zeroDim);
+            pswPassword.setPreferredSize(zeroDim);
+            pswPassword.setMinimumSize(zeroDim);
+            pswPassword.setMaximumSize(zeroDim);
+            pswPassword.setVisible(false);
+            // Hide "Forgot Password" link - not applicable
+            btnForgot.setVisible(false);
+            // EU workflow: hide login button (Enter in Asset ID field triggers login)
+            btnLogIn.setVisible(false);
+            java.awt.Dimension zeroBtnDim = new java.awt.Dimension(0, 0);
+            btnLogIn.setPreferredSize(zeroBtnDim);
+            btnLogIn.setMinimumSize(zeroBtnDim);
+            btnLogIn.setMaximumSize(zeroBtnDim);
+            lblPID.setText("Asset ID:");
+            // Auto-focus the Asset ID field after layout
+            javax.swing.SwingUtilities.invokeLater(() -> txtPID.requestFocusInWindow());
+            java.awt.Dimension zeroForgot = new java.awt.Dimension(0, 0);
+            btnForgot.setPreferredSize(zeroForgot);
+            btnForgot.setMinimumSize(zeroForgot);
+            btnForgot.setMaximumSize(zeroForgot);
+        }
+
+        // --- ExecHelper: Auto-login on startup ---
+        {
+            PCsCRMManager.authenticateCredentials(txtUsername.getText(),
+                    new String(pswPassword.getPassword()), isTestMode);
+            isLoggedIn = true;
+            allowSettingConditionGrade = true;
+            username = txtUsername.getText();
+        }
+
+        // --- ExecHelper: Inline grade & notes fields below Asset ID ---
+        {
+            execGradeCombo = new javax.swing.JComboBox<>();
+            fgConditionGradesAndDescriptions.forEach((grade, desc) -> {
+                execGradeCombo.addItem(grade + (desc.isEmpty() ? "" : " - " + desc));
+            });
+            execGradeCombo.setSelectedIndex(1); // Default to B
+
+            execNotesField = new javax.swing.JTextField(30);
+
+            execInputPanel = new javax.swing.JPanel();
+            execInputPanel.setLayout(new javax.swing.BoxLayout(execInputPanel, javax.swing.BoxLayout.Y_AXIS));
+
+            javax.swing.JPanel gradeRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 2));
+            gradeRow.add(new javax.swing.JLabel("Grade:"));
+            gradeRow.add(execGradeCombo);
+
+            // Condition checkboxes
+            execChkGlassGood = new javax.swing.JCheckBox("Glass good", true);
+            execChkChips = new javax.swing.JCheckBox("Chips");
+            execChkCracks = new javax.swing.JCheckBox("Cracks");
+            javax.swing.JPanel conditionRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 2));
+            conditionRow.add(new javax.swing.JLabel("Condition:"));
+            conditionRow.add(execChkGlassGood);
+            conditionRow.add(execChkChips);
+            conditionRow.add(execChkCracks);
+
+            javax.swing.JPanel notesRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 2));
+            notesRow.add(new javax.swing.JLabel("Notes:"));
+            execNotesField.setMinimumSize(new java.awt.Dimension(300, 26));
+            execNotesField.setPreferredSize(new java.awt.Dimension(400, 26));
+            notesRow.add(execNotesField);
+
+            execInputPanel.add(gradeRow);
+            execInputPanel.add(conditionRow);
+            execInputPanel.add(notesRow);
+            execInputPanel.setVisible(false); // Hidden until logged in
+
+            // Wrap content pane: existing GroupLayout in CENTER, input panel in SOUTH
+            javax.swing.JPanel existingContent = (javax.swing.JPanel) getContentPane();
+            javax.swing.JPanel wrapper = new javax.swing.JPanel(new java.awt.BorderLayout());
+            wrapper.add(existingContent, java.awt.BorderLayout.CENTER);
+            wrapper.add(execInputPanel, java.awt.BorderLayout.SOUTH);
+            setContentPane(wrapper);
+        }
 
         if (isMacOS) { // On macOS, switch menu shortcuts from CTRL_DOWN_MASK to META_DOWN_MASK.
             menResetTextSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, InputEvent.META_DOWN_MASK));
@@ -1164,11 +1260,11 @@ public class QAHelper extends javax.swing.JFrame {
                     + "Make sure you're connected to either a Wi-Fi network or plugged in with an Ethernet cable.<br/>"
                     + "If this computer does not have an Ethernet port, use an Ethernet adapter.<br/>"
                     + "Once you're connected to Wi-Fi or Ethernet, it may take a few moments for the internet connection to be established.<br/>"
-                    + "If it takes more than a few minutes, consult an instructor or inform Free Geek I.T.</html>"},
-                        "QA Helper  —  Add to Production Log Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Continue Without Logging Automatically (Only Choose If Added Manually)"}, "Try Again");
+                    + "If it takes more than a few minutes, consult an instructor or inform Executive Undertakings</html>"},
+                        "ExecHelper  -  Add to Production Log Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Continue Without Logging Automatically (Only Choose If Added Manually)"}, "Try Again");
 
                 if (addToProductionLogErrorResponse == JOptionPane.NO_OPTION) { // Check for "JOptionPane.NO_OPTION" specifically because still want pressing Escape key to Try Again. Canceling must be manually clicked.
-                    if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to continue WITHOUT automatically adding this computer to you production log?</b><br/><br/>This computer MUST still be manually added to your production log.<br/><br/><i>Only choose &quot;Yes&quot; if you have manually added this computer to your production log.</i></html>", "QA Helper  —  Confirm DO NOT Automatically Add to Production Log", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                    if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to continue WITHOUT automatically adding this computer to you production log?</b><br/><br/>This computer MUST still be manually added to your production log.<br/><br/><i>Only choose &quot;Yes&quot; if you have manually added this computer to your production log.</i></html>", "ExecHelper  -  Confirm DO NOT Automatically Add to Production Log", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
                         sendErrorEmail("CHOSE TO CONTINUE WITHOUT AUTOMATICALLY ADDING DEVICE TO PRODUCTION LOG");
 
                         loadingWindow.setAlwaysOnTop(true);
@@ -1439,7 +1535,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             loadingWindow.closeWindow();
 
-                            JOptionPane.showMessageDialog(null, "<html><b><i>Free Geek Setup</i> Hasn't Been Run Yet</b><br/><br/>Please run <i>Free Geek Setup</i> and then try running <i>QA Helper</i> again.</html>", "QA Helper  —  Free Geek Setup Not Run", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "<html><b><i>Free Geek Setup</i> Hasn't Been Run Yet</b><br/><br/>Please run <i>Free Geek Setup</i> and then try running <i>QA Helper</i> again.</html>", "ExecHelper  -  Free Geek Setup Not Run", JOptionPane.ERROR_MESSAGE);
 
                             try {
                                 Runtime.getRuntime().exec(new String[]{"/usr/bin/open", "-na", "/Users/fg-demo/Applications/Free Geek Setup.app"});
@@ -1548,7 +1644,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     if (!allowedJavaVersions.contains(runningJavaVersion)) {
                                         playAlertSound("error");
                                         sendErrorEmail("Outdated " + (isLinuxUbiquityMode ? "Linux" : "Windows") + " Installer\n\nRunning Java Version: " + runningJavaVersion + "\nAllowed Java Version(s): " + String.join(", ", allowedJavaVersions));
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Installer Is Outdated</b><br/><br/>Please deliver this USB installer to Free Geek I.T.</html>", "QA Helper  —  Outdated Installer", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Installer Is Outdated</b><br/><br/>Please deliver this USB installer to Executive Undertakings</html>", "ExecHelper  -  Outdated Installer", JOptionPane.ERROR_MESSAGE);
                                     }
                                 }
 
@@ -1556,15 +1652,15 @@ public class QAHelper extends javax.swing.JFrame {
                                     if (computerSpecs == null) {
                                         playAlertSound("error");
                                         sendErrorEmail("Failed to Load Computer Specs (computerSpecs IS NULL): " + finalLoadWindowExceptionString);
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Load Computer Specs</b><br/><br/><pre>" + finalLoadWindowExceptionString + "</pre><br/>This should not have happened, please inform Free Geek I.T.</html>", "QA Helper  —  Load Specs Failed", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Load Computer Specs</b><br/><br/><pre>" + finalLoadWindowExceptionString + "</pre><br/>This should not have happened, please inform Executive Undertakings</html>", "ExecHelper  -  Load Specs Failed", JOptionPane.ERROR_MESSAGE);
                                     } else if (!computerSpecs.getLoadSpecsException().isEmpty()) {
                                         playAlertSound("error");
                                         sendErrorEmail("Error Loading Computer Specs: " + computerSpecs.getLoadSpecsException());
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Loading Computer Specs</b><br/><br/><pre>" + computerSpecs.getLoadSpecsException() + "</pre><br/>This should not have happened, please inform Free Geek I.T.</html>", "QA Helper  —  Load Specs Error", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Loading Computer Specs</b><br/><br/><pre>" + computerSpecs.getLoadSpecsException() + "</pre><br/>This should not have happened, please inform Executive Undertakings</html>", "ExecHelper  -  Load Specs Error", JOptionPane.ERROR_MESSAGE);
                                     } else if (wasFirstLoad) {
                                         if ((isLinuxUbiquityMode || isWindowsPE) && computerSpecs.getFullStorage().contains(" eMMC")) {
                                             playAlertSound("error");
-                                            int eMMCDetectedResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>eMMC Storage Detected:</b><br/>" + computerSpecs.getFullStorage() + "<br/><br/><i>All computers with eMMC storage are below build specifications.</i><br/><br/><b>This computer left SDA by accident and the eMMC drive WAS NOT SECURELY ERASED.</b><br/><br/><u>This computer with un-erased eMMC storage must be reported and sent back to SDA.</u></html>", "QA Helper  —  eMMC Detected", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Shut Down", "Certify This eMMC Has Been Securely Erased"}, "Shut Down");
+                                            int eMMCDetectedResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>eMMC Storage Detected:</b><br/>" + computerSpecs.getFullStorage() + "<br/><br/><i>All computers with eMMC storage are below build specifications.</i><br/><br/><b>This computer left SDA by accident and the eMMC drive WAS NOT SECURELY ERASED.</b><br/><br/><u>This computer with un-erased eMMC storage must be reported and sent back to SDA.</u></html>", "ExecHelper  -  eMMC Detected", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Shut Down", "Certify This eMMC Has Been Securely Erased"}, "Shut Down");
 
                                             if (eMMCDetectedResponse != JOptionPane.NO_OPTION) { // Check for "JOptionPane.NO_OPTION" specifically because still want pressing Escape key to Shut Down. Certifying must be manually clicked.
                                                 if (isLinux) {
@@ -1599,7 +1695,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             String[] noSerialDialogButtons = new String[]{"Shut Down", "Reboot", "Keep Using QA Helper"};
 
                                             playAlertSound("error");
-                                            int noSerialDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>No Serial Number to License Windows with Digital Product Key</b><br/><br/>Since this computer does not have a computer or motherboard serial number available via software,<br/><u>it cannot have a Digital Product Key applied to it to license Windows.</u></html>", "QA Helper  —  No Serial Number to License Windows", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, noSerialDialogButtons, noSerialDialogButtons[0]);
+                                            int noSerialDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>No Serial Number to License Windows with Digital Product Key</b><br/><br/>Since this computer does not have a computer or motherboard serial number available via software,<br/><u>it cannot have a Digital Product Key applied to it to license Windows.</u></html>", "ExecHelper  -  No Serial Number to License Windows", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, noSerialDialogButtons, noSerialDialogButtons[0]);
 
                                             String noSerialDialogResponseString = "Keep Using QA Helper";
                                             if (noSerialDialogResponse > -1) {
@@ -1640,7 +1736,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             String[] customDesktopOrBareMotherboardDialogButtons = new String[]{"Custom Desktop", "Bare Motherboard"};
 
                                             playAlertSound("beep");
-                                            int customDesktopOrBareMotherboardDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Are you testing a fully built <u>custom desktop</u> or just a <u>bare motherboard</u>?</b></html>", "QA Helper  —  Specify Device Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, customDesktopOrBareMotherboardDialogButtons, customDesktopOrBareMotherboardDialogButtons[0]);
+                                            int customDesktopOrBareMotherboardDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Are you testing a fully built <u>custom desktop</u> or just a <u>bare motherboard</u>?</b></html>", "ExecHelper  -  Specify Device Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, customDesktopOrBareMotherboardDialogButtons, customDesktopOrBareMotherboardDialogButtons[0]);
 
                                             String customDesktopOrBareMotherboardDialogResponseString = "Custom Desktop";
                                             if (customDesktopOrBareMotherboardDialogResponse > -1) {
@@ -1697,7 +1793,7 @@ public class QAHelper extends javax.swing.JFrame {
             } else if (!currentUserGroups.contains("adm") && !currentUserGroups.contains("admin") && !currentUserGroups.contains("sudo") && !currentUserGroups.contains("sudoers")) {
                 loadingWindow.setAlwaysOnTop(false);
                 playAlertSound("error");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>You must be logged in as an Admin or Sudo user to be able to <i>" + passwordPromptReason + "</i>.</b></html>", "QA Helper  —  Admin Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>You must be logged in as an Admin or Sudo user to be able to <i>" + passwordPromptReason + "</i>.</b></html>", "ExecHelper  -  Admin Warning", JOptionPane.WARNING_MESSAGE);
                 loadingWindow.setAlwaysOnTop(true);
                 return;
             }
@@ -1784,7 +1880,7 @@ public class QAHelper extends javax.swing.JFrame {
                 };
 
                 loadingWindow.setAlwaysOnTop(false);
-                passwordPromptPane.createDialog(qaHelperWindow, "QA Helper  —  Admin Password").setVisible(true);
+                passwordPromptPane.createDialog(qaHelperWindow, "ExecHelper  -  Admin Password").setVisible(true);
                 loadingWindow.setAlwaysOnTop(true);
 
                 if (passwordPromptPane.getValue() != null && (int) passwordPromptPane.getValue() == JOptionPane.OK_OPTION) {
@@ -2029,13 +2125,13 @@ public class QAHelper extends javax.swing.JFrame {
                                         loadingWindow.closeWindow();
                                         playAlertSound("error");
                                         sendErrorEmail("App Update Error - Failed to create update finisher command file.");
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>Failed to create update finisher command file.</i></html>", "QA Helper  —  Update Error", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>Failed to create update finisher command file.</i></html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
                                     }
                                 } else {
                                     loadingWindow.closeWindow();
                                     playAlertSound("error");
                                     sendErrorEmail("App Update Error");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>You must re-download and re-install QA Helper.</i><br/><br/>Click \"OK\" to go to \"" + CustomStrings.UPDATE_BASE_URL + "\" to re-download QA Helper.</html>", "QA Helper  —  Update Error", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>You must re-download and re-install QA Helper.</i><br/><br/>Click \"OK\" to go to \"" + CustomStrings.UPDATE_BASE_URL + "\" to re-download QA Helper.</html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
 
                                     if (isLinux) {
                                         try {
@@ -2798,11 +2894,15 @@ public class QAHelper extends javax.swing.JFrame {
 
         if (isLoggedIn) {
             if (currentStatusAndTech == null) {
-                if (isTestMode) {
-                    System.out.println("MAYBE RETRIEVING STATUS HISTORY ON MAIN THREAD (IF IT WASN'T CACHED)");
+                if (pid.equals("N/A") || pid.isEmpty()) {
+                    // ExecHelper: Use default status when no PID entered yet
+                    currentStatusAndTech = new String[]{"Received", username};
+                } else {
+                    if (isTestMode) {
+                        System.out.println("MAYBE RETRIEVING STATUS HISTORY ON MAIN THREAD (IF IT WASN'T CACHED)");
+                    }
+                    currentStatusAndTech = loadStatusHistory(false);
                 }
-
-                currentStatusAndTech = loadStatusHistory(false);
             }
 
             // Never hide login and tasks in Windows since QA Helper will never be shown in demo mode.
@@ -2833,6 +2933,9 @@ public class QAHelper extends javax.swing.JFrame {
 
                 if (isLinuxUbiquityMode || isWindowsPE) {
                     btnDoneTestingText = "Install OS";
+                } else if (!pid.startsWith("FG")) {
+                    // ExecHelper: non-FG devices always show action after login
+                    btnDoneTestingText = "Add to Inventory";
                 }
             }
 
@@ -2903,31 +3006,37 @@ public class QAHelper extends javax.swing.JFrame {
 
         boolean shouldShowLogin = !shouldShowStatus;
         if (shouldShowLogin != btnLogIn.isVisible()) {
-            lblUsername.setVisible(shouldShowLogin);
-            txtUsername.setEnabled(shouldShowLogin);
-            txtUsername.setVisible(shouldShowLogin);
+            // ExecHelper: Tech field always visible
+            lblUsername.setVisible(true);
+            txtUsername.setEnabled(true);
+            txtUsername.setVisible(true);
 
-            lblPassword.setVisible(shouldShowLogin);
-            pswPassword.setEnabled(shouldShowLogin);
-            pswPassword.setVisible(shouldShowLogin);
+            // Password field permanently hidden in ExecHelper
+            lblPassword.setVisible(false);
+            pswPassword.setEnabled(true); // keep enabled so getPassword() returns the pre-filled value
+            pswPassword.setVisible(false);
 
             lblPID.setVisible(shouldShowLogin);
             txtPID.setEnabled(shouldShowLogin);
             txtPID.setVisible(shouldShowLogin);
 
-            btnTestMode.setEnabled(shouldShowLogin);
-            btnTestMode.setVisible(shouldShowLogin);
+            // ExecHelper: hide Test/Live Mode toggle
+            btnTestMode.setEnabled(false);
+            btnTestMode.setVisible(false);
 
-            btnForgot.setEnabled(shouldShowLogin);
-            btnForgot.setVisible(shouldShowLogin);
+            // ExecHelper: Forgot Password not applicable - always hidden
+            btnForgot.setEnabled(false);
+            btnForgot.setVisible(false);
 
-            btnCheckPID.setEnabled(shouldShowLogin);
-            btnCheckPID.setVisible(shouldShowLogin);
+            // ExecHelper: hide Check ID button
+            btnCheckPID.setEnabled(false);
+            btnCheckPID.setVisible(false);
 
             lblVersion.setVisible(shouldShowLogin);
 
+            // ExecHelper: login button always hidden (Enter in Asset ID triggers login)
             btnLogIn.setEnabled(shouldShowLogin);
-            btnLogIn.setVisible(shouldShowLogin);
+            btnLogIn.setVisible(false);
         }
 
         if (isPeripheralTestMode && lblModelLabel.isVisible()) {
@@ -3177,17 +3286,15 @@ public class QAHelper extends javax.swing.JFrame {
             btnVerifyRemoteManagement.setEnabled(shouldEnableVerifyRemoteManagement);
         }
 
-        boolean showConditionAndNotesButton = isLoggedIn;
-        if (showConditionAndNotesButton != btnSetConditionAndNotes.isVisible() || conditionAndNotesUpdated || themeUpdated) {
-            boolean conditionAndNotesAreEmpty = (currentConditionGrade.equals("N/A") && currentNotes.isEmpty());
-            if (allowSettingConditionGrade) {
-                btnSetConditionAndNotes.setText("<html><center>" + (conditionAndNotesAreEmpty ? "Add" : "Edit") + " Condition<br/>and Notes</center></html>");
-            } else {
-                btnSetConditionAndNotes.setText((conditionAndNotesAreEmpty ? "Add Notes" : "Edit Notes"));
-            }
-            btnSetConditionAndNotes.setFont(defaultFont.deriveFont(conditionAndNotesAreEmpty ? defaultFont.getStyle() : Font.BOLD));
-            btnSetConditionAndNotes.setEnabled(showConditionAndNotesButton);
-            btnSetConditionAndNotes.setVisible(showConditionAndNotesButton);
+        // ExecHelper: Always hide the old condition/notes button - replaced by inline fields
+        btnSetConditionAndNotes.setVisible(false);
+        btnSetConditionAndNotes.setEnabled(false);
+
+        // Show/hide inline grade & notes panel based on login state
+        if (execInputPanel != null && execInputPanel.isVisible() != isLoggedIn) {
+            execInputPanel.setVisible(isLoggedIn);
+            // Resize window to fit the panel
+            pack();
         }
 
         String btnSaveOrPrintSpecsText = ((isLoggedIn && !isWindows && loggedInUserInfo.containsKey("printerIPs")) ? ((isLinuxUbiquityMode ? "" : "Save or ") + "Print Specs") : "Save Specs");
@@ -4261,7 +4368,7 @@ public class QAHelper extends javax.swing.JFrame {
                     } else {
                         loadingWindow.closeWindow();
                         playAlertSound("error");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Username or Password</b></html>", "QA Helper  —  Login Error", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Username or Password</b></html>", "ExecHelper  -  Login Error", JOptionPane.WARNING_MESSAGE);
                     }
                 } catch (Exception authenticateUserException) {
                     if (isTestMode) {
@@ -4272,7 +4379,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                     loadingWindow.closeWindow();
                     playAlertSound("error");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Authenticate User</i></b></html>", "QA Helper  —  Authenticate User Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Authenticate User</i></b></html>", "ExecHelper  -  Authenticate User Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -4310,7 +4417,7 @@ public class QAHelper extends javax.swing.JFrame {
                             if (!pidExists) {
                                 loadingWindow.closeWindow();
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CrossMark", qaHelperWindow).toImgTag("left") + " <b style='color: " + errorColorHTML + "'>ID \"" + thisPID + "\" Does Not Exist</b><br/><br/><i>Double-check the ID or create it at PCsCRM.com.</i></html>", "QA Helper  —  ID Error", JOptionPane.WARNING_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CrossMark", qaHelperWindow).toImgTag("left") + " <b style='color: " + errorColorHTML + "'>ID \"" + thisPID + "\" Does Not Exist</b><br/><br/><i>Double-check the ID or create it at PCsCRM.com.</i></html>", "ExecHelper  -  ID Error", JOptionPane.WARNING_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
                             } else {
                                 String loggedBrand = "ERROR";
                                 String loggedModel = "ERROR";
@@ -4389,7 +4496,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             + "<b>&nbsp;Model:</b> " + loggedModel + "<br/>"
                                             + "<b>Serial:</b> " + loggedSerial
                                             + "</p>")
-                                            + "</html>", "QA Helper  —  Check ID", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
+                                            + "</html>", "ExecHelper  -  Check ID", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
                                 } else {
                                     if (!loggedSerial.isEmpty() && !loggedSerial.equals("NOT LOGGED") && !loggedSerial.equals((deviceTypeIsMotherboard ? computerSpecs.getMotherboardSerial() : computerSpecs.getSerial()))) {
                                         boolean allowLogin = false;
@@ -4427,7 +4534,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     + "<b>Brand:</b> " + loggedBrand + "<br/>"
                                                     + "<b>Model:</b> " + loggedModel + "<br/>"
                                                     + "<b>Serial:</b> " + loggedSerial + "<br/>"
-                                                    + "</html>", "QA Helper  —  ID Already Logged for Different Serial", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("Collision", qaHelperWindow).toImageIcon(32), pidAlreadyLoggedDialogButtons.toArray(), pidAlreadyLoggedDialogButtons.get(0));
+                                                    + "</html>", "ExecHelper  -  ID Already Logged for Different Serial", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("Collision", qaHelperWindow).toImageIcon(32), pidAlreadyLoggedDialogButtons.toArray(), pidAlreadyLoggedDialogButtons.get(0));
 
                                             if (pidAlreadyLoggedDialogReturn != JOptionPane.NO_OPTION) {
                                                 loggedInUserInfo.clear();
@@ -4458,7 +4565,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     pid = thisPID;
 
-                                    // TODO: ENABLE FOR FG WHEN FINALIZED AND DOCUMENTED OUR DESIRED CONDITION GRADES: allowSettingConditionGrade = pid.startsWith("FG"); // NOTE: NOT allowing setting "Condition Grade" for non-Free Geek IDs, because PCs for People uses the field for specific R2 grading which is used in audits.
+                                    allowSettingConditionGrade = !pid.startsWith("FG"); // ExecHelper: Enable grade selection for all non-FG IDs (EU prefix etc.)
                                     if (allowSettingConditionGrade && fgConditionGradesAndDescriptions.containsKey(loggedConditionGrade) && (!loggedConditionGrade.equals("B") || !loggedSetByVersion.isEmpty())) {
                                         // For Free Geek IDs, ignore default condition grade of "B" if specs have not been logged yet,
                                         // or were logged by a version of QA Helper (or FG API/Specs) older than SOME FUTURE VERSION
@@ -4486,13 +4593,13 @@ public class QAHelper extends javax.swing.JFrame {
 
                             loadingWindow.closeWindow();
                             playAlertSound("error");
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Check ID</i></b></html>", "QA Helper  —  Check ID Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Check ID</i></b></html>", "ExecHelper  -  Check ID Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
                     loadingWindow.closeWindow();
                     playAlertSound("error");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CrossMark", qaHelperWindow).toImgTag("left") + " <b style='color: " + errorColorHTML + "'>ID \"" + thisPID + "\" Is Not Valid</b><br/><br/><i>Double-check the ID or create it at PCsCRM.com.</i></html>", "QA Helper  —  ID Error", JOptionPane.WARNING_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CrossMark", qaHelperWindow).toImgTag("left") + " <b style='color: " + errorColorHTML + "'>ID \"" + thisPID + "\" Is Not Valid</b><br/><br/><i>Double-check the ID or create it at PCsCRM.com.</i></html>", "ExecHelper  -  ID Error", JOptionPane.WARNING_MESSAGE, new TwemojiImage("IDButton", qaHelperWindow).toImageIcon(32));
                 }
             } else {
                 playAlertSound("beep");
@@ -4521,6 +4628,11 @@ public class QAHelper extends javax.swing.JFrame {
         currentStatusAndProductType.put("Product Type", "UNKNOWN PRODUCT TYPE");
 
         if (isLoggedIn) {
+            // ExecHelper: Skip network call when no PID entered yet
+            if (pid.equals("N/A") || pid.isEmpty()) {
+                currentStatusAndProductType.put("Status", "Received");
+                return currentStatusAndProductType;
+            }
             try {
                 LinkedHashMap<String, String> currentSpecs = PCsCRMManager.getSpecsForPID(pid, isTestMode, true);
 
@@ -4531,10 +4643,10 @@ public class QAHelper extends javax.swing.JFrame {
                     sendErrorEmail(currentStatus);
                 }
 
-                String currentProductType = currentSpecs.get("Product Type");
+                String currentProductType = currentSpecs.getOrDefault("Product Type", "UNKNOWN PRODUCT TYPE");
                 currentStatusAndProductType.put("Product Type", currentProductType);
 
-                if (currentProductType.startsWith("NEW Product Type")) {
+                if (currentProductType != null && currentProductType.startsWith("NEW Product Type")) {
                     sendErrorEmail(currentProductType);
                 }
             } catch (Exception getCurrentStatusAndProductTypeException) {
@@ -4548,7 +4660,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                 if (!themeUpdated) { // No need to show blocking error if only updating theme such as changing font size.
                     playAlertSound("error");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Get Current Status</i></b></html>", "QA Helper  —  Current Status Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Get Current Status</i></b></html>", "ExecHelper  -  Current Status Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -4588,7 +4700,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                 if (!themeUpdated) { // No need to show blocking error if only updating theme such as changing font size.
                     playAlertSound("error");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Get Status History</i></b></html>", "QA Helper  —  Status History Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Get Status History</i></b></html>", "ExecHelper  -  Status History Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
@@ -4785,7 +4897,10 @@ public class QAHelper extends javax.swing.JFrame {
                 updateSpecs.put("Audio", escapeSingleLineSpecStringForHTML(computerSpecs.getAudio(), 150));
                 updateSpecs.put("Screen", (deviceTypeHasScreen ? escapeSingleLineSpecStringForHTML(computerSpecs.getScreenSize(), 150) : "N/A")); // Do not want to log a resolution on computers without built-in screens.
                 updateSpecs.put("Disc Drive", (deviceTypeIsMotherboard ? "N/A" : escapeSingleLineSpecStringForHTML(computerSpecs.getDiscDrive(), 150)));
-                updateSpecs.put("Notes", notesAndExtraFields);
+                // For non-FG devices, send only the user's notes (extra fields are
+                // already sent as proper JSON fields by PCsCRMManager).
+                // FG devices use the legacy HTML-formatted notes for PCsCRM.
+                updateSpecs.put("Notes", (!pid.startsWith("FG") && !currentNotes.isEmpty()) ? currentNotes : notesAndExtraFields);
 
                 if (allowSettingConditionGrade) {
                     updateSpecs.put("Condition Grade", currentConditionGrade);
@@ -4945,20 +5060,31 @@ public class QAHelper extends javax.swing.JFrame {
                     System.out.println("logComputerSpecsException: " + logComputerSpecsException);
                 }
 
-                sendErrorEmail(((newStatusName == null) ? "" : "Failed to Update Status to \"" + newStatusName + "\" on PCsCRM\n\n") + "logComputerSpecsException: " + logComputerSpecsException);
-
                 loadingWindow.closeWindow();
-                playAlertSound("error");
 
-                JTextArea logSpecsErrorTextArea = new JTextArea(20, 100);
-                logSpecsErrorTextArea.setText(logComputerSpecsException.toString());
-                logSpecsErrorTextArea.setEditable(false);
-                logSpecsErrorTextArea.setLineWrap(true);
-                logSpecsErrorTextArea.setWrapStyleWord(true);
-                logSpecsErrorTextArea.setFont(new Font(Font.MONOSPACED, lblVersion.getFont().getStyle(), logSpecsErrorTextArea.getFont().getSize()));
-                JScrollPane logSpecsErrorScrollPane = new JScrollPane(logSpecsErrorTextArea);
+                // Check for duplicate serial number error from Command Center
+                String dupMsg = logComputerSpecsException.getMessage();
+                if (dupMsg != null && dupMsg.startsWith("DUPLICATE_SERIAL:")) {
+                    playAlertSound("error");
+                    JOptionPane.showMessageDialog(qaHelperWindow,
+                        "<html><b>" + dupMsg.substring(16) + "</b></html>",
+                        "ExecHelper  -  Duplicate Serial Number",
+                        JOptionPane.WARNING_MESSAGE);
+                } else {
+                    sendErrorEmail(((newStatusName == null) ? "" : "Failed to Update Status to \"" + newStatusName + "\" on PCsCRM\n\n") + "logComputerSpecsException: " + logComputerSpecsException);
 
-                JOptionPane.showMessageDialog(qaHelperWindow, new Object[]{"<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Log Computer Specs</i> or Failed to <i>Verify Logged Specs</i></b><br/><br/></html>", logSpecsErrorScrollPane, "<html><br/>This should not have happened, please inform Free Geek I.T.</html>"}, "QA Helper  —  Log Computer Specs Error", JOptionPane.ERROR_MESSAGE);
+                    playAlertSound("error");
+
+                    JTextArea logSpecsErrorTextArea = new JTextArea(20, 100);
+                    logSpecsErrorTextArea.setText(logComputerSpecsException.toString());
+                    logSpecsErrorTextArea.setEditable(false);
+                    logSpecsErrorTextArea.setLineWrap(true);
+                    logSpecsErrorTextArea.setWrapStyleWord(true);
+                    logSpecsErrorTextArea.setFont(new Font(Font.MONOSPACED, lblVersion.getFont().getStyle(), logSpecsErrorTextArea.getFont().getSize()));
+                    JScrollPane logSpecsErrorScrollPane = new JScrollPane(logSpecsErrorTextArea);
+
+                    JOptionPane.showMessageDialog(qaHelperWindow, new Object[]{"<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Log Computer Specs</i> or Failed to <i>Verify Logged Specs</i></b><br/><br/></html>", logSpecsErrorScrollPane, "<html><br/>This should not have happened, please inform Executive Undertakings</html>"}, "ExecHelper  -  Log Computer Specs Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
 
@@ -4987,7 +5113,7 @@ public class QAHelper extends javax.swing.JFrame {
 
             if (aptIsRunning) {
                 playAlertSound("beep");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt installating apps or installating apps may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "QA Helper  —  App Install Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt installating apps or installating apps may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "ExecHelper  -  App Install Warning", JOptionPane.WARNING_MESSAGE);
             } else {
                 List<String> matchedAppNames = new ArrayList<>();
 
@@ -5106,7 +5232,7 @@ public class QAHelper extends javax.swing.JFrame {
                         String terminalOrPowerShell = (isLinux ? "Terminal" : "PowerShell");
 
                         focusWindow();
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started Installing " + joinedMatchedAppNames + " in " + terminalOrPowerShell + "</b><br/><br/><i>You can continue using QA Helper while " + joinedMatchedAppNames + " installs in " + terminalOrPowerShell + ".</i><br/><br/>When " + joinedMatchedAppNames + " is done installing, " + terminalOrPowerShell + " will stay open and you can press enter in the " + terminalOrPowerShell + " window to close it.</html>", "QA Helper  —  App Install", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started Installing " + joinedMatchedAppNames + " in " + terminalOrPowerShell + "</b><br/><br/><i>You can continue using QA Helper while " + joinedMatchedAppNames + " installs in " + terminalOrPowerShell + ".</i><br/><br/>When " + joinedMatchedAppNames + " is done installing, " + terminalOrPowerShell + " will stay open and you can press enter in the " + terminalOrPowerShell + " window to close it.</html>", "ExecHelper  -  App Install", JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException | InterruptedException installOptionalAppException) {
                         if (isTestMode) {
                             System.out.println("installOptionalAppException: " + installOptionalAppException);
@@ -5285,7 +5411,7 @@ public class QAHelper extends javax.swing.JFrame {
                 int setProductTypePromptResponse = JOptionPane.showOptionDialog(qaHelperWindow, new Object[]{"<html><b>Select New Product Type:</b></html>",
                     productTypesForDeviceTypeComboBox,
                     "<html><div style='font-size: smaller'>Current Product Type: <b>" + currentProductType + "</b></div></html>"
-                }, "QA Helper  —  Set Product Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32), setProductTypePromptButtons, setProductTypePromptButtons[0]);
+                }, "ExecHelper  -  Set Product Type", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32), setProductTypePromptButtons, setProductTypePromptButtons[0]);
 
                 String setProductTypePromptResponseString = "Cancel";
                 if (setProductTypePromptResponse > -1) {
@@ -5333,14 +5459,14 @@ public class QAHelper extends javax.swing.JFrame {
                                             playAlertSound("success");
                                             writeToHelperLogFile("Set Product Type");
 
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Set Product Type for ID \"" + pid + "\" to <u>" + newProductType + "</u></b></html>", "QA Helper  —  Successfully Set Product Type", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32));
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Set Product Type for ID \"" + pid + "\" to <u>" + newProductType + "</u></b></html>", "ExecHelper  -  Successfully Set Product Type", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32));
 
                                             if (currentStatus.equals(statusNames[3])) {
                                                 btnDoneTestingActionPerformed(null);
                                             }
                                         } else {
                                             playAlertSound("error");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Set Product Type for ID \"" + pid + "\" to <u>" + newProductType + "</u></b></html>", "QA Helper  —  Set Product Type Error", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Set Product Type for ID \"" + pid + "\" to <u>" + newProductType + "</u></b></html>", "ExecHelper  -  Set Product Type Error", JOptionPane.ERROR_MESSAGE);
                                             promptToSetProductType();
                                         }
                                     } catch (HeadlessException | InterruptedException | ExecutionException setProductTypeException) {
@@ -5625,7 +5751,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     + "</html>";
 
                             for (;;) {
-                                int openedInventoryManagerDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, openedInventoryManagerDialogMessage, "QA Helper  —  " + (returnValue.contains("enoughRAMforInventoryManager") ? "Opened" : "Cannot Open") + " Inventory Manager", JOptionPane.DEFAULT_OPTION, ((returnValue.contains("enoughRAMforInventoryManager") && returnValue.contains("didAutoLoginToInventoryManager") && returnValue.contains("didSetPIDtoClipboard")) ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE), new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32), openedInventoryManagerDialogButtons, openedInventoryManagerDialogButtons[0]);
+                                int openedInventoryManagerDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, openedInventoryManagerDialogMessage, "ExecHelper  -  " + (returnValue.contains("enoughRAMforInventoryManager") ? "Opened" : "Cannot Open") + " Inventory Manager", JOptionPane.DEFAULT_OPTION, ((returnValue.contains("enoughRAMforInventoryManager") && returnValue.contains("didAutoLoginToInventoryManager") && returnValue.contains("didSetPIDtoClipboard")) ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE), new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(32), openedInventoryManagerDialogButtons, openedInventoryManagerDialogButtons[0]);
                                 String openedInventoryManagerDialogResponseString = "Cancel";
                                 if (openedInventoryManagerDialogResponse > -1) {
                                     openedInventoryManagerDialogResponseString = openedInventoryManagerDialogButtons[openedInventoryManagerDialogResponse];
@@ -7051,7 +7177,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && isLoggedIn && !isReloading) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to log the current specs for ID \"" + pid + "\" without updating the status?</b></html>", "QA Helper  —  Confirm Log Specs", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to log the current specs for ID \"" + pid + "\" without updating the status?</b></html>", "ExecHelper  -  Confirm Log Specs", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -7074,10 +7200,10 @@ public class QAHelper extends javax.swing.JFrame {
                                 displayComputerSpecs(statusAndTech);
 
                                 playAlertSound("success");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Logged Current Computer Specs</b></html>", "QA Helper  —  Successfully Logged Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Logged Current Computer Specs</b></html>", "ExecHelper  -  Successfully Logged Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
                             } else {
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Current Computer Specs</b></html>", "QA Helper  —  Log Specs Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Current Computer Specs</b></html>", "ExecHelper  -  Log Specs Error", JOptionPane.ERROR_MESSAGE);
                             }
                         } catch (HeadlessException | InterruptedException | ExecutionException logSpecsException) {
                             if (isTestMode) {
@@ -7106,7 +7232,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (!currentStatus.equals(statusNames[3]) && !currentStatus.equals("UNKNOWN STATUS")) {
                 setActionsEnabled(false);
 
-                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the status for ID \"" + pid + "\" back to <u>" + statusNames[3] + "</u>?</b></html>", "QA Helper  —  Confirm Reopen Repair", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("HammerAndWrench", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the status for ID \"" + pid + "\" back to <u>" + statusNames[3] + "</u>?</b></html>", "ExecHelper  -  Confirm Reopen Repair", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("HammerAndWrench", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                     loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                     setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -7174,7 +7300,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (currentStatus.equals(statusNames[12])) {
                 setActionsEnabled(false);
 
-                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to <u>prepare for shipping to end user</u> (run \"oem-config-prepare\")?</b></html>", "QA Helper  —  Confirm Prepare for Shipping to End User", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Receipt", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to <u>prepare for shipping to end user</u> (run \"oem-config-prepare\")?</b></html>", "ExecHelper  -  Confirm Prepare for Shipping to End User", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Receipt", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                     loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                     setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -7196,7 +7322,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     String[] runOemConfigDialogButtons = new String[]{"Shut Down", "Reboot", "Quit", "Keep Using QA Helper"};
 
-                                    int runOemConfigDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Prepared for Shipping to End User</b><br/><br/><i>What would you like to do next?</i></html>", "QA Helper  —  Prepared for Shipping to End User", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, runOemConfigDialogButtons, runOemConfigDialogButtons[0]);
+                                    int runOemConfigDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Prepared for Shipping to End User</b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Prepared for Shipping to End User", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, runOemConfigDialogButtons, runOemConfigDialogButtons[0]);
 
                                     String runOemConfigDialogResponseString = "Keep Using QA Helper";
                                     if (runOemConfigDialogResponse > -1) {
@@ -7242,7 +7368,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 } else {
                                     playAlertSound("error");
                                     sendErrorEmail("Failed to Prepare for Shipping to End User");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Prepare for Shipping to End User</b><br/><br/>This should not have happened, please inform Free Geek I.T.</html>", "QA Helper  —  Prepare for Shipping to End User Failed", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Prepare for Shipping to End User</b><br/><br/>This should not have happened, please inform Executive Undertakings</html>", "ExecHelper  -  Prepare for Shipping to End User Failed", JOptionPane.ERROR_MESSAGE);
                                 }
                             } catch (InterruptedException | ExecutionException runOemConfigException) {
                                 if (isTestMode) {
@@ -7363,7 +7489,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (aptIsRunning) {
                 playAlertSound("beep");
 
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt installating <i>RegionSet</i> or installating <i>RegionSet</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "QA Helper  —  Set DVD Drive Region Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt installating <i>RegionSet</i> or installating <i>RegionSet</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "ExecHelper  -  Set DVD Drive Region Warning", JOptionPane.WARNING_MESSAGE);
             } else {
                 try {
                     String possibleSudo = (!adminPassword.equals("*UNKNOWN*") ? "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk " : "");
@@ -7377,7 +7503,7 @@ public class QAHelper extends javax.swing.JFrame {
                     TimeUnit.SECONDS.sleep(1);
 
                     focusWindow();
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started DVD Drive Region Set in a Terminal</b><br/><br/><i>You can continue using QA Helper while setting the DVD drive region in the Terminal.</i><br/><br/>When you are done setting the DVD drive region in the Terminal, you can press enter in the Terminal window to close it.</html>", "QA Helper  —  Set DVD Drive Region", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started DVD Drive Region Set in a Terminal</b><br/><br/><i>You can continue using QA Helper while setting the DVD drive region in the Terminal.</i><br/><br/>When you are done setting the DVD drive region in the Terminal, you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  Set DVD Drive Region", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException | InterruptedException setDvdDriveRegionException) {
                     if (isTestMode) {
                         System.out.println("setDvdDriveRegionException: " + setDvdDriveRegionException);
@@ -7468,8 +7594,8 @@ public class QAHelper extends javax.swing.JFrame {
                 txtPID.setText(currentPID);
             }
 
-            if (isTestMode) {
-                lastPIDscannedOrConfirmed = currentPID; // Do not confirm IDs in Test Mode for convenience.
+            if (isTestMode || !currentPID.startsWith("FG")) {
+                lastPIDscannedOrConfirmed = currentPID; // Skip confirmation for Test Mode and non-FG IDs
             }
             if (!lastPIDscannedOrConfirmed.equals(currentPID)) {
                 txtPID.setText("CONFIRM ID");
@@ -7494,7 +7620,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
                 };
 
-                pidConfirmationPane.createDialog(qaHelperWindow, "QA Helper  —  Confirm ID").setVisible(true);
+                pidConfirmationPane.createDialog(qaHelperWindow, "ExecHelper  -  Confirm ID").setVisible(true);
 
                 if (pidConfirmationPane.getValue() != null && (int) pidConfirmationPane.getValue() == JOptionPane.OK_OPTION && !pidConfirmationField.getText().trim().isEmpty()) {
                     String confirmedPID = pidConfirmationField.getText().trim().toUpperCase();
@@ -7507,7 +7633,7 @@ public class QAHelper extends javax.swing.JFrame {
                         playAlertSound("error");
                         JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>IDs Did Not Match</b><br/><br/>Please enter the correct ID before attempting to log in again.<br/><br/>"
                                 + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>MAKE SURE THE CORRECT ID IS ON THE HANDWRITTEN LABEL</i> " + new TwemojiImage("BackhandIndexPointingLeft", qaHelperWindow).toImgTag("right")
-                                + "</html>", "QA Helper  —  ID Error", JOptionPane.ERROR_MESSAGE);
+                                + "</html>", "ExecHelper  -  ID Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         lastPIDscannedOrConfirmed = currentPID;
                         txtPID.setText(currentPID);
@@ -7637,7 +7763,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && !isLoggedIn) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Would you like to go open \"pcscrm.com/login.aspx\" in your web browser?</b><br/><br/><i>You can use the \"Password help\" link on the PCsCRM.com login page to reset your password.</i></html>", "QA Helper  —  Forgot Password", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Would you like to go open \"pcscrm.com/login.aspx\" in your web browser?</b><br/><br/><i>You can use the \"Password help\" link on the PCsCRM.com login page to reset your password.</i></html>", "ExecHelper  -  Forgot Password", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
                 String pcsCrmForgotPasswordURL = "https://" + (isTestMode ? "test." : "") + "pcscrm.com/login.aspx";
                 String hiddenPCsCRMloginInputs = "";
 
@@ -7730,7 +7856,7 @@ public class QAHelper extends javax.swing.JFrame {
                         }
                     } else {
                         playAlertSound("beep");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>You will be able to open a web browser after you've installed the OS.</i></html>", "QA Helper  —  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>You will be able to open a web browser after you've installed the OS.</i></html>", "ExecHelper  -  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
                     }
                 } else {
                     try {
@@ -7856,7 +7982,7 @@ public class QAHelper extends javax.swing.JFrame {
                 + "</html>",
                 " ",
                 "<html><b>CPU Stress Test Duration:</b></html>",
-                cpuStressTestDurationMinutesComboBox}, "QA Helper  —  CPU Stress Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Brain", qaHelperWindow).toImageIcon());
+                cpuStressTestDurationMinutesComboBox}, "ExecHelper  -  CPU Stress Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Brain", qaHelperWindow).toImageIcon());
 
             int specifiedCPUstressTestDurationMinutes = 3;
 
@@ -8259,10 +8385,10 @@ public class QAHelper extends javax.swing.JFrame {
 
                             if (stressReturn.equals("install-error")) {
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"stress-ng\"</b><br/><br/><i>To manually install \"stress-ng\", open Terminal and run:</i><br/><pre>sudo apt install stress-ng</pre><br/>After \"stress-ng\" is installed, come back here and try again.</html>", "QA Helper  —  CPU Stress Test Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"stress-ng\"</b><br/><br/><i>To manually install \"stress-ng\", open Terminal and run:</i><br/><pre>sudo apt install stress-ng</pre><br/>After \"stress-ng\" is installed, come back here and try again.</html>", "ExecHelper  -  CPU Stress Test Error", JOptionPane.ERROR_MESSAGE);
                             } else if (stressReturn.equals("mac-windows-done")) {
                                 playAlertSound("success");
-                                int cpuStressTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>CPU Stress Test Completed</b></html>", "QA Helper  —  CPU Stress Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Brain", qaHelperWindow).toImageIcon(32), cpuStressTestCompletedButtons.toArray(), cpuStressTestCompletedButtons.get(0));
+                                int cpuStressTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>CPU Stress Test Completed</b></html>", "ExecHelper  -  CPU Stress Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Brain", qaHelperWindow).toImageIcon(32), cpuStressTestCompletedButtons.toArray(), cpuStressTestCompletedButtons.get(0));
 
                                 String cpuStressTestCompletedDialogResponseString = "Continue";
                                 if (cpuStressTestCompletedDialogResponse > -1) {
@@ -8315,7 +8441,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 focusWindow();
                                 int cpuStressTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, new Object[]{
                                     cpuStressTestOutputHeaderLabel, cpuStressTestOutputScrollPane
-                                }, "QA Helper  —  CPU Stress Test " + (stressPassed ? "Passed" : "Failed"), JOptionPane.DEFAULT_OPTION, (stressPassed ? JOptionPane.PLAIN_MESSAGE : JOptionPane.ERROR_MESSAGE), new TwemojiImage("Brain", qaHelperWindow).toImageIcon(), cpuStressTestCompletedButtons.toArray(), cpuStressTestCompletedButtons.get(0));
+                                }, "ExecHelper  -  CPU Stress Test " + (stressPassed ? "Passed" : "Failed"), JOptionPane.DEFAULT_OPTION, (stressPassed ? JOptionPane.PLAIN_MESSAGE : JOptionPane.ERROR_MESSAGE), new TwemojiImage("Brain", qaHelperWindow).toImageIcon(), cpuStressTestCompletedButtons.toArray(), cpuStressTestCompletedButtons.get(0));
 
                                 String cpuStressTestCompletedDialogResponseString = "Continue";
                                 if (cpuStressTestCompletedDialogResponse > -1) {
@@ -8359,7 +8485,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isCPUverified ? "UNVERIFY" : "verify") + "</i> the CPU?</b></html>", "QA Helper  —  Confirm " + (isCPUverified ? "Unverify" : "Verify") + " CPU", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isCPUverified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isCPUverified ? "UNVERIFY" : "verify") + "</i> the CPU?</b></html>", "ExecHelper  -  Confirm " + (isCPUverified ? "Unverify" : "Verify") + " CPU", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isCPUverified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isCPUverified = !isCPUverified;
 
                 writeToHelperLogFile("Test: CPU " + (isCPUverified ? "Verified" : "UNVERIFIED"));
@@ -8407,7 +8533,7 @@ public class QAHelper extends javax.swing.JFrame {
                         + "The <b>last line</b> <i>MUST</i> be <u>No actions needed.</u><br/>"
                         + "<br/>"
                         + "</html>",
-                        hdSentinelOutputScrollPane}, "QA Helper  —  Drive Health", JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon());
+                        hdSentinelOutputScrollPane}, "ExecHelper  -  Drive Health", JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon());
 
                     if (!computerSpecs.getDriveHealthWarning() && !computerSpecs.getDriveRecalled() && !isDriveHealthVerified && btnVerifyDriveHealth.isVisible() && btnVerifyDriveHealth.isEnabled()) {
                         String disksFormattedWithoutPartitionTable = computerSpecs.getDisksFormattedWithoutPartitionTable();
@@ -8418,7 +8544,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
                 } else {
                     playAlertSound("error");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Load Drive Health</b><br/><br/><i>Try again after reloading specs and entering admin password.</i></html>", "QA Helper  —  Drive Health Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Load Drive Health</b><br/><br/><i>Try again after reloading specs and entering admin password.</i></html>", "ExecHelper  -  Drive Health Error", JOptionPane.ERROR_MESSAGE);
                     btnReloadSpecs.requestFocusInWindow();
                 }
 
@@ -8441,7 +8567,7 @@ public class QAHelper extends javax.swing.JFrame {
                             setState(Frame.ICONIFIED);
                         } else {
                             // TODO: Make this message better
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>CrystalDiskInfo</i> will open momentarily.</b></html>", "QA Helper  —  Open CrystalDiskInfo", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon(32));
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>CrystalDiskInfo</i> will open momentarily.</b></html>", "ExecHelper  -  Open CrystalDiskInfo", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon(32));
                         }
 
                         if (!isDriveHealthVerified && btnVerifyDriveHealth.isVisible() && btnVerifyDriveHealth.isEnabled()) {
@@ -8463,7 +8589,7 @@ public class QAHelper extends javax.swing.JFrame {
                         Runtime.getRuntime().exec(new String[]{"/usr/bin/open", "-a", (new File("/Applications/DriveDx.app").exists() ? "/Applications/DriveDx.app" : "/Users/fg-demo/Applications/DriveDx.app")});
 
                         // TODO: Make this message better
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>DriveDx</i> will open momentarily.</b></html>", "QA Helper  —  Open DriveDx", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon(32));
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>DriveDx</i> will open momentarily.</b></html>", "ExecHelper  -  Open DriveDx", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Hospital", qaHelperWindow).toImageIcon(32));
 
                         if (!isDriveHealthVerified && btnVerifyDriveHealth.isVisible() && btnVerifyDriveHealth.isEnabled()) {
                             btnVerifyDriveHealthActionPerformed(null);
@@ -8484,7 +8610,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDriveHealthVerified ? "UNVERIFY" : "verify") + "</i> the hard drive health?</b></html>", "QA Helper  —  Confirm " + (isDriveHealthVerified ? "Unverify" : "Verify") + " Hard Drive Health", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDriveHealthVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDriveHealthVerified ? "UNVERIFY" : "verify") + "</i> the hard drive health?</b></html>", "ExecHelper  -  Confirm " + (isDriveHealthVerified ? "Unverify" : "Verify") + " Hard Drive Health", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDriveHealthVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isDriveHealthVerified = !isDriveHealthVerified;
 
                 writeToHelperLogFile("Test: Drive Health " + (isDriveHealthVerified ? "Verified" : "UNVERIFIED"));
@@ -8531,7 +8657,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
 
                 // TODO: Make this message better.
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The disc drive should eject momentarily.</b></html>", "QA Helper  —  Disc Drive Ejected", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("DVD", qaHelperWindow).toImageIcon(32));
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The disc drive should eject momentarily.</b></html>", "ExecHelper  -  Disc Drive Ejected", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("DVD", qaHelperWindow).toImageIcon(32));
 
                 if (!isDiscDriveVerified && btnVerifyDiscDrive.isVisible() && btnVerifyDiscDrive.isEnabled()) {
                     btnVerifyDiscDriveActionPerformed(null);
@@ -8542,7 +8668,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
 
                 playAlertSound("error");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Perform Eject Command</b></html>", "QA Helper  —  Eject Disc Drive Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Perform Eject Command</b></html>", "ExecHelper  -  Eject Disc Drive Error", JOptionPane.ERROR_MESSAGE);
             }
 
             setActionsEnabled(true);
@@ -8555,7 +8681,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDiscDriveVerified ? "UNVERIFY" : "verify") + "</i> the disc drive?</b></html>", "QA Helper  —  Confirm " + (isDiscDriveVerified ? "Unverify" : "Verify") + " Disc Drive", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDiscDriveVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDiscDriveVerified ? "UNVERIFY" : "verify") + "</i> the disc drive?</b></html>", "ExecHelper  -  Confirm " + (isDiscDriveVerified ? "Unverify" : "Verify") + " Disc Drive", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDiscDriveVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isDiscDriveVerified = !isDiscDriveVerified;
 
                 boolean hasDiscDrive = !computerSpecs.getDiscDriveArray().isEmpty();
@@ -8756,7 +8882,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 + "<br/><br/>"
                                                 + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("left") + " If an Ethernet cable is plugged in and is not detected after multiple<br/>"
                                                 + new TwemojiImage("Blank", qaHelperWindow).toImgTag("left") + " attempts, click \"Skip Ethernet Test\" and <u>CONSULT AN INSTRUCTOR</u>."
-                                                + "</html>", "QA Helper  —  No Ethernet Cable Detected", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), plugInEthernetDialogButtons, plugInEthernetDialogButtons[0]) != JOptionPane.YES_OPTION);
+                                                + "</html>", "ExecHelper  -  No Ethernet Cable Detected", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), plugInEthernetDialogButtons, plugInEthernetDialogButtons[0]) != JOptionPane.YES_OPTION);
                                         loadingWindow.setAlwaysOnTop(true);
 
                                         if (ethernetTestSkipped) {
@@ -8811,7 +8937,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             + "<br/><br/>"
                                             + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("left") + " If the Ethernet cable is securely connected and this test fails after multiple<br/>"
                                             + new TwemojiImage("Blank", qaHelperWindow).toImgTag("left") + " attempts, click \"Skip Ethernet Test\" and <u>CONSULT AN INSTRUCTOR</u>."
-                                            + "</html>", "QA Helper  —  Failed to Connect via Ethernet", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), failedViaEthernetDialogButtons, failedViaEthernetDialogButtons[0]) != JOptionPane.YES_OPTION);
+                                            + "</html>", "ExecHelper  -  Failed to Connect via Ethernet", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), failedViaEthernetDialogButtons, failedViaEthernetDialogButtons[0]) != JOptionPane.YES_OPTION);
                                     loadingWindow.setAlwaysOnTop(true);
 
                                     if (ethernetTestSkipped) {
@@ -8923,7 +9049,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                         + new TwemojiImage("Blank", qaHelperWindow).toImgTag("left") + " click \"Skip Wi-Fi Test\" and then test Wi-Fi again after you're booted into the installed OS."
                                                         : "and the Ethernet cable is disconnected and<br/>"
                                                         + new TwemojiImage("Blank", qaHelperWindow).toImgTag("left") + " this test fails after multiple attempts, click \"Skip Wi-Fi Test\" and <u>CONSULT AN INSTRUCTOR</u>.")
-                                                + "</html>", "QA Helper  —  Wi-Fi Disabled", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), turnOnWiFiDialogButtons, turnOnWiFiDialogButtons[0]) != JOptionPane.YES_OPTION);
+                                                + "</html>", "ExecHelper  -  Wi-Fi Disabled", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), turnOnWiFiDialogButtons, turnOnWiFiDialogButtons[0]) != JOptionPane.YES_OPTION);
                                         loadingWindow.setAlwaysOnTop(true);
 
                                         if (wiFiTestSkipped) {
@@ -9269,7 +9395,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     + "<br/><br/>"
                                                     + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("left") + " If this computer is connected to a known good Wi-Fi network and this test fails<br/>"
                                                     + new TwemojiImage("Blank", qaHelperWindow).toImgTag("left") + " after multiple attempts, click \"Skip Wi-Fi Test\" and <u>CONSULT AN INSTRUCTOR</u>.")
-                                            + "</html>", "QA Helper  —  Failed to Connect via Wi-Fi", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), failedViaWiFiDialogButtons, failedViaWiFiDialogButtons[0]) != JOptionPane.YES_OPTION);
+                                            + "</html>", "ExecHelper  -  Failed to Connect via Wi-Fi", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(32), failedViaWiFiDialogButtons, failedViaWiFiDialogButtons[0]) != JOptionPane.YES_OPTION);
                                     loadingWindow.setAlwaysOnTop(true);
 
                                     if (wiFiTestSkipped) {
@@ -9436,7 +9562,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                         playAlertSound(didFullPass ? "success" : "error");
                         focusWindow();
-                        int internetTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, internetTestResult, "QA Helper  —  " + internetTestTitle, JOptionPane.DEFAULT_OPTION, (didFullPass ? JOptionPane.INFORMATION_MESSAGE : (didPartialPass ? JOptionPane.WARNING_MESSAGE : JOptionPane.ERROR_MESSAGE)), new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(), internetTestCompletedButtons.toArray(), internetTestCompletedButtons.get(0));
+                        int internetTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, internetTestResult, "ExecHelper  -  " + internetTestTitle, JOptionPane.DEFAULT_OPTION, (didFullPass ? JOptionPane.INFORMATION_MESSAGE : (didPartialPass ? JOptionPane.WARNING_MESSAGE : JOptionPane.ERROR_MESSAGE)), new TwemojiImage("SatelliteAntenna", qaHelperWindow).toImageIcon(), internetTestCompletedButtons.toArray(), internetTestCompletedButtons.get(0));
 
                         String internetTestCompletedDialogResponseString = "Continue";
                         if (internetTestCompletedDialogResponse > -1) {
@@ -9467,7 +9593,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isWindowsPE) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isInternetVerified ? "UNVERIFY" : "verify") + "</i> internet connectivity?</b></html>", "QA Helper  —  Confirm " + (isInternetVerified ? "Unverify" : "Verify") + " Internet", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isInternetVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isInternetVerified ? "UNVERIFY" : "verify") + "</i> internet connectivity?</b></html>", "ExecHelper  -  Confirm " + (isInternetVerified ? "Unverify" : "Verify") + " Internet", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isInternetVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isInternetVerified = !isInternetVerified;
 
                 boolean hasWiFi = computerSpecs.getWireless().contains("Wi-Fi");
@@ -9533,7 +9659,7 @@ public class QAHelper extends javax.swing.JFrame {
                         + "<i>You can perform these screen tests in any order, when you are done with one test you will be prompted to perform the other.</i>"
                         + "<br/><br/>"
                         + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>BOTH OF THESE SCREEN TESTS MUST BE PERFORMED AND PASSED BEFORE THE SCREEN IS VERIFIED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                        + "</center></html>", "QA Helper  —  Screen Test Options", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(), screenTestOptionsDialogButtons, screenTestOptionsDialogButtons[0]);
+                        + "</center></html>", "ExecHelper  -  Screen Test Options", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Laptop", qaHelperWindow).toImageIcon(), screenTestOptionsDialogButtons, screenTestOptionsDialogButtons[0]);
 
                 String screenTestOptionsDialogResponseString = "Cancel";
                 if (screenTestOptionsDialogResponse > -1) {
@@ -9602,7 +9728,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 + "<li>The screen has <i>ANY</i> <u>scratches</u> or <u>dents</u>.</li>"
                                 + "</ul>"
                                 + "<br/><center>"
-                                + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF SOLID COLORS SCREEN TEST FAILS</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")) + "</center></html>", "QA Helper  —  " + (shouldDoTouchscreenTest ? "Touchscreen" : "Solid Colors Screen") + " Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage(shouldDoTouchscreenTest ? "IndexPointingUp" : "FlagMauritius", qaHelperWindow).toImageIcon());
+                                + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF SOLID COLORS SCREEN TEST FAILS</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")) + "</center></html>", "ExecHelper  -  " + (shouldDoTouchscreenTest ? "Touchscreen" : "Solid Colors Screen") + " Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage(shouldDoTouchscreenTest ? "IndexPointingUp" : "FlagMauritius", qaHelperWindow).toImageIcon());
 
                 if (screenTestPromptReturn == JOptionPane.OK_OPTION) {
                     if (shouldDoTouchscreenTest) {
@@ -9635,7 +9761,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             + "</ul>"
                                             + "<br/><center>"
                                             + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF TOUCHSCREEN TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                            + "</center></html>", "QA Helper  —  Touchscreen Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("IndexPointingUp", qaHelperWindow).toImageIcon(), screenTestCompletedButtons.toArray(), screenTestCompletedButtons.get(0));
+                                            + "</center></html>", "ExecHelper  -  Touchscreen Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("IndexPointingUp", qaHelperWindow).toImageIcon(), screenTestCompletedButtons.toArray(), screenTestCompletedButtons.get(0));
 
                                     String screenTestCompletedDialogResponseString = "Continue";
                                     if (screenTestCompletedDialogResponse > -1) {
@@ -9662,7 +9788,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             + "the <u>touchscreen not working</u>, <b>you can just peform the touchscreen test again.</b></i>"
                                             + "<br/><br/>"
                                             + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF TOUCHSCREEN TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                            + "</center></html>", "QA Helper  —  Touchscreen Test Failed", JOptionPane.ERROR_MESSAGE, new TwemojiImage("IndexPointingUp", qaHelperWindow).toImageIcon());
+                                            + "</center></html>", "ExecHelper  -  Touchscreen Test Failed", JOptionPane.ERROR_MESSAGE, new TwemojiImage("IndexPointingUp", qaHelperWindow).toImageIcon());
 
                                     setActionsEnabled(true);
                                     btnTestScreenActionPerformed(evt);
@@ -9715,7 +9841,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         + "</ul>"
                                         + "<br/><center>"
                                         + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF SOLID COLORS SCREEN TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                        + "</center></html>", "QA Helper  —  Solid Colors Screen Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("FlagMauritius", qaHelperWindow).toImageIcon(), screenTestCompletedButtons.toArray(), screenTestCompletedButtons.get(0));
+                                        + "</center></html>", "ExecHelper  -  Solid Colors Screen Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("FlagMauritius", qaHelperWindow).toImageIcon(), screenTestCompletedButtons.toArray(), screenTestCompletedButtons.get(0));
 
                                 String screenTestCompletedDialogResponseString = "Continue";
                                 if (screenTestCompletedDialogResponse > -1) {
@@ -9761,7 +9887,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isScreenVerified ? "UNVERIFY" : "verify") + "</i> the screen?</b></html>", "QA Helper  —  Confirm " + (isScreenVerified ? "Unverify" : "Verify") + " Screen", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isScreenVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isScreenVerified ? "UNVERIFY" : "verify") + "</i> the screen?</b></html>", "ExecHelper  -  Confirm " + (isScreenVerified ? "Unverify" : "Verify") + " Screen", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isScreenVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isScreenVerified = !isScreenVerified;
 
                 writeToHelperLogFile("Test: Screen " + (isScreenVerified ? "Verified" : "UNVERIFIED"));
@@ -9905,7 +10031,7 @@ public class QAHelper extends javax.swing.JFrame {
                 ((isLinux && !outputCards.isEmpty()) ? outputCardComboBox : ""),
                 ((isMacOS && !isMacOSmojaveOrNewer) ? turnDownOutputVolumeCheckbox : ""),
                 ((isMacOS && !isMacOSmojaveOrNewer) ? "<html>" + new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <i>Check box above to turn down output volume before running headphone test.</i></html>" : "")
-            }, "QA Helper  —  Audio Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Loudspeaker", qaHelperWindow).toImageIcon());
+            }, "ExecHelper  -  Audio Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Loudspeaker", qaHelperWindow).toImageIcon());
 
             if (audioTestPromptReturn == JOptionPane.OK_OPTION) {
                 loadingWindow.setLoadingTextAndDisplay("QA Helper is Testing Audio", "Testing", true, "Loudspeaker");
@@ -10266,7 +10392,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     break;
                                 case "error":
                                     loadingWindow.closeWindow();
-                                    JOptionPane.showMessageDialog((isWindowsPE ? null : qaHelperWindow), "<html><b>Failed to Play Audio Test</b></html>", "QA Helper  —  Audio Test Error", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog((isWindowsPE ? null : qaHelperWindow), "<html><b>Failed to Play Audio Test</b></html>", "ExecHelper  -  Audio Test Error", JOptionPane.ERROR_MESSAGE);
                                     break;
                                 default:
                                     break;
@@ -10330,7 +10456,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 + (!isPeripheralTestMode ? new TwemojiImage("ShuffleTracksButton", qaHelperWindow).toImgTag("left") + " <i>REMEMBER TO TEST BOTH <u>BUILT-IN SPEAKERS</u> AND <u>HEADPHONES</u></i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right") + "<br/><br/>" : "")
                                 + ((!isPeripheralTestMode && !isLaptop) ? new TwemojiImage("Headphone", qaHelperWindow).toImgTag("left") + " <i>REMEMBER TO TEST <u>ALL HEADPHONE PORTS</u></i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right") + "<br/><br/>" : "")
                                 + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF AUDIO TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                + "</center></html>", "QA Helper  —  Audio Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Loudspeaker", qaHelperWindow).toImageIcon(), audioTestCompletedButtons.toArray(), audioTestCompletedButtons.get(0));
+                                + "</center></html>", "ExecHelper  -  Audio Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Loudspeaker", qaHelperWindow).toImageIcon(), audioTestCompletedButtons.toArray(), audioTestCompletedButtons.get(0));
 
                         String audioTestCompletedDialogResponseString = "Continue";
                         if (audioTestCompletedDialogResponse > -1) {
@@ -10384,7 +10510,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isWindowsPE) { // Do not allow Audio Verification in WinPE (even though we can test when in WinRE) since we want it verified in OS after driver are installed.
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isAudioVerified ? "UNVERIFY" : "verify") + "</i> the audio outputs?</b></html>", "QA Helper  —  Confirm " + (isAudioVerified ? "Unverify" : "Verify") + " Audio", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isAudioVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isAudioVerified ? "UNVERIFY" : "verify") + "</i> the audio outputs?</b></html>", "ExecHelper  -  Confirm " + (isAudioVerified ? "Unverify" : "Verify") + " Audio", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isAudioVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isAudioVerified = !isAudioVerified;
 
                 writeToHelperLogFile("Test: Audio " + (isAudioVerified ? "Verified" : "UNVERIFIED"));
@@ -10414,7 +10540,7 @@ public class QAHelper extends javax.swing.JFrame {
 
             if (isMacOS && new CommandReader(new String[]{"/usr/bin/osascript", "-e", "input volume of (get volume settings)"}).getFirstOutputLine().equals("missing value")) {
                 playAlertSound("error");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Microphone Detected</b><br/><br/><i>If this computer is supposed to have a microphone, then Microphone Test has failed.</i></html>", "QA Helper  —  Microphone Test Error", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Microphone Detected</b><br/><br/><i>If this computer is supposed to have a microphone, then Microphone Test has failed.</i></html>", "ExecHelper  -  Microphone Test Error", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
 
                 setActionsEnabled(true);
                 if (!isPeripheralTestMode) {
@@ -10591,7 +10717,7 @@ public class QAHelper extends javax.swing.JFrame {
                     ((isLinux && !outputCards.isEmpty()) ? " " : ""),
                     ((isLinux && !outputCards.isEmpty()) ? "<html><b>Output Options:</b></html>" : ""),
                     ((isLinux && !outputCards.isEmpty()) ? outputCardComboBox : "")
-                }, "QA Helper  —  Microphone Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon());
+                }, "ExecHelper  -  Microphone Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon());
 
                 if (isLinux) {
                     File micTestRecordingFile = new File(System.getProperty("java.io.tmpdir"), "qa_helper-mic_test.wav");
@@ -11425,12 +11551,12 @@ public class QAHelper extends javax.swing.JFrame {
                                             ? new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <b style='color: " + attentionColorHTML + "'>IF THE RECORDING WAS <u>VERY QUIET/SILENT</u> OR <u>VERY LOAD/DISTORTED</u>:</b><br/>"
                                             + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <b style='color: " + attentionColorHTML + "'><i>TEST AGAIN WITH <u>HIGHER OR LOWER MIC INPUT VOLUME</u> SELECTED</i></b>"
                                             : new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF MICROPHONE TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right"))
-                                            + "</html>", "QA Helper  —  Microphone Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
+                                            + "</html>", "ExecHelper  -  Microphone Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
                                 } else {
                                     Collections.reverse(microphoneTestCompletedButtons);
 
                                     playAlertSound("error");
-                                    microphoneTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <b>Failed to Record Audio or Playback Recording</b>" + (isMacOS ? (((computerSpecs != null) && computerSpecs.getFullCPU().endsWith("+ T2 Security Chip")) ? "<br/><br/>Sometimes the recording fails on T2 Macs. Try again." : "<br/><br/>If you approved Microphone access and still got this error, quit and relaunch QA Helper and then try again.") : "") + "</html>", "QA Helper  —  Microphone Test Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(32), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
+                                    microphoneTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <b>Failed to Record Audio or Playback Recording</b>" + (isMacOS ? (((computerSpecs != null) && computerSpecs.getFullCPU().endsWith("+ T2 Security Chip")) ? "<br/><br/>Sometimes the recording fails on T2 Macs. Try again." : "<br/><br/>If you approved Microphone access and still got this error, quit and relaunch QA Helper and then try again.") : "") + "</html>", "ExecHelper  -  Microphone Test Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(32), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
                                 }
 
                                 String microphoneTestCompletedDialogResponseString = "Continue";
@@ -11487,7 +11613,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isWindowsPE && (!isMacOS || !new CommandReader(new String[]{"/usr/bin/osascript", "-e", "input volume of (get volume settings)"}).getFirstOutputLine().equals("missing value"))) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isMicrophoneVerified ? "UNVERIFY" : "verify") + "</i> the microphone?</b></html>", "QA Helper  —  Confirm " + (isMicrophoneVerified ? "Unverify" : "Verify") + " Microphone", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isMicrophoneVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isMicrophoneVerified ? "UNVERIFY" : "verify") + "</i> the microphone?</b></html>", "ExecHelper  -  Confirm " + (isMicrophoneVerified ? "Unverify" : "Verify") + " Microphone", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isMicrophoneVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isMicrophoneVerified = !isMicrophoneVerified;
 
                 writeToHelperLogFile("Test: Microphone " + (isMicrophoneVerified ? "Verified" : "UNVERIFIED"));
@@ -11516,7 +11642,7 @@ public class QAHelper extends javax.swing.JFrame {
 
             if ((computerSpecs != null) && !computerSpecs.hasCamera()) {
                 playAlertSound("error");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Camera Detected</b><br/><br/><i>If this computer is supposed to have a camera, then Camera Test has failed.</i></html>", "QA Helper  —  Camera Test Error", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Camera Detected</b><br/><br/><i>If this computer is supposed to have a camera, then Camera Test has failed.</i></html>", "ExecHelper  -  Camera Test Error", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
 
                 setActionsEnabled(true);
                 focusNextTestTaskVerifyButton(btnTestCamera);
@@ -11570,7 +11696,7 @@ public class QAHelper extends javax.swing.JFrame {
                         + "</center></html>",
                         (isLinux ? " " : ""),
                         (isLinux ? useAlternateWebCamAppCheckbox : "")
-                    }, "QA Helper  —  Camera Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("MovieCamera", qaHelperWindow).toImageIcon());
+                    }, "ExecHelper  -  Camera Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("MovieCamera", qaHelperWindow).toImageIcon());
 
                     if (cameraTestPromptReturn == JOptionPane.OK_OPTION) {
                         loadingWindow.setLoadingTextAndDisplay("QA Helper is Setting Up Camera Test", "Testing", "MovieCamera");
@@ -11922,7 +12048,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     if (webCamAppReturn.equals("install-error")) {
                                         playAlertSound("error");
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"" + webCamAppName + "\"</b><br/><br/><i>To manually install \"" + webCamAppName + "\", open Terminal and run:</i><br/><pre>sudo apt install " + webCamAppName + "</pre><br/>After \"" + webCamAppName + "\" is installed, come back here and try again.</html>", "QA Helper  —  Camera Test Error", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"" + webCamAppName + "\"</b><br/><br/><i>To manually install \"" + webCamAppName + "\", open Terminal and run:</i><br/><pre>sudo apt install " + webCamAppName + "</pre><br/>After \"" + webCamAppName + "\" is installed, come back here and try again.</html>", "ExecHelper  -  Camera Test Error", JOptionPane.ERROR_MESSAGE);
                                     } else {
                                         String[] cameraTestCompletedButtons = new String[]{"Continue", "Test Camera Again"};
 
@@ -11945,7 +12071,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 + "<br/><center>"
                                                 + (isLinux ? new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <i>IF THE CAMERA OUTPUT IS ONLY BLACK, TRY AGAIN WITH \"Use Alternate Web Cam App\" CHECKED</i><br/>" : "")
                                                 + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF CAMERA TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                                + "</center></html>", "QA Helper  —  Camera Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("MovieCamera", qaHelperWindow).toImageIcon(), cameraTestCompletedButtons, cameraTestCompletedButtons[0]);
+                                                + "</center></html>", "ExecHelper  -  Camera Test Completed", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("MovieCamera", qaHelperWindow).toImageIcon(), cameraTestCompletedButtons, cameraTestCompletedButtons[0]);
 
                                         String cameraTestCompletedDialogResponseString = "Continue";
                                         if (cameraTestCompletedDialogResponse > -1) {
@@ -11976,7 +12102,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
                 } else {
                     playAlertSound("beep");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Test Camera</b><br/><br/><i>You will be able to test the camera after you've installed the OS.</i></html>", "QA Helper  —  Cannot Run Camera Test", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Test Camera</b><br/><br/><i>You will be able to test the camera after you've installed the OS.</i></html>", "ExecHelper  -  Cannot Run Camera Test", JOptionPane.WARNING_MESSAGE);
 
                     setActionsEnabled(true);
                     if (!isPeripheralTestMode) {
@@ -11993,7 +12119,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && computerSpecs.hasCamera() && !isWindowsPE) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isCameraVerified ? "UNVERIFY" : "verify") + "</i> the camera?</b></html>", "QA Helper  —  Confirm " + (isCameraVerified ? "Unverify" : "Verify") + " Camera", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isCameraVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isCameraVerified ? "UNVERIFY" : "verify") + "</i> the camera?</b></html>", "ExecHelper  -  Confirm " + (isCameraVerified ? "Unverify" : "Verify") + " Camera", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isCameraVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isCameraVerified = !isCameraVerified;
 
                 writeToHelperLogFile("Test: Camera " + (isCameraVerified ? "Verified" : "UNVERIFIED"));
@@ -12044,7 +12170,7 @@ public class QAHelper extends javax.swing.JFrame {
                     + "<br/><br/>"
                     + "<center>"
                     + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF KEYBOARD TEST FAILS</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                    + "</center></html>", "QA Helper  —  Keyboard Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Keyboard", qaHelperWindow).toImageIcon());
+                    + "</center></html>", "ExecHelper  -  Keyboard Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Keyboard", qaHelperWindow).toImageIcon());
 
             if (keyboardTestPromptReturn == JOptionPane.OK_OPTION) {
                 String javaPath = "";
@@ -12170,10 +12296,10 @@ public class QAHelper extends javax.swing.JFrame {
                                 + new TwemojiImage("CheckMarkButton", qaHelperWindow).toImgTag("left") + " When you are finished testing the keyboard, come back here and click \"OK\" to proceed " + new TwemojiImage("ThumbsUp", qaHelperWindow).toImgTag("right")
                                 + "<br/><br/>"
                                 + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>CONSULT AN INSTRUCTOR IF KEYBOARD TEST FAILED</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
-                                + "</center></html>", "QA Helper  —  Keyboard Test", JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Keyboard", qaHelperWindow).toImageIcon());
+                                + "</center></html>", "ExecHelper  -  Keyboard Test", JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Keyboard", qaHelperWindow).toImageIcon());
 
                         if ((computerSpecs != null) && computerSpecs.getKeyboardRecalled()) {
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Keyboard Possibly Recalled for Repair</b><br/><br/><i>If this keyboard had any bad keys or other issues, it may be able to be replaced for free by the manufacturer.</i></html>", "QA Helper  —  Keyboard Recall", JOptionPane.WARNING_MESSAGE, new TwemojiImage("Construction", qaHelperWindow).toImageIcon(32));
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Keyboard Possibly Recalled for Repair</b><br/><br/><i>If this keyboard had any bad keys or other issues, it may be able to be replaced for free by the manufacturer.</i></html>", "ExecHelper  -  Keyboard Recall", JOptionPane.WARNING_MESSAGE, new TwemojiImage("Construction", qaHelperWindow).toImageIcon(32));
                         }
                     }
 
@@ -12188,7 +12314,7 @@ public class QAHelper extends javax.swing.JFrame {
                     setActionsEnabled(true, !isWindowsPE);
                 } else {
                     playAlertSound("beep");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Keyboard Test App Not Found</b><br/><br/><pre>javaPath = " + javaPath + "<br/>keyboardTestJarTempPath = " + keyboardTestJarTempPath + "</pre><br/><i>This should not have happened, please inform Free Geek I.T.</i></html>", "QA Helper  —  Cannot Run Keyboard Test", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Keyboard Test App Not Found</b><br/><br/><pre>javaPath = " + javaPath + "<br/>keyboardTestJarTempPath = " + keyboardTestJarTempPath + "</pre><br/><i>This should not have happened, please inform Executive Undertakings</i></html>", "ExecHelper  -  Cannot Run Keyboard Test", JOptionPane.WARNING_MESSAGE);
 
                     setActionsEnabled(true);
                     if (!isPeripheralTestMode) {
@@ -12210,7 +12336,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isKeyboardVerified ? "UNVERIFY" : "verify") + "</i> the keyboard?</b></html>", "QA Helper  —  Confirm " + (isKeyboardVerified ? "Unverify" : "Verify") + " Keyboard", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isKeyboardVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isKeyboardVerified ? "UNVERIFY" : "verify") + "</i> the keyboard?</b></html>", "ExecHelper  -  Confirm " + (isKeyboardVerified ? "Unverify" : "Verify") + " Keyboard", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isKeyboardVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isKeyboardVerified = !isKeyboardVerified;
 
                 writeToHelperLogFile("Test: Keyboard " + (isKeyboardVerified ? "Verified" : "UNVERIFIED"));
@@ -12255,7 +12381,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isWindowsPE) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isMouseVerified ? "UNVERIFY" : "verify") + "</i> the mouse?</b></html>", "QA Helper  —  Confirm " + (isMouseVerified ? "Unverify" : "Verify") + " Mouse", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isMouseVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isMouseVerified ? "UNVERIFY" : "verify") + "</i> the mouse?</b></html>", "ExecHelper  -  Confirm " + (isMouseVerified ? "Unverify" : "Verify") + " Mouse", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isMouseVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isMouseVerified = !isMouseVerified;
 
                 writeToHelperLogFile("Test: Mouse " + (isMouseVerified ? "Verified" : "UNVERIFIED"));
@@ -12327,7 +12453,7 @@ public class QAHelper extends javax.swing.JFrame {
                     + "<b style='font-family: monospace'>&nbsp;&nbsp;&nbsp;</b> " + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>IF ANY OF THESE SETTINGS ARE ENABLED AND CANNOT BE DISABLED, INFORM AN INSTRUCTOR</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
                     + "<br/><br/>"
                     + "<b style='font-family: monospace'>12)</b> <u>Save the UEFI/BIOS Setup configuration</u> and <b>reboot the computer to boot up normally.</b>"
-                    + "</html>", "QA Helper  —  UEFI/BIOS Setup Setup Information", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(), biosSetupButtons, biosSetupButtons[0]);
+                    + "</html>", "ExecHelper  -  UEFI/BIOS Setup Setup Information", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(), biosSetupButtons, biosSetupButtons[0]);
 
             String biosSetupDialogResponseString = "Cancel";
             if (biosSetupDialogResponse > -1) {
@@ -12363,7 +12489,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && isLoggedIn && (computerSpecs != null) && pid.startsWith("FG") && !isMacOS) {
             setActionsEnabled(false);
 
-            if (!shouldConfirm || JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to log ID \"" + pid + "\" as Absolute Persistence/Computrace enabled?</b><br/><br/><p style='font-family: monospace'><b>Serial:</b> " + computerSpecs.getSerial() + "<br/><b>&nbsp;&nbsp;UUID:</b> " + computerSpecs.getBiosUUID() + "</p></html>", "QA Helper  —  Confirm Log Absolute Persistence/Computrace Enabled", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (!shouldConfirm || JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to log ID \"" + pid + "\" as Absolute Persistence/Computrace enabled?</b><br/><br/><p style='font-family: monospace'><b>Serial:</b> " + computerSpecs.getSerial() + "<br/><b>&nbsp;&nbsp;UUID:</b> " + computerSpecs.getBiosUUID() + "</p></html>", "ExecHelper  -  Confirm Log Absolute Persistence/Computrace Enabled", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -12406,7 +12532,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
 
                             if (logAbsoluteEnabledResult.endsWith("LOGGED")) {
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + (logAbsoluteEnabledResult.startsWith("ALREADY") ? "Already" : "Successfully") + " Logged ID \"" + pid + "\" as Absolute Persistence/Computrace Enabled</u></b><br/><br/><p style='font-family: monospace'><b>Serial:</b> " + computerSpecs.getSerial() + "<br/><b>&nbsp;&nbsp;UUID:</b> " + computerSpecs.getBiosUUID() + "</p></html>", "QA Helper  —  " + (logAbsoluteEnabledResult.startsWith("ALREADY") ? "Already" : "Successfully") + " Logged Absolute Persistence/Computrace Enabled", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(32));
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + (logAbsoluteEnabledResult.startsWith("ALREADY") ? "Already" : "Successfully") + " Logged ID \"" + pid + "\" as Absolute Persistence/Computrace Enabled</u></b><br/><br/><p style='font-family: monospace'><b>Serial:</b> " + computerSpecs.getSerial() + "<br/><b>&nbsp;&nbsp;UUID:</b> " + computerSpecs.getBiosUUID() + "</p></html>", "ExecHelper  -  " + (logAbsoluteEnabledResult.startsWith("ALREADY") ? "Already" : "Successfully") + " Logged Absolute Persistence/Computrace Enabled", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("ControlKnobs", qaHelperWindow).toImageIcon(32));
                             } else {
                                 if (logAbsoluteEnabledResult.isEmpty()) {
                                     logAbsoluteEnabledResult = "NO RESPONSE";
@@ -12430,8 +12556,8 @@ public class QAHelper extends javax.swing.JFrame {
                                     + "Make sure you're connected to either a Wi-Fi network or plugged in with an Ethernet cable.<br/>"
                                     + "If this computer does not have an Ethernet port, use a USB to Ethernet adapter.<br/>"
                                     + "Once you're connected to Wi-Fi or Ethernet, it may take a few moments for the internet connection to be established.<br/>"
-                                    + "If it takes more than a few minutes, consult an instructor or inform Free Geek I.T.</html>"},
-                                        "QA Helper  —  Log Absolute Enabled Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
+                                    + "If it takes more than a few minutes, consult an instructor or inform Executive Undertakings</html>"},
+                                        "ExecHelper  -  Log Absolute Enabled Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
 
                                 if (failedToLogAbsoluteEnabledResult == JOptionPane.YES_OPTION) {
                                     logAbsoluteComputraceEnabled(false);
@@ -12454,7 +12580,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isMacOS) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isBIOSverified ? "UNVERIFY" : "verify") + "</i> the UEFI/BIOS Setup configuration?</b></html>", "QA Helper  —  Confirm " + (isBIOSverified ? "Unverify" : "Verify") + " UEFI/BIOS Setup", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isBIOSverified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isBIOSverified ? "UNVERIFY" : "verify") + "</i> the UEFI/BIOS Setup configuration?</b></html>", "ExecHelper  -  Confirm " + (isBIOSverified ? "Unverify" : "Verify") + " UEFI/BIOS Setup", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isBIOSverified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isBIOSverified = !isBIOSverified;
 
                 writeToHelperLogFile("Task: UEFI/BIOS Setup " + (isBIOSverified ? "Verified" : "UNVERIFIED"));
@@ -12500,7 +12626,7 @@ public class QAHelper extends javax.swing.JFrame {
                             + new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImgTag("left") + " If HDMI/DisplayPort/Mini DisplayPort is working correctly, you should <u>see this computers desktop picture on the external monitor</u>."
                             + "<br/><br/>"
                             + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <i>IF YOU DO NOT SEE THE DESKTOP PICTURE ON THE EXTERNAL MONITOR, INFORM AN INSTRUCTOR</i> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")))
-                    + "</html>", "QA Helper  —  Check Ports", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("PuzzlePiece", qaHelperWindow).toImageIcon());
+                    + "</html>", "ExecHelper  -  Check Ports", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("PuzzlePiece", qaHelperWindow).toImageIcon());
 
             if (!isPortsVerified && btnVerifyPorts.isVisible() && btnVerifyPorts.isEnabled()) {
                 btnVerifyPortsActionPerformed(null);
@@ -12516,7 +12642,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled || (evt == null)) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isPortsVerified ? "UNVERIFY" : "verify") + "</i> the ports?</b></html>", "QA Helper  —  Confirm " + (isPortsVerified ? "Unverify" : "Verify") + " Ports", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isPortsVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isPortsVerified ? "UNVERIFY" : "verify") + "</i> the ports?</b></html>", "ExecHelper  -  Confirm " + (isPortsVerified ? "Unverify" : "Verify") + " Ports", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isPortsVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isPortsVerified = !isPortsVerified;
 
                 writeToHelperLogFile("Task: Ports " + (isPortsVerified ? "Verified" : "UNVERIFIED"));
@@ -12568,7 +12694,7 @@ public class QAHelper extends javax.swing.JFrame {
                 if (aptIsRunning) {
                     playAlertSound("beep");
 
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt <i>Driver Manager</i> or <i>Driver Manager</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "QA Helper  —  Check Drivers Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt <i>Driver Manager</i> or <i>Driver Manager</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "ExecHelper  -  Check Drivers Warning", JOptionPane.WARNING_MESSAGE);
                 } else {
                     String possibleSudo = (!adminPassword.equals("*UNKNOWN*") ? "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk " : "/usr/bin/pkexec ");
 
@@ -12599,7 +12725,7 @@ public class QAHelper extends javax.swing.JFrame {
                         }).execute();
 
                         // TODO: Add a message describing what should be checked in Driver Manager
-                        //JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>Driver Manager</i> will open momentarily.</b></html>", "QA Helper  —  Check Drivers", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(32));
+                        //JOptionPane.showMessageDialog(qaHelperWindow, "<html><b><i>Driver Manager</i> will open momentarily.</b></html>", "ExecHelper  -  Check Drivers", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(32));
                         if (!isDriversVerified && btnVerifyDrivers.isVisible() && btnVerifyDrivers.isEnabled()) {
                             btnVerifyDriversActionPerformed(null);
                         }
@@ -12775,7 +12901,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 + (isLenovoWithSystemUpdateApp ? "<i>run \"Get new updates\"</i> in <u>Lenovo System Update</u> or " : "")
                                 + "<u>search for drivers</u><br/>"
                                 + "for this computers model or GPU to get the <u>newest drivers as well as BIOS updates</u>, etc.<br/>"
-                                + "<i>" + (isLenovoWithSystemUpdateApp ? "Running Lenovo System Update or s" : "S") + "earching for drivers in not required if you're not having any issues with this computer.</i>") + "</html>"}, "QA Helper  —  Check Drivers", JOptionPane.DEFAULT_OPTION, (driverErrors ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE), new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(), driversDialogButtons.toArray(), driversDialogButtons.get(0));
+                                + "<i>" + (isLenovoWithSystemUpdateApp ? "Running Lenovo System Update or s" : "S") + "earching for drivers in not required if you're not having any issues with this computer.</i>") + "</html>"}, "ExecHelper  -  Check Drivers", JOptionPane.DEFAULT_OPTION, (driverErrors ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE), new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(), driversDialogButtons.toArray(), driversDialogButtons.get(0));
 
                             String driversDialogResponseString = "OK";
                             if (driversDialogResponse > -1) {
@@ -12853,7 +12979,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     String gpu = computerSpecs.getFullGPU();
 
                                     int searchDriversDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Would you like to search Google for model or GPU drivers?</b><br/><br/><b>Model:</b> " + brandAndModel + "<br/><b>Serial to Copy to Clipboard:</b> " + escapeSingleLineSpecStringForHTML((deviceTypeIsMotherboard ? computerSpecs.getFullMotherboardSerial() : computerSpecs.getFullSerial())) + "<br/><br/><b>GPU:</b> " + gpu + "</html>",
-                                            "QA Helper  —  Search Google for Drivers", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("MagnifyingGlassTiltedLeft", qaHelperWindow).toImageIcon(32), searchDriversDialogButtons, searchDriversDialogButtons[0]);
+                                            "ExecHelper  -  Search Google for Drivers", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("MagnifyingGlassTiltedLeft", qaHelperWindow).toImageIcon(32), searchDriversDialogButtons, searchDriversDialogButtons[0]);
                                     String searchDriversDialogResponseString = "Cancel";
                                     if (searchDriversDialogResponse > -1) {
                                         searchDriversDialogResponseString = searchDriversDialogButtons[searchDriversDialogResponse];
@@ -12890,7 +13016,7 @@ public class QAHelper extends javax.swing.JFrame {
                             System.out.println("checkWindowsDriversException: " + checkWindowsDriversException);
                         }
                         playAlertSound("error");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING DRIVERS</b><br/><br/><i>Please Try Again</i></html>", "QA Helper  —  Check Drivers Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING DRIVERS</b><br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  Check Drivers Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                     setActionsEnabled(true);
@@ -12905,7 +13031,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isMacOS && !isLinuxLiveBoot && !isWindowsPE) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDriversVerified ? "UNVERIFY" : "verify") + "</i> the drivers?</b></html>", "QA Helper  —  Confirm " + (isDriversVerified ? "Unverify" : "Verify") + " Drivers", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDriversVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isDriversVerified ? "UNVERIFY" : "verify") + "</i> the drivers?</b></html>", "ExecHelper  -  Confirm " + (isDriversVerified ? "Unverify" : "Verify") + " Drivers", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isDriversVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isDriversVerified = !isDriversVerified;
 
                 writeToHelperLogFile("Task: Drivers " + (isDriversVerified ? "Verified" : "UNVERIFIED"));
@@ -12950,7 +13076,7 @@ public class QAHelper extends javax.swing.JFrame {
                         focusWindow();
 
                         String[] softwareUpdateButtons = new String[]{"OK", "Also Install System Updates"};
-                        int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Checking for <i>Firmware Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while Firmware Updates are checked and prepared in the Terminal.</i><br/><br/>When Firmware Updates are done checking and preparing, you may need to reboot to install them.<br/><br/><br/><b>To save time during refurbishment, <u>installing <i>system updates</i> IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to also check for and install system updates anyway, click the \"Also Install System Updates\" button below.</i></html>", "QA Helper  —  Firmware Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
+                        int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Checking for <i>Firmware Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while Firmware Updates are checked and prepared in the Terminal.</i><br/><br/>When Firmware Updates are done checking and preparing, you may need to reboot to install them.<br/><br/><br/><b>To save time during refurbishment, <u>installing <i>system updates</i> IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to also check for and install system updates anyway, click the \"Also Install System Updates\" button below.</i></html>", "ExecHelper  -  Firmware Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
 
                         String softwareUpdateDialogResponseString = "OK";
                         if (softwareUpdateDialogResponse > -1) {
@@ -12970,7 +13096,7 @@ public class QAHelper extends javax.swing.JFrame {
                             if (aptIsRunning) {
                                 playAlertSound("beep");
 
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt <i>System Updates</i> or <i>System Updates</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "QA Helper  —  System Updates Warning", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Another installation process (such as \"apt\" or \"mintUpdate\") is currently running. <i>This process may be running in the background.</i></b><br/><br/><i>This other installation process could interrupt <i>System Updates</i> or <i>System Updates</i> may interrupt the other installation process.</i><br/><br/>Try again after the other installation process has finished.</html>", "ExecHelper  -  System Updates Warning", JOptionPane.WARNING_MESSAGE);
                             } else {
                                 String systemUpdateCommand = "/usr/bin/sudo /usr/local/bin/apt update && /usr/bin/sudo /usr/local/bin/apt upgrade -y";
 
@@ -12988,7 +13114,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 TimeUnit.SECONDS.sleep(1);
 
                                 focusWindow();
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started <i>System Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while System Updates install in the Terminal.</i><br/><br/>When System Updates are done, the Terminal will stay open and you can press enter in the Terminal window to close it.</html>", "QA Helper  —  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started <i>System Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while System Updates install in the Terminal.</i><br/><br/>When System Updates are done, the Terminal will stay open and you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
                             }
                         }
                     } catch (HeadlessException | IOException | InterruptedException | NumberFormatException installUpdatesViaTerminalException) {
@@ -13001,7 +13127,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
             } else if (isMacOS) {
                 if (new File("/Users/Shared/.fgResetSnapshotCreated").exists()) {
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b style='color: " + warningColorHTML + "'>System Updates <i style='color: " + errorColorHTML + "'>MUST NOT</i> Be Installed on This Mac!</b><br/><br/><b>This Mac will be reset using a specially made reset Snapshot.</b><br/><br/><i>If any System Updates are installed, that reset Snapshot will be automatically deleted by macOS which would prevent resetting this Mac.</i></html>", "QA Helper  —  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b style='color: " + warningColorHTML + "'>System Updates <i style='color: " + errorColorHTML + "'>MUST NOT</i> Be Installed on This Mac!</b><br/><br/><b>This Mac will be reset using a specially made reset Snapshot.</b><br/><br/><i>If any System Updates are installed, that reset Snapshot will be automatically deleted by macOS which would prevent resetting this Mac.</i></html>", "ExecHelper  -  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
                     focusNextTestTaskVerifyButton(btnSystemUpdates);
                 } else {
                     String[] macOSversionParts = System.getProperty("os.version").replaceAll("[^0-9.]", "").split("\\.");
@@ -13014,7 +13140,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
 
                             String[] softwareUpdateButtons = new String[]{"OK", "Open Software Update in " + systemPreferencesOrSettingsAppName};
-                            int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing system updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for or install system updates anyway, click the \"Open Software Update in " + systemPreferencesOrSettingsAppName + "\" button below.</i><br/><br/>When Software Update in " + systemPreferencesOrSettingsAppName + " is opened, updates will be checked automatically.<br/>To install any available updates, click the \"Update Now\" button in " + systemPreferencesOrSettingsAppName + ".</html>", "QA Helper  —  System Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
+                            int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing system updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for or install system updates anyway, click the \"Open Software Update in " + systemPreferencesOrSettingsAppName + "\" button below.</i><br/><br/>When Software Update in " + systemPreferencesOrSettingsAppName + " is opened, updates will be checked automatically.<br/>To install any available updates, click the \"Update Now\" button in " + systemPreferencesOrSettingsAppName + ".</html>", "ExecHelper  -  System Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
 
                             String softwareUpdateDialogResponseString = "OK";
                             if (softwareUpdateDialogResponse > -1) {
@@ -13037,7 +13163,7 @@ public class QAHelper extends javax.swing.JFrame {
                     } else {
                         try {
                             String[] softwareUpdateButtons = new String[]{"OK", "Open Update Section in Mac App Store"};
-                            int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing system updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for or install system updates anyway, click the \"Open Update Section in Mac App Store\" button below.</i><br/><br/>When the Update section in Mac App Store is opened, updates will be checked automatically.<br/>To install any available updates, click the \"Update All\" button in Mac App Store.</html>", "QA Helper  —  System Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
+                            int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing system updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for or install system updates anyway, click the \"Open Update Section in Mac App Store\" button below.</i><br/><br/>When the Update section in Mac App Store is opened, updates will be checked automatically.<br/>To install any available updates, click the \"Update All\" button in Mac App Store.</html>", "ExecHelper  -  System Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
 
                             String softwareUpdateDialogResponseString = "OK";
                             if (softwareUpdateDialogResponse > -1) {
@@ -13059,7 +13185,7 @@ public class QAHelper extends javax.swing.JFrame {
             } else if (isWindows && !isWindowsPE) {
                 try {
                     String[] windowsUpdateButtons = new String[]{"OK", "Open Windows Update in Settings"};
-                    int windowsUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing Windows updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for and install Windows updates anyway, click the \"Open Windows Update in Settings\" button below.</i><br/><br/>When the Windows Update in Settings is opened, click the \"Check for updates\" button in Settings to install any available updates.</html>", "QA Helper  —  Windows Update", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), windowsUpdateButtons, windowsUpdateButtons[0]);
+                    int windowsUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>To save time during refurbishment, <u>installing Windows updates IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to check for and install Windows updates anyway, click the \"Open Windows Update in Settings\" button below.</i><br/><br/>When the Windows Update in Settings is opened, click the \"Check for updates\" button in Settings to install any available updates.</html>", "ExecHelper  -  Windows Update", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), windowsUpdateButtons, windowsUpdateButtons[0]);
 
                     String windowsUpdateDialogResponseString = "OK";
                     if (windowsUpdateDialogResponse > -1) {
@@ -13096,7 +13222,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && !isWindowsPE && (!isMacOS || !new File("/Users/Shared/.fgResetSnapshotCreated").exists())) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isUpdatesVerified ? "UNVERIFY" : "verify") + "</i> that the " + (isLinux ? "firmware" : "system") + " is up-to-date?</b></html>", "QA Helper  —  Confirm " + (isUpdatesVerified ? "Unverify" : "Verify") + " System Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isUpdatesVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isUpdatesVerified ? "UNVERIFY" : "verify") + "</i> that the " + (isLinux ? "firmware" : "system") + " is up-to-date?</b></html>", "ExecHelper  -  Confirm " + (isUpdatesVerified ? "Unverify" : "Verify") + " System Updates", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isUpdatesVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isUpdatesVerified = !isUpdatesVerified;
 
                 writeToHelperLogFile("Task: Updates " + (isUpdatesVerified ? "Verified" : "UNVERIFIED"));
@@ -13317,7 +13443,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         }
 
-                        int windowsLicenseResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + windowsLicenseOutput + "</html>", "QA Helper  —  Windows License", JOptionPane.DEFAULT_OPTION, (isLicensed ? (possibleNonRefurbProductKey ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE) : JOptionPane.WARNING_MESSAGE), new TwemojiImage("Window", qaHelperWindow).toImageIcon(), windowsLicenseButtons, windowsLicenseButtons[0]);
+                        int windowsLicenseResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + windowsLicenseOutput + "</html>", "ExecHelper  -  Windows License", JOptionPane.DEFAULT_OPTION, (isLicensed ? (possibleNonRefurbProductKey ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE) : JOptionPane.WARNING_MESSAGE), new TwemojiImage("Window", qaHelperWindow).toImageIcon(), windowsLicenseButtons, windowsLicenseButtons[0]);
 
                         String windowsLicenseResponseString = "OK";
                         if (windowsLicenseResponse > -1) {
@@ -13361,7 +13487,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     } else {
                                         playAlertSound("error");
                                         sendErrorEmail("Cannot Re-License Digital Product Key Since DPK Logs Not Found");
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Re-License Digital Product Key Since DPK Logs Not Found</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Free Geek I.T.</i></html>", "QA Helper  —  Cannot Re-License DPK", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Re-License Digital Product Key Since DPK Logs Not Found</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Executive Undertakings</i></html>", "ExecHelper  -  Cannot Re-License DPK", JOptionPane.ERROR_MESSAGE);
                                         setActionsEnabled(true);
                                     }
                                 } else { // TODO: Is this condition still possible?
@@ -13380,7 +13506,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     playAlertSound("beep");
 
                                     String[] confirmGMLorCOAbuttons = new String[]{"Cancel", "Confirm GML", "Confirm COA"};
-                                    int confirmGMLorCOAresponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b style='color: " + attentionColorHTML + "'>Windows can only be installed and licensed with a Refurbished DPK on computers that originally shipped with Windows.</b><br/><br/><b>You must manually verify that a GML or COA sticker is on this computer since an existing original DPK was NOT detected in the Registry or SMBIOS.</b><br/><br/>Does this computer have a Genuine Microsoft Label (GML) or Certificate of Authenticity (COA) sticker for any of the following Windows versions anywhere on its case?<br/><br/><b style='color: " + verifiedColorHTML + "'>Windows XP, Windows Vista, Windows 7 (Starter, Home Basic, Home Premium, Pro, or Ultimate),<br/>Windows 8 or 8.1 (Home or Pro), Windows 10 (Home or Pro), or Windows 11 (Home or Pro)</b><br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it, Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "QA Helper  —  Confirm Windows GML or COA", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), confirmGMLorCOAbuttons, confirmGMLorCOAbuttons[0]);
+                                    int confirmGMLorCOAresponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b style='color: " + attentionColorHTML + "'>Windows can only be installed and licensed with a Refurbished DPK on computers that originally shipped with Windows.</b><br/><br/><b>You must manually verify that a GML or COA sticker is on this computer since an existing original DPK was NOT detected in the Registry or SMBIOS.</b><br/><br/>Does this computer have a Genuine Microsoft Label (GML) or Certificate of Authenticity (COA) sticker for any of the following Windows versions anywhere on its case?<br/><br/><b style='color: " + verifiedColorHTML + "'>Windows XP, Windows Vista, Windows 7 (Starter, Home Basic, Home Premium, Pro, or Ultimate),<br/>Windows 8 or 8.1 (Home or Pro), Windows 10 (Home or Pro), or Windows 11 (Home or Pro)</b><br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it, Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "ExecHelper  -  Confirm Windows GML or COA", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), confirmGMLorCOAbuttons, confirmGMLorCOAbuttons[0]);
 
                                     String confirmGMLorCOAresponseString = "Cancel";
                                     if (confirmGMLorCOAresponse > -1) {
@@ -13391,7 +13517,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         logSpecsAction("Manually Confirmed Existing COA");
                                         sendNoticeEmail("Manually Confirmed Existing COA");
 
-                                        boolean openManualWindowsLicense = (JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Since this computer has a Physical COA on it, manually license Windows with<br/>the Product Key on the Physical COA before applying a Refurbished DPK.</b><br/><br/>After you have manually licensed Windows, come back to QA Helper and<br/>click the \"Check Windows License / License Windows\" button again.<br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it,<br/>Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "QA Helper  —  Manually License Windows", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), new String[]{"Open Windows Manual License Prompt", "Cancel"}, "Open Windows Manual License Prompt") == JOptionPane.YES_OPTION);
+                                        boolean openManualWindowsLicense = (JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Since this computer has a Physical COA on it, manually license Windows with<br/>the Product Key on the Physical COA before applying a Refurbished DPK.</b><br/><br/>After you have manually licensed Windows, come back to QA Helper and<br/>click the \"Check Windows License / License Windows\" button again.<br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it,<br/>Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "ExecHelper  -  Manually License Windows", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), new String[]{"Open Windows Manual License Prompt", "Cancel"}, "Open Windows Manual License Prompt") == JOptionPane.YES_OPTION);
 
                                         if (openManualWindowsLicense) {
                                             try {
@@ -13456,7 +13582,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             productKeyTypeDialogButtons.add("Retrieve and Apply Commercial Refurbished DPK");
                                             productKeyTypeDialogButtons.add("Cancel");
 
-                                            int productKeyTypeResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Would you like to retrieve and apply a <u>Commercial</u>" + (!isWindowsHomeEdition ? " or <i>Citizenship</i>" : "") + " Refurbished Digital Product Key to license Windows?</b>" + (!isWindowsHomeEdition ? "<br/><br/>If you choose a <i>Citizenship</i> Refurbished DPK, this computer will ONLY be able to be distributed to ELIGIBLE organizations or individuals, and will NOT be able to be sold online.<br/><br/><u>Be sure to ONLY choose a <i>Citizenship</i> Refurbished DPK if specifically instructed to do so for this computer.</u>" : "") + "</html>", "QA Helper  —  " + (isWindowsHomeEdition ? "Confirm Refurbished DPK" : "Choose Refurbished DPK Type"), JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("OldKey", qaHelperWindow).toImageIcon(32), productKeyTypeDialogButtons.toArray(), productKeyTypeDialogButtons.get(0));
+                                            int productKeyTypeResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Would you like to retrieve and apply a <u>Commercial</u>" + (!isWindowsHomeEdition ? " or <i>Citizenship</i>" : "") + " Refurbished Digital Product Key to license Windows?</b>" + (!isWindowsHomeEdition ? "<br/><br/>If you choose a <i>Citizenship</i> Refurbished DPK, this computer will ONLY be able to be distributed to ELIGIBLE organizations or individuals, and will NOT be able to be sold online.<br/><br/><u>Be sure to ONLY choose a <i>Citizenship</i> Refurbished DPK if specifically instructed to do so for this computer.</u>" : "") + "</html>", "ExecHelper  -  " + (isWindowsHomeEdition ? "Confirm Refurbished DPK" : "Choose Refurbished DPK Type"), JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("OldKey", qaHelperWindow).toImageIcon(32), productKeyTypeDialogButtons.toArray(), productKeyTypeDialogButtons.get(0));
 
                                             String productKeyTypeResponseString = "Cancel";
                                             if (productKeyTypeResponse > -1) {
@@ -13475,7 +13601,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                             + new TwemojiImage("Collision", qaHelperWindow).toImgTag("left") + " <b style='color: " + attentionColorHTML + "'>THIS WILL OVERWRITE THE SAVED PRODUCT KEY IN PCsCRM (<u>" + savedProductKey + "</u>) FOR ID \"" + pid + "\"</b> " + new TwemojiImage("DoubleExclamationMark", qaHelperWindow).toImgTag("right")
                                                             + "<br/><br/>"
                                                             + new TwemojiImage("BackhandIndexPointingRight", qaHelperWindow).toImgTag("left") + " <b style='color: " + warningColorHTML + "'>IF THE SAVED PRODUCT KEY IS NOT CORRECT, YOU MAY HAVE LOGGED IN WITH THE WRONG ID</b> " + new TwemojiImage("BackhandIndexPointingLeft", qaHelperWindow).toImgTag("right")
-                                                            + "</center></html>", "QA Helper  —  Confirm Overwriting Saved Product Key in PCsCRM", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("OldKey", qaHelperWindow).toImageIcon(32));
+                                                            + "</center></html>", "ExecHelper  -  Confirm Overwriting Saved Product Key in PCsCRM", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, new TwemojiImage("OldKey", qaHelperWindow).toImageIcon(32));
 
                                                     if (confirmChangeProductKeyPromptReturn == JOptionPane.OK_OPTION) {
                                                         retrieveAndApplyDigitalProductKey(retrieveCitizenshipDPK);
@@ -13490,7 +13616,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             playAlertSound("error");
 
                                             sendErrorEmail("Required OA3Tool Not Found to Retrieve DPK from MSC");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Required OA3Tool Not Found to Retrieve Digital Product Key</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Free Geek I.T.</i></html>", "QA Helper  —  OA3Tool Missing", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Required OA3Tool Not Found to Retrieve Digital Product Key</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Executive Undertakings</i></html>", "ExecHelper  -  OA3Tool Missing", JOptionPane.ERROR_MESSAGE);
 
                                             setActionsEnabled(true);
                                         }
@@ -13499,11 +13625,11 @@ public class QAHelper extends javax.swing.JFrame {
 
                                         if (!isLicensed || possibleNonRefurbProductKey) {
                                             sendErrorEmail("Cannot Re-Apply Digital Product Key for This ID - MUST REVERT FIRST");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Re-Apply Digital Product Key for This ID</b><br/><br/>The previously applied DPK must be reverted before a new DPK can be applied to this computer.<br/><br/><i>Please contact Free Geek I.T. to be able to apply a new DPK.</i></html>", "QA Helper  —  Cannot Re-Apply DPK", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Re-Apply Digital Product Key for This ID</b><br/><br/>The previously applied DPK must be reverted before a new DPK can be applied to this computer.<br/><br/><i>Please contact Executive Undertakings to be able to apply a new DPK.</i></html>", "ExecHelper  -  Cannot Re-Apply DPK", JOptionPane.ERROR_MESSAGE);
                                             // After a DPK has been confirmed to be reverted in MSC, a new DPK can be applied to this computer by creating a "\Install\DPK\REVERTED" file or folder and trying again.
                                         } else {
                                             sendErrorEmail("Cannot Change Product Key After Applying Digital Product Key");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Change Product Key After Applying Digital Product Key</b><br/><br/><i>Please contact Free Geek I.T. if there is an issue with this DPK.</i></html>", "QA Helper  —  Cannot Change DPK", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Cannot Change Product Key After Applying Digital Product Key</b><br/><br/><i>Please contact Executive Undertakings if there is an issue with this DPK.</i></html>", "ExecHelper  -  Cannot Change DPK", JOptionPane.ERROR_MESSAGE);
                                         }
 
                                         setActionsEnabled(true);
@@ -13529,7 +13655,7 @@ public class QAHelper extends javax.swing.JFrame {
                         sendErrorEmail("checkWindowsLicenseException: " + checkWindowsLicenseException);
 
                         playAlertSound("error");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING WINDOWS LICENSE</b><br/><br/><i>Please Try Again</i></html>", "QA Helper  —  Check Windows License Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING WINDOWS LICENSE</b><br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  Check Windows License Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                     if (!didContinueLicenseWindows) {
@@ -13864,10 +13990,10 @@ public class QAHelper extends javax.swing.JFrame {
                             sendErrorEmail(retrieveDPKoutput);
 
                             if (retrieveDPKoutput.equals("NO SERIAL NUMBER")) {
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Serial Number for Digital Product Key</b><br/><br/>Since this computer does not have a computer or motherboard serial number available via software,<br/><u>it cannot have a Digital Product Key applied to it.</u></html>", "QA Helper  —  No Serial Number for Digital Product Key", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>No Serial Number for Digital Product Key</b><br/><br/>Since this computer does not have a computer or motherboard serial number available via software,<br/><u>it cannot have a Digital Product Key applied to it.</u></html>", "ExecHelper  -  No Serial Number for Digital Product Key", JOptionPane.ERROR_MESSAGE);
                             } else if (retrieveDPKoutput.startsWith("ERROR RETRIEVING ")) {
                                 String dpkTypeCode = retrieveDPKoutput.substring(17, retrieveDPKoutput.indexOf(":"));
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Retrieving \"" + dpkTypeCode + "\" from MSC</b><br/><br/><pre>" + retrieveDPKoutput.substring((retrieveDPKoutput.indexOf(": ") + 2)) + "</pre><br/><i>Please Inform Free Geek I.T.</i></html>", "QA Helper  —  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Retrieving \"" + dpkTypeCode + "\" from MSC</b><br/><br/><pre>" + retrieveDPKoutput.substring((retrieveDPKoutput.indexOf(": ") + 2)) + "</pre><br/><i>Please Inform Executive Undertakings</i></html>", "ExecHelper  -  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
                             } else if (retrieveDPKoutput.equals("FAILED TO CONNECT TO MSC")) {
                                 JOptionPane.showMessageDialog(qaHelperWindow, "<html><b style='color: " + warningColorHTML + "'>Local Free Geek Network Is Required to Retrieve Digital Product Key</b>"
                                         + "<br/><br/>"
@@ -13875,9 +14001,9 @@ public class QAHelper extends javax.swing.JFrame {
                                         + "<br/><br/>"
                                         + "Make sure you're connected to the \"FG Staff\" Wi-Fi network or plugged in with an Ethernet cable at Free Geek."
                                         + "<br/><br/>"
-                                        + "<i>Please Inform Free Geek I.T. If This Error Continues While Connected to Local Free Geek Network</i></html>", "QA Helper  —  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
+                                        + "<i>Please Inform Executive Undertakings If This Error Continues While Connected to Local Free Geek Network</i></html>", "ExecHelper  -  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
                             } else {
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + retrieveDPKoutput + "</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Free Geek I.T.</i></html>", "QA Helper  —  Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + retrieveDPKoutput + "</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Executive Undertakings</i></html>", "ExecHelper  -  Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
                             }
 
                             setActionsEnabled(true);
@@ -13889,7 +14015,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                         playAlertSound("error");
                         sendErrorEmail("UNKNOWN ERROR RETRIEVING DIGITAL PRODUCT KEY");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR RETRIEVING DIGITAL PRODUCT KEY</b><br/><br/><i>Please Try Again</i></html>", "QA Helper  —  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR RETRIEVING DIGITAL PRODUCT KEY</b><br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  Retrieve Digital Product Key Error", JOptionPane.ERROR_MESSAGE);
 
                         setActionsEnabled(true);
                     }
@@ -14303,7 +14429,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     longErrorMessage = "<b><span style='color: " + successColorHTML + "'>Licensed Windows</span>, but <span style='color: " + errorColorHTML + "'>Failed to Finalize DPK</span>:</b>"
                                             + "<br/><br/>"
                                             + "<pre>" + licenseWindowsOutput.substring(11) + "</pre>"
-                                            + "<br/><i>Please Inform Free Geek I.T.</i>";
+                                            + "<br/><i>Please Inform Executive Undertakings</i>";
                                 } else {
                                     switch (licenseWindowsOutput) {
                                         case "INTERNET REQUIRED TO LICENSE WINDOWS":
@@ -14330,7 +14456,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
 
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + longErrorMessage + "</html>", "QA Helper  —  License Windows Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + longErrorMessage + "</html>", "ExecHelper  -  License Windows Error", JOptionPane.ERROR_MESSAGE);
 
                                 licenseWindowsWithProductKey(newProductKey, dpkTypeCode); // Try again if re-attempting after a CBR upload error or something with a DPK.
                             }
@@ -14342,7 +14468,7 @@ public class QAHelper extends javax.swing.JFrame {
                             sendErrorEmail("licenseWindowsException: " + licenseWindowsException);
 
                             playAlertSound("error");
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR LICENSING WINDOWS</b><br/><br/><i>Please Try Again</i></html>", "QA Helper  —  License Windows Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR LICENSING WINDOWS</b><br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  License Windows Error", JOptionPane.ERROR_MESSAGE);
 
                             licenseWindowsWithProductKey(newProductKey, dpkTypeCode);
                         }
@@ -14352,7 +14478,7 @@ public class QAHelper extends javax.swing.JFrame {
                 playAlertSound("beep");
                 String invalidProductKeyOrDPKTypeCodeError = "Cannot License Invalid Digital Product Key (" + newProductKey + ") or DPK Type Code (" + dpkTypeCode + ")";
                 sendErrorEmail(invalidProductKeyOrDPKTypeCodeError);
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + invalidProductKeyOrDPKTypeCodeError + "</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Free Geek I.T.</i></html>", "QA Helper  —  Cannot Change DPK", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>" + invalidProductKeyOrDPKTypeCodeError + "</b><br/><br/>THIS SHOULD NOT HAVE HAPPENED<br/><br/><i>Please Inform Executive Undertakings</i></html>", "ExecHelper  -  Cannot Change DPK", JOptionPane.ERROR_MESSAGE);
                 setActionsEnabled(true);
             }
         } else {
@@ -14365,7 +14491,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && isWindows && !isWindowsPE) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isWindowsLicenseVerified ? "UNVERIFY" : "verify") + "</i> that Windows is licensed with the correct Product Key?</b></html>", "QA Helper  —  Confirm " + (isWindowsLicenseVerified ? "Unverify" : "Verify") + " Windows License", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isWindowsLicenseVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isWindowsLicenseVerified ? "UNVERIFY" : "verify") + "</i> that Windows is licensed with the correct Product Key?</b></html>", "ExecHelper  -  Confirm " + (isWindowsLicenseVerified ? "Unverify" : "Verify") + " Windows License", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isWindowsLicenseVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isWindowsLicenseVerified = !isWindowsLicenseVerified;
 
                 writeToHelperLogFile("Task: Windows License " + (isWindowsLicenseVerified ? "Verified" : "UNVERIFIED"));
@@ -14436,7 +14562,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
                             };
 
-                            passwordPromptPane.createDialog(qaHelperWindow, "QA Helper  —  Admin Password").setVisible(true);
+                            passwordPromptPane.createDialog(qaHelperWindow, "ExecHelper  -  Admin Password").setVisible(true);
 
                             if (passwordPromptPane.getValue() != null && (int) passwordPromptPane.getValue() == JOptionPane.OK_OPTION) {
                                 possibleAdminPasswordForRemoteManagement = new String(passwordField.getPassword());
@@ -14567,8 +14693,8 @@ public class QAHelper extends javax.swing.JFrame {
                                                                 + "Make sure you're connected to either a Wi-Fi network or plugged in with an Ethernet cable.<br/>"
                                                                 + "If this Mac does not have an Ethernet port, use a Thunderbolt or USB to Ethernet adapter.<br/>"
                                                                 + "Once you're connected to Wi-Fi or Ethernet, it may take a few moments for the internet connection to be established.<br/>"
-                                                                + "If it takes more than a few minutes, consult an instructor or inform Free Geek I.T.</html>"},
-                                                                    "QA Helper  —  Log Remote Managed Mac Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again"}, "Try Again");
+                                                                + "If it takes more than a few minutes, consult an instructor or inform Executive Undertakings</html>"},
+                                                                    "ExecHelper  -  Log Remote Managed Mac Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again"}, "Try Again");
 
                                                             TimeUnit.SECONDS.sleep(1);
                                                         }
@@ -14594,12 +14720,12 @@ public class QAHelper extends javax.swing.JFrame {
                                                             + "<br/>"
                                                             + new TwemojiImage("IDButton", qaHelperWindow).toImgTag("left") + " The Serial Number for this Mac is <b>" + escapeSingleLineSpecStringForHTML(computerSpecs.getFullSerial()) + "</b>"
                                                             + (pid.startsWith("FG") ? ("<br/><br/><br/><center>" + new TwemojiImage("Memo", qaHelperWindow).toImgTag("left") + " <i>THIS MAC AND CONTACT INFO HAS BEEN LOGGED</i> " + new TwemojiImage("CheckMarkButton", qaHelperWindow).toImgTag("right") + "</center>") : "")
-                                                            + "</html>", "QA Helper  —  Check Remote Management", JOptionPane.WARNING_MESSAGE, new TwemojiImage("LockedWithKey", qaHelperWindow).toImageIcon());
+                                                            + "</html>", "ExecHelper  -  Check Remote Management", JOptionPane.WARNING_MESSAGE, new TwemojiImage("LockedWithKey", qaHelperWindow).toImageIcon());
                                                 } else {
                                                     // TODO: Mark as removed if was previously Remote Managed like the other AppleScripts do now?
 
                                                     playAlertSound("success");
-                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CheckMarkButton", qaHelperWindow).toImgTag("left") + " <b style='color: " + successColorHTML + "'>Remote Management <i>IS NOT</i> Enabled</b></html>", "QA Helper  —  Check Remote Management", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Unlocked", qaHelperWindow).toImageIcon(32));
+                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html>" + new TwemojiImage("CheckMarkButton", qaHelperWindow).toImgTag("left") + " <b style='color: " + successColorHTML + "'>Remote Management <i>IS NOT</i> Enabled</b></html>", "ExecHelper  -  Check Remote Management", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Unlocked", qaHelperWindow).toImageIcon(32));
 
                                                     if (!isRemoteManagementVerified && btnVerifyRemoteManagement.isVisible() && btnVerifyRemoteManagement.isEnabled()) {
                                                         btnVerifyRemoteManagementActionPerformed(null);
@@ -14608,7 +14734,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             } else {
                                                 playAlertSound("error");
                                                 sendErrorEmail("ERROR CHECKING REMOTE MANAGEMENT\n\nREMOTE MANAGEMENT CHECK OUTPUT:\n" + String.join("\n", remoteManagementOutputLines));
-                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>ERROR CHECKING REMOTE MANAGEMENT</b><br/><br/><u>REMOTE MANAGEMENT CHECK OUTPUT:</u><br/>" + String.join("<br/>", remoteManagementOutputLines) + "<br/><br/><i>Please Try Again</i></html>", "QA Helper  —  Check Remote Management Error", JOptionPane.ERROR_MESSAGE);
+                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>ERROR CHECKING REMOTE MANAGEMENT</b><br/><br/><u>REMOTE MANAGEMENT CHECK OUTPUT:</u><br/>" + String.join("<br/>", remoteManagementOutputLines) + "<br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  Check Remote Management Error", JOptionPane.ERROR_MESSAGE);
                                             }
                                         } catch (HeadlessException | InterruptedException | ExecutionException checkRemoteManagementException) {
                                             if (isTestMode) {
@@ -14616,7 +14742,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                             playAlertSound("error");
                                             sendErrorEmail("UNKNOWN ERROR CHECKING REMOTE MANAGEMENT");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING REMOTE MANAGEMENT</b><br/><br/><i>Please Try Again</i></html>", "QA Helper  —  Check Remote Management Error", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>UNKNOWN ERROR CHECKING REMOTE MANAGEMENT</b><br/><br/><i>Please Try Again</i></html>", "ExecHelper  -  Check Remote Management Error", JOptionPane.ERROR_MESSAGE);
                                         }
 
                                         setActionsEnabled(true);
@@ -14624,7 +14750,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }).execute();
                             } else {
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Admin Password for \"" + fullAdminUsernameForRemoteManagement + "\"</b></html>", "QA Helper  —  Incorrect Password", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Admin Password for \"" + fullAdminUsernameForRemoteManagement + "\"</b></html>", "ExecHelper  -  Incorrect Password", JOptionPane.WARNING_MESSAGE);
                                 setActionsEnabled(true);
                             }
                         } else {
@@ -14633,18 +14759,18 @@ public class QAHelper extends javax.swing.JFrame {
                         }
                     } else {
                         playAlertSound("error");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Internet Is Required to Check Remote Management</b><br/><br/><i>Failed to Connect to Apple.com</i></html>", "QA Helper  —  Check Remote Management Error", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Internet Is Required to Check Remote Management</b><br/><br/><i>Failed to Connect to Apple.com</i></html>", "ExecHelper  -  Check Remote Management Error", JOptionPane.WARNING_MESSAGE);
                         setActionsEnabled(true);
                     }
                 } else {
                     playAlertSound("beep");
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>You Must <i>LOG IN</i> to Check Remote Management</b></html>", "QA Helper  —  Log In to Check Remote Management", JOptionPane.WARNING_MESSAGE, new TwemojiImage("LockedWithKey", qaHelperWindow).toImageIcon(32));
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>You Must <i>LOG IN</i> to Check Remote Management</b></html>", "ExecHelper  -  Log In to Check Remote Management", JOptionPane.WARNING_MESSAGE, new TwemojiImage("LockedWithKey", qaHelperWindow).toImageIcon(32));
                     setActionsEnabled(true);
                     focusNextTestTaskVerifyButton(btnCheckRemoteManagement);
                 }
             } else {
                 playAlertSound("beep");
-                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Somehow, this Mac <i>DOES NOT</i> have a System Serial Number.</b><br/><br/><i>Without a System Serial Number, Remote Management cannot be checked.</i><br/><br/>But also, without a System Serial Number, it is <i>IMPOSSIBLE</i> for Remote Management to be enabled.</html>", "QA Helper  —  Check Remote Management Impossible", JOptionPane.WARNING_MESSAGE, new TwemojiImage("ExclamationQuestionMark", qaHelperWindow).toImageIcon(32));
+                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Somehow, this Mac <i>DOES NOT</i> have a System Serial Number.</b><br/><br/><i>Without a System Serial Number, Remote Management cannot be checked.</i><br/><br/>But also, without a System Serial Number, it is <i>IMPOSSIBLE</i> for Remote Management to be enabled.</html>", "ExecHelper  -  Check Remote Management Impossible", JOptionPane.WARNING_MESSAGE, new TwemojiImage("ExclamationQuestionMark", qaHelperWindow).toImageIcon(32));
                 setActionsEnabled(true);
             }
         } else {
@@ -14656,7 +14782,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null)) && isMacOS && isLoggedIn) {
             setActionsEnabled(false);
 
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isRemoteManagementVerified ? "UNVERIFY" : "verify") + "</i> that remote management is not enabled?</b></html>", "QA Helper  —  Confirm " + (isRemoteManagementVerified ? "Unverify" : "Verify") + " Remote Management", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isRemoteManagementVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>" + ((evt == null) ? "Would you like " : "Are you sure you want ") + "to <i>" + (isRemoteManagementVerified ? "UNVERIFY" : "verify") + "</i> that remote management is not enabled?</b></html>", "ExecHelper  -  Confirm " + (isRemoteManagementVerified ? "Unverify" : "Verify") + " Remote Management", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage((isRemoteManagementVerified ? "CrossMark" : "CheckBoxWithCheck"), qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 isRemoteManagementVerified = !isRemoteManagementVerified;
 
                 writeToHelperLogFile("Task: Remote Management " + (isRemoteManagementVerified ? "Verified" : "UNVERIFIED"));
@@ -14736,7 +14862,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
             };
 
-            notesPromptPane.createDialog(qaHelperWindow, "QA Helper  —  " + conditionAndNotesOrOnlyNotes + " for " + pid).setVisible(true);
+            notesPromptPane.createDialog(qaHelperWindow, "ExecHelper  -  " + conditionAndNotesOrOnlyNotes + " for " + pid).setVisible(true);
 
             if (notesPromptPane.getValue() != null && notesPromptPane.getValue().equals("Save " + conditionAndNotesOrOnlyNotes)) {
                 String newConditionGrade = (allowSettingConditionGrade ? fgConditionGrades.get(conditionGradesComboBox.getSelectedIndex()) : currentConditionGrade);
@@ -14772,10 +14898,10 @@ public class QAHelper extends javax.swing.JFrame {
                                     lastConditionAndNotesSaveFailed = false;
 
                                     playAlertSound("success");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Saved " + conditionAndNotesOrOnlyNotes + "</b></html>", "QA Helper  —  Saved " + conditionAndNotesOrOnlyNotes, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Successfully Saved " + conditionAndNotesOrOnlyNotes + "</b></html>", "ExecHelper  -  Saved " + conditionAndNotesOrOnlyNotes, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
                                 } else {
                                     playAlertSound("error");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Save " + conditionAndNotesOrOnlyNotes + "</b></html>", "QA Helper  —  Error Saving " + conditionAndNotesOrOnlyNotes, JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Save " + conditionAndNotesOrOnlyNotes + "</b></html>", "ExecHelper  -  Error Saving " + conditionAndNotesOrOnlyNotes, JOptionPane.ERROR_MESSAGE);
                                 }
                             } catch (HeadlessException | InterruptedException | ExecutionException saveConditionAndNotesException) {
                                 if (isTestMode) {
@@ -14970,7 +15096,7 @@ public class QAHelper extends javax.swing.JFrame {
                             " ",
                             "<html>Select Printer:</html>",
                             printersComboBox
-                        }, "QA Helper  —  Confirm " + (onlyOfferToPrint ? "" : "Save or ") + "Print Specs", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32), saveOrPrintSpecsDialogButtons.toArray(), saveOrPrintSpecsDialogButtons.get(0));
+                        }, "ExecHelper  -  Confirm " + (onlyOfferToPrint ? "" : "Save or ") + "Print Specs", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32), saveOrPrintSpecsDialogButtons.toArray(), saveOrPrintSpecsDialogButtons.get(0));
 
                         String saveOrPrintSpecsPromptResponseString = "Cancel";
                         if (saveOrPrintSpecsPromptResponse > -1) {
@@ -15021,7 +15147,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                         if (sendToPrinterResponse.endsWith("SENT TO PRINTER")) {
                             playAlertSound("success");
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The specs have been sent to printer:</b><br/><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "</html>", "QA Helper  —  Successfully Printed Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The specs have been sent to printer:</b><br/><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "</html>", "ExecHelper  -  Successfully Printed Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
                             break;
                         } else {
                             if (pingPrinterResponse.isEmpty()) {
@@ -15035,7 +15161,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
 
                             playAlertSound("error");
-                            int printSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SENDING SPECS TO PRINTER:</b><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "<br/><br/><pre>" + sendToPrinterResponse + "</pre><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the local network to be able to print to local printers.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "QA Helper  —  Print Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
+                            int printSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SENDING SPECS TO PRINTER:</b><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "<br/><br/><pre>" + sendToPrinterResponse + "</pre><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the local network to be able to print to local printers.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Print Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
                             if (printSpecsErrorResponse != JOptionPane.YES_OPTION) {
                                 break;
                             }
@@ -15069,11 +15195,11 @@ public class QAHelper extends javax.swing.JFrame {
 
                     if (didSaveSpecsFile) {
                         playAlertSound("success");
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The specs have been saved into the following file:</b><br/><br/>" + saveSpecsFile.getPath() + "</html>", "QA Helper  —  Save Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>The specs have been saved into the following file:</b><br/><br/>" + saveSpecsFile.getPath() + "</html>", "ExecHelper  -  Save Specs", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("Memo", qaHelperWindow).toImageIcon(32));
                         break;
                     } else {
                         playAlertSound("error");
-                        int saveSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SAVING SPECS INTO THE FOLLOWING FILE:</b><br/><br/>" + saveSpecsFile.getPath() + "<br/><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the Desktop to be able to save the file.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "QA Helper  —  Save Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
+                        int saveSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SAVING SPECS INTO THE FOLLOWING FILE:</b><br/><br/>" + saveSpecsFile.getPath() + "<br/><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the Desktop to be able to save the file.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Save Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
                         if (saveSpecsErrorResponse != JOptionPane.YES_OPTION) {
                             break;
                         }
@@ -15194,7 +15320,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                     optionsDialogButtons.addAll(Arrays.asList("Set Price", "Mark as Sold" + (showRunOemConfigPrepareCheckbox ? " & Prepare for Shipping to End User" : ""), "Nothing"));
 
-                    int optionsDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>What would you like to do?</b></html>", "QA Helper  —  Options", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, optionsDialogButtons.toArray(), optionsDialogButtons.get(0));
+                    int optionsDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>What would you like to do?</b></html>", "ExecHelper  -  Options", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, optionsDialogButtons.toArray(), optionsDialogButtons.get(0));
                     String optionsDialogResponseString = "Nothing";
                     if (optionsDialogResponse > -1) {
                         optionsDialogResponseString = optionsDialogButtons.get(optionsDialogResponse);
@@ -15236,7 +15362,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         };
 
-                        passwordPromptPane.createDialog(qaHelperWindow, "QA Helper  —  Admin Password").setVisible(true);
+                        passwordPromptPane.createDialog(qaHelperWindow, "ExecHelper  -  Admin Password").setVisible(true);
 
                         if (passwordPromptPane.getValue() != null && (int) passwordPromptPane.getValue() == JOptionPane.OK_OPTION) {
                             String adminPasswordForTask = new String(passwordField.getPassword());
@@ -15273,12 +15399,12 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                         };
 
-                                        pricePromptPane.createDialog(qaHelperWindow, "QA Helper  —  Set Price").setVisible(true);
+                                        pricePromptPane.createDialog(qaHelperWindow, "ExecHelper  -  Set Price").setVisible(true);
 
                                         String newPrice = "$" + pricePromptField.getText().replaceAll("[^0-9,]", "");
 
                                         if (pricePromptPane.getValue() != null && (int) pricePromptPane.getValue() == JOptionPane.OK_OPTION && !newPrice.equals("$")
-                                                && JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the price to <u>" + newPrice + "</u>?</b></html>", "QA Helper  —  Confirm Price", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("DollarBanknote", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                                                && JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the price to <u>" + newPrice + "</u>?</b></html>", "ExecHelper  -  Confirm Price", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("DollarBanknote", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                                             writeToHelperLogFile("Price: " + newPrice);
 
                                             isSold = false;
@@ -15293,7 +15419,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         JCheckBox runOemConfigPrepareCheckbox = new JCheckBox("Prepare for Shipping to End User (Run \"oem-config-prepare\")");
                                         runOemConfigPrepareCheckbox.setSelected(true);
                                         Object[] markAsSoldConfirmationMessageAndOptions = new Object[]{markAsSoldConfirmationMessage, (showRunOemConfigPrepareCheckbox ? " " : ""), (showRunOemConfigPrepareCheckbox ? runOemConfigPrepareCheckbox : "")};
-                                        if (JOptionPane.showConfirmDialog(qaHelperWindow, markAsSoldConfirmationMessageAndOptions, "QA Helper  —  Confirm Mark as Sold", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Receipt", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                                        if (JOptionPane.showConfirmDialog(qaHelperWindow, markAsSoldConfirmationMessageAndOptions, "ExecHelper  -  Confirm Mark as Sold", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Receipt", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                                             if (isMacOS && new File("/Users/fg-demo/Applications/Free Geek Reset.app").exists()) {
                                                 writeToHelperLogFile("Sold");
                                                 isSold = true;
@@ -15326,7 +15452,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     }
                                                     markedAsSoldDialogButtons.addAll(Arrays.asList("Shut Down", "Reboot", "Keep Using QA Helper"));
 
-                                                    int markedAsSoldDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Marked ID \"" + pid + "\" as Sold" + ((showRunOemConfigPrepareCheckbox && runOemConfigPrepareCheckbox.isSelected()) ? " & Prepared for Shipping to End User" : "") + "</b><br/><br/><i>What would you like to do next?</i></html>", "QA Helper  —  Marked as Sold", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, markedAsSoldDialogButtons.toArray(), markedAsSoldDialogButtons.get(0));
+                                                    int markedAsSoldDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Marked ID \"" + pid + "\" as Sold" + ((showRunOemConfigPrepareCheckbox && runOemConfigPrepareCheckbox.isSelected()) ? " & Prepared for Shipping to End User" : "") + "</b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Marked as Sold", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, markedAsSoldDialogButtons.toArray(), markedAsSoldDialogButtons.get(0));
 
                                                     String markedAsSoldResponseString = "Keep Using QA Helper";
                                                     if (markedAsSoldDialogResponse > -1) {
@@ -15412,7 +15538,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 } else {
                                                     playAlertSound("error");
                                                     sendErrorEmail("Failed to Prepare for Shipping to End User");
-                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Prepare for Shipping to End User</b><br/><br/>This should not have happened, please inform Free Geek I.T.</html>", "QA Helper  —  Prepare for Shipping to End User Failed", JOptionPane.ERROR_MESSAGE);
+                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Prepare for Shipping to End User</b><br/><br/>This should not have happened, please inform Executive Undertakings</html>", "ExecHelper  -  Prepare for Shipping to End User Failed", JOptionPane.ERROR_MESSAGE);
                                                 }
                                             }
                                         }
@@ -15422,7 +15548,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
                             } else {
                                 playAlertSound("error");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Admin Password for \"" + fullAdminUsernameForTask + "\"</b></html>", "QA Helper  —  Incorrect Password", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Incorrect Admin Password for \"" + fullAdminUsernameForTask + "\"</b></html>", "ExecHelper  -  Incorrect Password", JOptionPane.WARNING_MESSAGE);
                             }
                         }
                     }
@@ -15435,8 +15561,97 @@ public class QAHelper extends javax.swing.JFrame {
                 String[] statusNames = privateStrings.getPCsCRMStatusNames();
                 HashMap<String, String> currentStatusAndProductType = getCurrentStatusAndProductType();
                 String currentStatus = currentStatusAndProductType.get("Status");
-                if (!currentStatus.equals("UNKNOWN STATUS") && !currentStatus.equals(statusNames[2]) && !currentStatus.equals(statusNames[3])) {
-                    System.exit(0);
+                if (!currentStatus.equals("UNKNOWN STATUS") && !currentStatus.equals(statusNames[2]) && !currentStatus.equals(statusNames[3]) && pid.startsWith("FG")) {
+                    System.exit(0); // FG devices: exit if not in QA Passed or In Repair
+                } else if (!pid.startsWith("FG") && execGradeCombo != null && !isReloading) {
+                    // ExecHelper: Direct add-to-inventory for non-FG devices
+                    // Read Asset ID from text field (may differ from pid set at login)
+                    String enteredPID = txtPID.getText().replaceAll("\\s", "").toUpperCase();
+                    if (!enteredPID.isEmpty() && !enteredPID.equals("N/A")) {
+                        pid = enteredPID;
+                    }
+                    if (pid.equals("N/A") || pid.isEmpty()) {
+                        playAlertSound("error");
+                        JOptionPane.showMessageDialog(qaHelperWindow,
+                            "<html><b>Please enter an Asset ID first.</b></html>",
+                            "ExecHelper  -  Missing Asset ID",
+                            JOptionPane.WARNING_MESSAGE);
+                        setActionsEnabled(true);
+                        return;
+                    }
+                    String selectedItem = (String) execGradeCombo.getSelectedItem();
+                    String selectedGrade = selectedItem.substring(0, 1); // First char is the grade letter
+                    currentConditionGrade = selectedGrade;
+                    // Build notes from condition checkboxes + free text
+                    java.util.ArrayList<String> noteParts = new java.util.ArrayList<>();
+                    if (execChkGlassGood != null && execChkGlassGood.isSelected()) noteParts.add("Glass good");
+                    if (execChkChips != null && execChkChips.isSelected()) noteParts.add("Chips");
+                    if (execChkCracks != null && execChkCracks.isSelected()) noteParts.add("Cracks");
+                    String freeText = execNotesField.getText().trim();
+                    if (!freeText.isEmpty()) noteParts.add(freeText);
+                    currentNotes = String.join(", ", noteParts);
+                    conditionAndNotesUpdated = true;
+
+                    loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+                    setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+                    loadingWindow.setLoadingTextAndDisplay("Adding to Inventory", "Working", "CheckMarkButton");
+
+                    (new SwingWorker<String[], Void>() {
+                        @Override
+                        protected String[] doInBackground() throws Exception {
+                            return (logComputerSpecs(statusNames[2], null, null, null, null, null) ? loadStatusHistory(false) : null);
+                        }
+
+                        @Override
+                        protected void done() {
+                            try {
+                                loadingWindow.closeWindow();
+                                String[] statusAndTech = get();
+                                if (statusAndTech != null) {
+                                    displayComputerSpecs(statusAndTech);
+                                    playAlertSound("success");
+                                    JOptionPane.showMessageDialog(qaHelperWindow,
+                                        "<html><b>Successfully Added to Inventory</b>"
+                                        + "<br/><br/>Grade: <b>" + currentConditionGrade + "</b>"
+                                        + (currentNotes.isEmpty() ? "" : "<br/>Notes: " + currentNotes)
+                                        + "</html>",
+                                        "ExecHelper  -  Added to Inventory",
+                                        JOptionPane.INFORMATION_MESSAGE,
+                                        new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32));
+                                } else {
+                                    playAlertSound("error");
+                                    JOptionPane.showMessageDialog(qaHelperWindow,
+                                        "<html><b>Failed to Add to Inventory</b></html>",
+                                        "ExecHelper  -  Inventory Error",
+                                        JOptionPane.ERROR_MESSAGE);
+                                }
+                            } catch (HeadlessException | InterruptedException | java.util.concurrent.ExecutionException addToInventoryException) {
+                                loadingWindow.closeWindow();
+                                String exMsg = (addToInventoryException.getCause() != null) ? addToInventoryException.getCause().getMessage() : addToInventoryException.getMessage();
+                                if (exMsg != null && exMsg.startsWith("DUPLICATE_SERIAL:")) {
+                                    playAlertSound("error");
+                                    JOptionPane.showMessageDialog(qaHelperWindow,
+                                        "<html><b>" + exMsg.substring(16) + "</b></html>",
+                                        "ExecHelper  -  Duplicate Serial",
+                                        JOptionPane.WARNING_MESSAGE);
+                                } else {
+                                    playAlertSound("error");
+                                    JOptionPane.showMessageDialog(qaHelperWindow,
+                                        "<html><b>Failed to Add to Inventory</b></html>",
+                                        "ExecHelper  -  Inventory Error",
+                                        JOptionPane.ERROR_MESSAGE);
+                                }
+                                if (isTestMode) {
+                                    System.out.println("addToInventoryException: " + addToInventoryException);
+                                }
+                            }
+
+                            loadingWindow.closeWindow();
+                            setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+                            loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+                            setActionsEnabled(true);
+                        }
+                    }).execute();
                 } else if (!isReloading) {
                     ArrayList<String> doneTestingDialogButtons = new ArrayList<>();
 
@@ -15488,7 +15703,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
                     doneTestingDialogButtons.addAll(Arrays.asList("Shut Down", "Reboot", "Cancel"));
 
-                    int doneTestingDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>What would you like to do next?</b>" + (didSetProductType ? "" : ("<br/><br/><i>Before " + (continueToFGSpecsInsteadOfSetStatus ? "continuing on FG Specs" : "setting status to \"" + statusNames[12] + "\"") + ", you must set the correct Product Type" + (pid.startsWith("FG") ? (".</i>") : " on PCsCRM.com.</i>"))) + (pid.startsWith("FG") ? "<br/><br/><b>Current Product Type:</b> " + currentStatusAndProductType.get("Product Type") : "") + "</html>", "QA Helper  —  Done Testing", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, doneTestingDialogButtons.toArray(), doneTestingDialogButtons.get(0));
+                    int doneTestingDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>What would you like to do next?</b>" + (didSetProductType ? "" : ("<br/><br/><i>Before " + (continueToFGSpecsInsteadOfSetStatus ? "continuing on FG Specs" : "setting status to \"" + statusNames[12] + "\"") + ", you must set the correct Product Type" + (pid.startsWith("FG") ? (".</i>") : " on PCsCRM.com.</i>"))) + (pid.startsWith("FG") ? "<br/><br/><b>Current Product Type:</b> " + currentStatusAndProductType.get("Product Type") : "") + "</html>", "ExecHelper  -  Done Testing", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, doneTestingDialogButtons.toArray(), doneTestingDialogButtons.get(0));
 
                     String doneTestingResponseString = "Cancel";
                     if (doneTestingDialogResponse > -1) {
@@ -15574,7 +15789,7 @@ public class QAHelper extends javax.swing.JFrame {
                             autoLoginToPCsCRMInventoryManagerPage();
                         }
                     } else if (doneTestingResponseString.equals("Set Status to \"" + statusNames[2] + "\"")) { // THIS IS NOT CURRENTLY USED
-                        if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the status for ID \"" + pid + "\" to <u>" + statusNames[2] + "</u>?</b></html>", "QA Helper  —  Confirm " + statusNames[2], JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                        if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to set the status for ID \"" + pid + "\" to <u>" + statusNames[2] + "</u>?</b></html>", "ExecHelper  -  Confirm " + statusNames[2], JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                             loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                             setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
@@ -15598,7 +15813,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             playAlertSound("success");
                                             String[] successfullyUpdatedStatusDialogButtons = new String[]{((isLinuxUbiquityMode || isWindowsPE) ? "Install OS" : "Quit"), "Shut Down", "Keep Using QA Helper"};
 
-                                            int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[2] + "</u></b><br/><br/><i>What would you like to do next?</i></html>", "QA Helper  —  Status Updated", (!isMacOS ? JOptionPane.YES_NO_CANCEL_OPTION : JOptionPane.YES_NO_OPTION), JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons, successfullyUpdatedStatusDialogButtons[0]);
+                                            int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[2] + "</u></b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Status Updated", (!isMacOS ? JOptionPane.YES_NO_CANCEL_OPTION : JOptionPane.YES_NO_OPTION), JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons, successfullyUpdatedStatusDialogButtons[0]);
                                             switch (successfullyUpdatedStatusDialogResponse) {
                                                 case JOptionPane.YES_OPTION:
                                                     System.exit(0);
@@ -15646,7 +15861,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         } else {
                                             loadingWindow.closeWindow();
                                             playAlertSound("error");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Specs and/or Update Status to <u>" + statusNames[2] + "</u></b></html>", "QA Helper  —  Update Status Error", JOptionPane.ERROR_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Specs and/or Update Status to <u>" + statusNames[2] + "</u></b></html>", "ExecHelper  -  Update Status Error", JOptionPane.ERROR_MESSAGE);
                                         }
                                     } catch (HeadlessException | InterruptedException | ExecutionException setStatusToRefurbishCompleteException) {
                                         if (isTestMode) {
@@ -15677,7 +15892,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                         Object[] qaDoneConfirmationMessageAndOptions = new Object[]{qaDoneConfirmationMessage, ((showChangeFreeGeekPasswordCheckbox || showRunOemConfigPrepareCheckbox) ? " " : ""), (showChangeFreeGeekPasswordCheckbox ? changeFreeGeekPasswordCheckbox : ""), (showRunOemConfigPrepareCheckbox ? runOemConfigPrepareCheckbox : "")};
 
-                        if (JOptionPane.showConfirmDialog(qaHelperWindow, qaDoneConfirmationMessageAndOptions, "QA Helper  —  Confirm " + statusNames[12], JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                        if (JOptionPane.showConfirmDialog(qaHelperWindow, qaDoneConfirmationMessageAndOptions, "ExecHelper  -  Confirm " + statusNames[12], JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                             if (isLinux) {
                                 getAdminPassword("Prepare for " + statusNames[12]); // Get password if needed.
                             }
@@ -15778,7 +15993,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                             loadingWindow.setAlwaysOnTop(false);
                                             playAlertSound("beep");
-                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>NOTICE: Not Confirming Windows License Before " + statusNames[12] + " in TEST MODE</b></html>", "QA Helper  —  Windows License Test Mode Notice", JOptionPane.WARNING_MESSAGE);
+                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>NOTICE: Not Confirming Windows License Before " + statusNames[12] + " in TEST MODE</b></html>", "ExecHelper  -  Windows License Test Mode Notice", JOptionPane.WARNING_MESSAGE);
                                             loadingWindow.setAlwaysOnTop(true);
                                         } else {
                                             try {
@@ -15923,7 +16138,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     }
                                                 };
 
-                                                dpkGmrlStickerConfirmationPane.createDialog(qaHelperWindow, "QA Helper  —  Confirm GMRL for DPK").setVisible(true);
+                                                dpkGmrlStickerConfirmationPane.createDialog(qaHelperWindow, "ExecHelper  -  Confirm GMRL for DPK").setVisible(true);
 
                                                 if (dpkGmrlStickerConfirmationPane.getValue() != null && (int) dpkGmrlStickerConfirmationPane.getValue() == JOptionPane.OK_OPTION && dpkGmrlStickerConfirmationField.getText().trim().toUpperCase().equals("GMRL")) {
                                                     dpkGmrlStickerConfirmed = true;
@@ -16018,9 +16233,9 @@ public class QAHelper extends javax.swing.JFrame {
                                                                         playAlertSound("error");
 
                                                                         if (!new File("/usr/sbin/oem-config-prepare").exists()) {
-                                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"oem-config-gtk\" to be able to Run \"oem-config-prepare\"</b><br/><br/><i>To manually install \"oem-config-gtk\", open Terminal and run:</i><br/><pre>sudo apt install oem-config-gtk</pre><br/>After \"oem-config-gtk\" is installed, you can run \"oem-config-prepare\" manually by selecting <b>Prepare for shipping to end user</b> from the <b>system applicatons menu</b>.</html>", "QA Helper  —  Install Prepare for Shipping to End User Error", JOptionPane.ERROR_MESSAGE);
+                                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Install \"oem-config-gtk\" to be able to Run \"oem-config-prepare\"</b><br/><br/><i>To manually install \"oem-config-gtk\", open Terminal and run:</i><br/><pre>sudo apt install oem-config-gtk</pre><br/>After \"oem-config-gtk\" is installed, you can run \"oem-config-prepare\" manually by selecting <b>Prepare for shipping to end user</b> from the <b>system applicatons menu</b>.</html>", "ExecHelper  -  Install Prepare for Shipping to End User Error", JOptionPane.ERROR_MESSAGE);
                                                                         } else {
-                                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Run \"oem-config-prepare\"</b><br/><br/>You can run \"oem-config-prepare\" manually by selecting <b>Prepare for shipping to end user</b> from the <b>system applicatons menu</b>.</html>", "QA Helper  —  Run Prepare for Shipping to End User Error", JOptionPane.ERROR_MESSAGE);
+                                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Run \"oem-config-prepare\"</b><br/><br/>You can run \"oem-config-prepare\" manually by selecting <b>Prepare for shipping to end user</b> from the <b>system applicatons menu</b>.</html>", "ExecHelper  -  Run Prepare for Shipping to End User Error", JOptionPane.ERROR_MESSAGE);
                                                                         }
                                                                     }
                                                                 }
@@ -16082,7 +16297,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                             successfullyUpdatedStatusDialogButtons.add("Keep Using QA Helper");
 
                                                             for (;;) {
-                                                                int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[12] + "<u></b>" + oemConfigPrepareNote + updatedFreeGeekAdminPasswordNote + "<br/><br/><i>What would you like to do next?</i></html>", "QA Helper  —  Status Updated", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons.toArray(), successfullyUpdatedStatusDialogButtons.get(0));
+                                                                int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[12] + "<u></b>" + oemConfigPrepareNote + updatedFreeGeekAdminPasswordNote + "<br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Status Updated", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons.toArray(), successfullyUpdatedStatusDialogButtons.get(0));
 
                                                                 String successfullyUpdatedStatusDialogResponseString = "Keep Using QA Helper";
                                                                 if (successfullyUpdatedStatusDialogResponse > -1) {
@@ -16202,7 +16417,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                         } else if (returnValue.equals("update-failed")) {
                                                             loadingWindow.closeWindow();
                                                             playAlertSound("error");
-                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Specs and/or Update Status to <u>" + statusNames[12] + "</u></b></html>", "QA Helper  —  Update Status Error", JOptionPane.ERROR_MESSAGE);
+                                                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Log Specs and/or Update Status to <u>" + statusNames[12] + "</u></b></html>", "ExecHelper  -  Update Status Error", JOptionPane.ERROR_MESSAGE);
                                                         }
                                                     } catch (HeadlessException | InterruptedException | ExecutionException setStatusToQACompleteException) {
                                                         if (isTestMode) {
@@ -16226,17 +16441,17 @@ public class QAHelper extends javax.swing.JFrame {
                                             playAlertSound("error");
 
                                             if (returnValue.contains("+must-set-product-type")) {
-                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must first <u>set the Product Type" + (pid.startsWith("FG") ? "" : " on PCsCRM.com") + "</u>.</i></html>", "QA Helper  —  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must first <u>set the Product Type" + (pid.startsWith("FG") ? "" : " on PCsCRM.com") + "</u>.</i></html>", "ExecHelper  -  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
                                                 btnDoneTestingActionPerformed(null);
                                             } else if (isWindows) {
                                                 if (dpkGmrlStickerConfirmed) {
-                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must correct the Windows license issues.</i></html>", "QA Helper  —  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must correct the Windows license issues.</i></html>", "ExecHelper  -  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
                                                     btnCheckWindowsLicenseActionPerformed(new java.awt.event.ActionEvent(btnCheckWindowsLicense, java.awt.event.ActionEvent.ACTION_PERFORMED, statusNames[12] + " License Issue")); // Do not pass "null" evt since that indicates justSetProductKey.
                                                 } else {
-                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must confirm the \"Genuine Microsoft Refurbisher Label\" (GMRL) sticker has been affixed to this computer since a DPK has been applied.</i></html>", "QA Helper  —  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Computer Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this computer, you must confirm the \"Genuine Microsoft Refurbisher Label\" (GMRL) sticker has been affixed to this computer since a DPK has been applied.</i></html>", "ExecHelper  -  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
                                                 }
                                             } else if (isMacOS) {
-                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Mac Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this Mac, <u>Free Geek Setup</u> must finish running.</i></html>", "QA Helper  —  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>This Mac Is Not Ready to Be Marked As <u>" + statusNames[12] + "</u></b><br/><br/><i>To be able to <u>" + statusNames[12] + "</u> this Mac, <u>Free Geek Setup</u> must finish running.</i></html>", "ExecHelper  -  Not Ready for " + statusNames[12], JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
 
                                                 try {
                                                     Runtime.getRuntime().exec(new String[]{"/usr/bin/open", "-na", "/Users/fg-demo/Applications/Free Geek Setup.app"});
@@ -16252,7 +16467,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 aptUpdateErrorTextArea.setFont(new Font(Font.MONOSPACED, lblVersion.getFont().getStyle(), aptUpdateErrorTextArea.getFont().getSize()));
                                                 JScrollPane aptUpdateErrorScrollPane = new JScrollPane(aptUpdateErrorTextArea);
 
-                                                JOptionPane.showMessageDialog(qaHelperWindow, new Object[]{"<html><b>Failed to Update \"apt\" Cache Before <u>" + statusNames[12] + "</u></b><br/><br/></html>", aptUpdateErrorScrollPane, "<html><br/>This should not have happened, please inform Free Geek I.T.</html>"}, "QA Helper  —  Not Ready for " + statusNames[12] + " (\"apt\" Update Error)", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
+                                                JOptionPane.showMessageDialog(qaHelperWindow, new Object[]{"<html><b>Failed to Update \"apt\" Cache Before <u>" + statusNames[12] + "</u></b><br/><br/></html>", aptUpdateErrorScrollPane, "<html><br/>This should not have happened, please inform Executive Undertakings</html>"}, "ExecHelper  -  Not Ready for " + statusNames[12] + " (\"apt\" Update Error)", JOptionPane.ERROR_MESSAGE, new TwemojiImage("NoEntry", qaHelperWindow).toImageIcon(32));
                                             }
                                         }
                                     } catch (HeadlessException | InterruptedException | ExecutionException confirmReadyForQACompleteException) {
@@ -16362,7 +16577,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
                             } else {
                                 playAlertSound("beep");
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>Instead, you continue on FG Specs on another computer.</i></html>", "QA Helper  —  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>Instead, you continue on FG Specs on another computer.</i></html>", "ExecHelper  -  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
                             }
                         } else {
                             try {
@@ -16686,7 +16901,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         } else {
                             playAlertSound("beep");
-                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>You will be able to open a web browser after you've installed the OS.</i></html>", "QA Helper  —  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Not Enough Free RAM to Open Web Browser</b><br/><br/><i>You will be able to open a web browser after you've installed the OS.</i></html>", "ExecHelper  -  Cannot Open Web Browser", JOptionPane.WARNING_MESSAGE);
                         }
                     } else {
                         for (String thisSpecSearchURL : specSearchURLs) {
@@ -16714,7 +16929,7 @@ public class QAHelper extends javax.swing.JFrame {
 
     private void menReRunSetupWindowsScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menReRunSetupWindowsScriptActionPerformed
         if (actionsEnabled && isLoggedIn && isWindows && !isWindowsPE && new File("\\Install\\Scripts\\Setup Windows.ps1").exists()) {
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to re-run the \"Setup Windows\" script?</b></html>", "QA Helper  —  Confirm Re-Run \"Setup Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to re-run the \"Setup Windows\" script?</b></html>", "ExecHelper  -  Confirm Re-Run \"Setup Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
                 try {
                     new File(System.getProperty("user.home") + "\\Desktop\\QA Helper.lnk").delete();
 
@@ -16733,7 +16948,7 @@ public class QAHelper extends javax.swing.JFrame {
 
     private void menRunCompleteWindowsScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menRunCompleteWindowsScriptActionPerformed
         if (actionsEnabled && isLoggedIn && isWindows && !isWindowsPE && new File("\\Install\\Scripts\\Complete Windows.ps1").exists()) {
-            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to run the \"Complete Windows\" script and shut down this computer?</b></html>", "QA Helper  —  Confirm Run \"Complete Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to run the \"Complete Windows\" script and shut down this computer?</b></html>", "ExecHelper  -  Confirm Run \"Complete Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 try {
                     Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\""});
                     TimeUnit.SECONDS.sleep(1);
@@ -16777,7 +16992,7 @@ public class QAHelper extends javax.swing.JFrame {
             }
 
             if (canManuallyCacheDrivers) {
-                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to cache the currently installed drivers for this computer model?</b></html>", "QA Helper  —  Confirm Cache Drivers", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
+                if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to cache the currently installed drivers for this computer model?</b></html>", "ExecHelper  -  Confirm Cache Drivers", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                     try {
                         Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\" OnlyCacheDrivers"});
                     } catch (IOException runCacheDriversException) {
