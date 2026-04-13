@@ -1,0 +1,99 @@
+name: Build Windows
+
+# Runs automatically when a release tag is pushed (e.g. v2026.1.7-1).
+# Can also be triggered manually from the Actions tab.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Read version from the canonical version file.
+      # jpackage on Windows requires N.N.N format, so strip the build suffix
+      # (e.g. 2026.1.7-1 → 2026.1.7).
+      - name: Read app version
+        id: ver
+        shell: pwsh
+        run: |
+          $raw = (Get-Content "src/Resources/qa-helper-version.txt").Trim()
+          $pkg = $raw -replace '-\d+$', ''
+          "raw=$raw" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "pkg=$pkg" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Version: $raw  (jpackage: $pkg)"
+
+      - name: Build JAR with Ant
+        run: ant -f build.xml jar
+
+      # jlink produces a trimmed JRE (~30 MB vs ~300 MB full JDK).
+      # Same three modules used by the macOS build script.
+      # Output goes to RUNNER_TEMP so it doesn't end up inside --input dist.
+      - name: Create slim JRE with jlink
+        shell: pwsh
+        run: |
+          & "$env:JAVA_HOME\bin\jlink.exe" `
+            --no-header-files `
+            --no-man-pages `
+            --strip-debug `
+            --compress zip-9 `
+            --add-modules java.base,java.desktop,java.logging `
+            --output "$env:RUNNER_TEMP\jlink-jre"
+
+      # jpackage bundles the JAR + slim JRE into a self-contained app image.
+      # --input dist picks up QA_Helper.jar and dist/lib/*.jar (the manifest
+      # classpath already references lib/ so everything resolves correctly).
+      # If you add a QAHelper.ico to src/Resources/ it will be used automatically.
+      - name: Package with jpackage
+        shell: pwsh
+        run: |
+          $iconArgs = @()
+          if (Test-Path "src/Resources/QAHelper.ico") {
+            $iconArgs = @("--icon", "src/Resources/QAHelper.ico")
+          }
+          & "$env:JAVA_HOME\bin\jpackage.exe" `
+            --type app-image `
+            --name ExecHelper `
+            --input dist `
+            --main-jar QA_Helper.jar `
+            --main-class GUI.QAHelper `
+            --app-version "${{ steps.ver.outputs.pkg }}" `
+            --runtime-image "$env:RUNNER_TEMP\jlink-jre" `
+            --java-options "--enable-native-access=ALL-UNNAMED" `
+            --dest dist\windows-app `
+            @iconArgs
+
+      - name: Zip app image
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist\windows-app\ExecHelper" `
+            -DestinationPath "dist\QAHelper-windows.zip"
+
+      # Always upload as a workflow artifact (useful for test builds off main).
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QAHelper-windows-${{ steps.ver.outputs.raw }}
+          path: dist/QAHelper-windows.zip
+
+      # On tag pushes, attach the ZIP to the GitHub Release.
+      # Run `gh release create` as normal — this action adds the asset to the
+      # release that already exists (or creates one if it doesn't).
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/QAHelper-windows.zip
