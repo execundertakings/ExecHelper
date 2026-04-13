@@ -25,5 +25,4 @@ Licenses/
 Twemoji/
 
 # Ignore specific private source files:
-PCsCRMManager.java
 PrivateStrings.java
