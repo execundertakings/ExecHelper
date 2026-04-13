@@ -35,12 +35,23 @@ jobs:
           "pkg=$pkg" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Version: $raw  (jpackage: $pkg)"
 
+      # build.xml -pre-compile and -post-jar bash calls are guarded with
+      # osfamily="unix" so they are silently skipped here.
+      # The post-jar target produces dist/QAHelper-windows-jar.zip (JAR only,
+      # stripped of Linux/macOS-specific resources).
       - name: Build JAR with Ant
         run: ant -f build.xml jar
 
+      # Extract the Windows-specific JAR to a clean input directory for jpackage.
+      - name: Extract Windows JAR
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "dist\jpackage-input"
+          Expand-Archive -Path "dist\QAHelper-windows-jar.zip" -DestinationPath "dist\jpackage-input"
+
       # jlink produces a trimmed JRE (~30 MB vs ~300 MB full JDK).
       # Same three modules used by the macOS build script.
-      # Output goes to RUNNER_TEMP so it doesn't end up inside --input dist.
+      # Output goes to RUNNER_TEMP so it doesn't sit inside --input.
       - name: Create slim JRE with jlink
         shell: pwsh
         run: |
@@ -52,10 +63,8 @@ jobs:
             --add-modules java.base,java.desktop,java.logging `
             --output "$env:RUNNER_TEMP\jlink-jre"
 
-      # jpackage bundles the JAR + slim JRE into a self-contained app image.
-      # --input dist picks up QA_Helper.jar and dist/lib/*.jar (the manifest
-      # classpath already references lib/ so everything resolves correctly).
-      # If you add a QAHelper.ico to src/Resources/ it will be used automatically.
+      # Bundle the Windows JAR + slim JRE into a self-contained app image.
+      # Uses a custom icon if src/Resources/QAHelper.ico exists.
       - name: Package with jpackage
         shell: pwsh
         run: |
@@ -66,7 +75,7 @@ jobs:
           & "$env:JAVA_HOME\bin\jpackage.exe" `
             --type app-image `
             --name ExecHelper `
-            --input dist `
+            --input dist\jpackage-input `
             --main-jar QA_Helper.jar `
             --main-class GUI.QAHelper `
             --app-version "${{ steps.ver.outputs.pkg }}" `

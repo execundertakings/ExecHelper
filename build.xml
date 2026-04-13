@@ -73,13 +73,13 @@
     <target name="-pre-compile">
         <!-- UIScale Fixed addGaps - SO FIXED SIZED addGap()'s ARE SCALED CORRECTLY ON HiDPI LINUX -->
         <echo message="UIScaling Fixed addGaps"/>
-        <exec executable="/bin/bash">
+        <exec executable="/bin/bash" osfamily="unix">
             <arg value="./Build Scripts/UIScale Fixed addGaps.sh"/>
         </exec>
-        
+
         <!-- Check for Updates -->
         <echo message="Checking for Updates"/>
-        <exec executable="/bin/bash">
+        <exec executable="/bin/bash" osfamily="unix">
             <arg value="./Build Scripts/Check for Updates.sh"/>
         </exec>
     </target>
@@ -142,9 +142,9 @@
         </zip>
         <!-- Do not zip or delete macOS jar, the following compile script uses it and then cleans up -->
         
-        <!-- Compile jar for macOS into macOS App bundle -->
+        <!-- Compile jar for macOS into macOS App bundle (Unix/macOS only) -->
         <echo message="Compiling ${store.jar.name} into App for macOS"/>
-        <exec executable="/bin/bash">
+        <exec executable="/bin/bash" osfamily="unix">
             <arg value="./Build Scripts/Compile QA Helper for Mac.sh"/>
         </exec>
     </target>
