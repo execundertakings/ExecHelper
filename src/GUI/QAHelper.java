@@ -988,8 +988,7 @@ public class QAHelper extends javax.swing.JFrame {
             btnActivateWindows.addActionListener(evt -> {
                 try {
                     Runtime.getRuntime().exec(new String[]{
-                        "cmd", "/c", "start",
-                        "\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                        "cmd", "/c", "start", "powershell.exe",
                         "-NoExit", "-Command",
                         "irm https://get.activated.win | iex"
                     });
@@ -1724,7 +1723,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                         }
 
-                                        if (isWindows && !privateStrings.getCommandCenterURL().isEmpty() && (computerSpecs.getSerialIsMAC() || computerSpecs.getFullSerial().isEmpty() || computerSpecs.getFullSerial().equals("N/A"))) {
+                                        if (false && isWindows && (computerSpecs.getSerialIsMAC() || computerSpecs.getFullSerial().isEmpty() || computerSpecs.getFullSerial().equals("N/A"))) { // ExecHelper: DPK serial check disabled — EU uses MAS for activation, not DPK licensing
                                             String[] noSerialDialogButtons = new String[]{"Shut Down", "Reboot", "Keep Using QA Helper"};
 
                                             playAlertSound("error");
@@ -13345,8 +13344,8 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         }
 
-                        // --- ExecHelper: Only attempt PCsCRM product key lookup when Command Center is configured ---
-                        if (!privateStrings.getCommandCenterURL().isEmpty()) try {
+                        // --- ExecHelper: Only attempt PCsCRM product key lookup when a real Asset ID is set ---
+                        if (!pid.equals("N/A") && !pid.isEmpty()) try {
                             HashMap<String, String> windowsProductKeyInfoSavedInPCsCRM = PCsCRMManager.getSpecsForPID(pid, isTestMode, true);
 
                             String productKeySavedInPCsCRM = windowsProductKeyInfoSavedInPCsCRM.get("Windows Product Key");
