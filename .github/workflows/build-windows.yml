@@ -35,6 +35,24 @@ jobs:
           "pkg=$pkg" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Version: $raw  (jpackage: $pkg)"
 
+      # libs/ is gitignored — download the four dependencies from Maven Central.
+      - name: Download dependencies
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path libs
+          $mvn = "https://repo1.maven.org/maven2"
+          $deps = @(
+            "$mvn/com/formdev/flatlaf/3.6/flatlaf-3.6.jar",
+            "$mvn/org/json/json/20250517/json-20250517.jar",
+            "$mvn/org/apache/commons/commons-text/1.15.0/commons-text-1.15.0.jar",
+            "$mvn/org/apache/commons/commons-lang3/3.20.0/commons-lang3-3.20.0.jar"
+          )
+          foreach ($url in $deps) {
+            $file = "libs/" + ($url -split '/')[-1]
+            Write-Host "Downloading $file"
+            Invoke-WebRequest -Uri $url -OutFile $file
+          }
+
       # build.xml -pre-compile and -post-jar bash calls are guarded with
       # osfamily="unix" so they are silently skipped here.
       # The post-jar target produces dist/QAHelper-windows-jar.zip (JAR only,
