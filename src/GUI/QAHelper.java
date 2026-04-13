@@ -936,6 +936,19 @@ public class QAHelper extends javax.swing.JFrame {
             username = txtUsername.getText();
         }
 
+        // --- ExecHelper: Hide Asset ID field if no inventory system is configured ---
+        if (privateStrings.getCommandCenterURL().isEmpty()) {
+            java.awt.Dimension zeroPIDdim = new java.awt.Dimension(0, 0);
+            lblPID.setVisible(false);
+            lblPID.setPreferredSize(zeroPIDdim);
+            lblPID.setMinimumSize(zeroPIDdim);
+            lblPID.setMaximumSize(zeroPIDdim);
+            txtPID.setVisible(false);
+            txtPID.setPreferredSize(zeroPIDdim);
+            txtPID.setMinimumSize(zeroPIDdim);
+            txtPID.setMaximumSize(zeroPIDdim);
+        }
+
         // --- ExecHelper: Inline grade & notes fields below Asset ID ---
         {
             execGradeCombo = new javax.swing.JComboBox<>();
@@ -969,9 +982,29 @@ public class QAHelper extends javax.swing.JFrame {
             execNotesField.setPreferredSize(new java.awt.Dimension(400, 26));
             notesRow.add(execNotesField);
 
+            // Activate Windows button (Windows-only)
+            javax.swing.JPanel activateRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 2));
+            javax.swing.JButton btnActivateWindows = new javax.swing.JButton("Activate Windows");
+            btnActivateWindows.addActionListener(evt -> {
+                try {
+                    Runtime.getRuntime().exec(new String[]{
+                        "cmd", "/c", "start",
+                        "\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                        "-NoExit", "-Command",
+                        "irm https://get.activated.win | iex"
+                    });
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(qaHelperWindow,
+                        "<html><b>Failed to open PowerShell</b><br/>" + ex.getMessage() + "</html>",
+                        "ExecHelper  -  Activation Error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            activateRow.add(btnActivateWindows);
+
             execInputPanel.add(gradeRow);
             execInputPanel.add(conditionRow);
             execInputPanel.add(notesRow);
+            execInputPanel.add(activateRow);
             execInputPanel.setVisible(false); // Hidden until logged in
 
             // Wrap content pane: existing GroupLayout in CENTER, input panel in SOUTH
