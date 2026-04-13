@@ -1724,7 +1724,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                         }
 
-                                        if (isWindows && (computerSpecs.getSerialIsMAC() || computerSpecs.getFullSerial().isEmpty() || computerSpecs.getFullSerial().equals("N/A"))) {
+                                        if (isWindows && !privateStrings.getCommandCenterURL().isEmpty() && (computerSpecs.getSerialIsMAC() || computerSpecs.getFullSerial().isEmpty() || computerSpecs.getFullSerial().equals("N/A"))) {
                                             String[] noSerialDialogButtons = new String[]{"Shut Down", "Reboot", "Keep Using QA Helper"};
 
                                             playAlertSound("error");
@@ -13345,7 +13345,8 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         }
 
-                        try {
+                        // --- ExecHelper: Only attempt PCsCRM product key lookup when Command Center is configured ---
+                        if (!privateStrings.getCommandCenterURL().isEmpty()) try {
                             HashMap<String, String> windowsProductKeyInfoSavedInPCsCRM = PCsCRMManager.getSpecsForPID(pid, isTestMode, true);
 
                             String productKeySavedInPCsCRM = windowsProductKeyInfoSavedInPCsCRM.get("Windows Product Key");
