@@ -78,7 +78,7 @@ jobs:
             --no-man-pages `
             --strip-debug `
             --compress zip-9 `
-            --add-modules java.base,java.desktop,java.logging `
+            --add-modules java.base,java.desktop,java.logging,java.net.http,java.naming,jdk.crypto.ec,jdk.crypto.cryptoki `
             --output "$env:RUNNER_TEMP\jlink-jre"
 
       # Bundle the Windows JAR + slim JRE into a self-contained app image.
