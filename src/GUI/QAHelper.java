@@ -260,7 +260,7 @@ public class QAHelper extends javax.swing.JFrame {
                 String cinnamonGtkThemeName = new CommandReader(new String[]{"/usr/bin/gsettings", "get", "org.cinnamon.desktop.interface", "gtk-theme"}).getFirstOutputLine().toLowerCase();
                 osIsDarkMode = (cinnamonGtkThemeName.contains("-dark") && !cinnamonGtkThemeName.contains("-darker"));
             } else if (isWindows) {
-                osIsDarkMode = !new CommandReader(new String[]{"\\Windows\\System32\\reg.exe", "query", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"}).getFirstOutputLineContaining("0x0").isEmpty();
+                osIsDarkMode = !new CommandReader(new String[]{"reg.exe", "query", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"}).getFirstOutputLineContaining("0x0").isEmpty();
             }
 
             try {
@@ -387,7 +387,7 @@ public class QAHelper extends javax.swing.JFrame {
             try {
                 boolean multipleInstancesRunning;
                 if (isWindows) {
-                    multipleInstancesRunning = (new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine).CommandLine"}).getOutputLines().length > multipleInstanceMinimum);
+                    multipleInstancesRunning = (new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine).CommandLine"}).getOutputLines().length > multipleInstanceMinimum);
                 } else {
                     // GUI.QAHelper catches when it's run from NetBeans, QA_Helper.jar catches when the .jar is launched, /QA Helper.app catches when the Mac app is run. Ignore any non-java or non-"QA Helper.app" processes to ignore sudo launches or bash scripts (such as when auto-updating), etc.
                     multipleInstancesRunning = (new CommandReader(new String[]{"/usr/bin/pgrep", "-fl", "(GUI\\.QAHelper|QA_Helper\\.jar|/QA Helper\\.app)"}).getOutputLinesContaining((isMacOS ? new String[]{"QA Helper.app/Contents/MacOS/QA Helper", "/java"} : new String[]{" java"})).length > multipleInstanceMinimum);
@@ -402,7 +402,7 @@ public class QAHelper extends javax.swing.JFrame {
                             Runtime.getRuntime().exec((isWindows
                                     // Based On: https://stackoverflow.com/a/58548853
                                     // This new method is much better than the previous AppActivate method, but still also do the AppActive method since it seems to maybe not work as well on Windows 11.
-                                    ? new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
+                                    ? new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
                                         + "[DllImport(\\\"user32.dll\\\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n"
                                         + "[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);\n"
                                         + "[DllImport(\\\"user32.dll\\\")] public static extern bool IsIconic(IntPtr hWnd);\n"
@@ -631,10 +631,10 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         }
                     } else if (isWindows) {
-                        boolean isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"\\Windows\\System32\\reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
+                        boolean isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
 
                         try {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
                         } catch (IOException | InterruptedException quitPowershellStressException) {
                             if (isTestMode) {
                                 System.out.println("quitPowershellStressException: " + quitPowershellStressException);
@@ -646,7 +646,7 @@ public class QAHelper extends javax.swing.JFrame {
                             if (!isWindowsPE || new File("\\Windows\\System32\\taskkill.exe").exists()) {
                                 Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\taskkill.exe", "/im", (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor.exe" : (isWindowsPE ? "Taskmgr.exe" : "perfmon.exe")), "/t"}).waitFor(); // Even though we launch resmon.exe the running executable is perfmon.exe
                             } else {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor" : "Taskmgr")}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor" : "Taskmgr")}).waitFor();
                             }
                         } catch (IOException | InterruptedException quitTaskManagerException) {
                             if (isTestMode) {
@@ -655,7 +655,7 @@ public class QAHelper extends javax.swing.JFrame {
                         }
 
                         try {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%Keyboard_Test%.jar%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%Keyboard_Test%.jar%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
                         } catch (IOException | InterruptedException quitPowershellStressException) {
                             if (isTestMode) {
                                 System.out.println("quitPowershellStressException: " + quitPowershellStressException);
@@ -664,7 +664,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                         if (!isWindowsPE) {
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
                             } catch (IOException | InterruptedException quitRecordingPropertiesException) {
                                 if (isTestMode) {
                                     System.out.println("quitRecordingPropertiesException: " + quitRecordingPropertiesException);
@@ -872,9 +872,9 @@ public class QAHelper extends javax.swing.JFrame {
                 }
             }
 
-            isWindowsHomeEdition = (!new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_OperatingSystem -Property Caption).Caption"}).getFirstOutputLineContaining(" Home").isEmpty());
+            isWindowsHomeEdition = (!new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_OperatingSystem -Property Caption).Caption"}).getFirstOutputLineContaining(" Home").isEmpty());
 
-            isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"\\Windows\\System32\\reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
+            isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
             isWindowsRE = (isWindowsPE && new File("\\sources\\recovery\\RecEnv.exe").exists());
 
             try {
@@ -1053,7 +1053,7 @@ public class QAHelper extends javax.swing.JFrame {
                             String cinnamonGtkThemeName = new CommandReader(new String[]{"/usr/bin/gsettings", "get", "org.cinnamon.desktop.interface", "gtk-theme"}).getFirstOutputLine().toLowerCase();
                             osIsDarkMode = (cinnamonGtkThemeName.contains("-dark") && !cinnamonGtkThemeName.contains("-darker"));
                         } else if (isWindows) {
-                            osIsDarkMode = !new CommandReader(new String[]{"\\Windows\\System32\\reg.exe", "query", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"}).getFirstOutputLineContaining("0x0").isEmpty();
+                            osIsDarkMode = !new CommandReader(new String[]{"reg.exe", "query", "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme"}).getFirstOutputLineContaining("0x0").isEmpty();
                         }
 
                         if (osIsDarkMode != currentLookAndFeelName.endsWith(" Dark")) {
@@ -1134,7 +1134,7 @@ public class QAHelper extends javax.swing.JFrame {
                     Runtime.getRuntime().exec((isWindows
                             // Based On: https://stackoverflow.com/a/58548853
                             // This new method is much better than the previous AppActivate method, but still also do the AppActive method since it seems to maybe not work as well on Windows 11.
-                            ? new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
+                            ? new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
                                 + "[DllImport(\\\"user32.dll\\\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n"
                                 + "[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);\n"
                                 + "[DllImport(\\\"user32.dll\\\")] public static extern bool IsIconic(IntPtr hWnd);\n"
@@ -1710,7 +1710,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     }
                                                 } else if (isWindows) {
                                                     try {
-                                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                                         TimeUnit.SECONDS.sleep(2);
                                                     } catch (IOException | InterruptedException stopComputerException) {
                                                         if (isTestMode) {
@@ -1737,7 +1737,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             switch (noSerialDialogResponseString) {
                                                 case "Shut Down":
                                                     try {
-                                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                                         TimeUnit.SECONDS.sleep(2);
                                                     } catch (IOException | InterruptedException stopComputerException) {
                                                         if (isTestMode) {
@@ -1749,7 +1749,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     break;
                                                 case "Reboot":
                                                     try {
-                                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
+                                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
                                                         TimeUnit.SECONDS.sleep(2);
                                                     } catch (IOException | InterruptedException restartComputerException) {
                                                         if (isTestMode) {
@@ -1764,7 +1764,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                         }
 
-                                        if (!manuallySetDeviceType && computerSpecs.getPossibleCustomDesktopOrBareMotherboard()) {
+                                        if (false && !manuallySetDeviceType && computerSpecs.getPossibleCustomDesktopOrBareMotherboard()) { // ExecHelper: disabled — EU tests iMacs, not bare motherboards
                                             String[] customDesktopOrBareMotherboardDialogButtons = new String[]{"Custom Desktop", "Bare Motherboard"};
 
                                             playAlertSound("beep");
@@ -2003,7 +2003,7 @@ public class QAHelper extends javax.swing.JFrame {
                     String runningJarInfoFirstPart = runningJarInfo.split(" -jar ")[0];
                     javaPath = runningJarInfoFirstPart.substring(runningJarInfoFirstPart.indexOf(" ") + 1);
                 } else if (isWindows) {
-                    javaPath = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" | Select-Object -First 1).Path"}).getFirstOutputLine();
+                    javaPath = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" | Select-Object -First 1).Path"}).getFirstOutputLine();
                     if (javaPath.endsWith("java.exe") && new File(javaPath.replace("java.exe", "javaw.exe")).exists()) {
                         javaPath = javaPath.replace("java.exe", "javaw.exe");
                     }
@@ -2067,7 +2067,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     new File(tempDirectory, "qa-helper_update-finisher.cmd").delete();
                                 }
 
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
                                     "$ProgressPreference = 'SilentlyContinue';" // Not showing progress makes "Invoke-WebRequest" downloads MUCH faster: https://stackoverflow.com/a/43477248
                                     + "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3;"
                                     + "Invoke-WebRequest " + CustomStrings.UPDATE_BASE_URL + appUpdateZipFilename + " -OutFile '" + appUpdateZipFilePath + "';" // TODO: Do in Java. Eventually.
@@ -2093,7 +2093,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             if (new File(appUpdateJarTempFilePath).exists()) {
                                 if (isWindows) {
-                                    downloadedJarVersion = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                                    downloadedJarVersion = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
                                         "Add-Type -AssemblyName System.IO.Compression.FileSystem;"
                                         + "$qaHelperJar = [System.IO.Compression.ZipFile]::OpenRead('" + appUpdateJarTempFilePath + "');"
                                         + "$qaHelperJar.Entries | Where-Object { $_.Name -eq 'qa-helper-version.txt' } | Select-Object -First 1 { [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, '" + tempDirectory + "qa_helper-downloaded_version.txt', $true) } | Out-Null;"
@@ -2150,7 +2150,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     if (windowsQAhelperUpdateFinisherFile.exists()) {
                                         // Need to create a CMD file and launch it with Start-Process so it doesn't get killed when QA Helper quits
-                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Start-Process -WindowStyle Hidden '" + windowsQAhelperUpdateFinisherFile.getPath() + "'"}).waitFor();
+                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Start-Process -WindowStyle Hidden '" + windowsQAhelperUpdateFinisherFile.getPath() + "'"}).waitFor();
 
                                         System.exit(0);
                                     } else {
@@ -4238,7 +4238,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                 try {
                                     if (isWindows) {
-                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object Media.SoundPlayer \"\\Windows\\Media\\Windows` Foreground.wav\").PlaySync();"});
+                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object Media.SoundPlayer \"\\Windows\\Media\\Windows` Foreground.wav\").PlaySync();"});
                                     } else {
                                         Runtime.getRuntime().exec(new String[]{"/usr/bin/afplay", "/System/Library/Sounds/Basso.aiff"});
                                     }
@@ -4280,7 +4280,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                 try {
                                     if (isWindows) {
-                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object Media.SoundPlayer \"\\Windows\\Media\\Windows` Exclamation.wav\").PlaySync();"});
+                                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object Media.SoundPlayer \"\\Windows\\Media\\Windows` Exclamation.wav\").PlaySync();"});
                                     } else {
                                         Runtime.getRuntime().exec(new String[]{"/usr/bin/afplay", "/System/Library/Sounds/Glass.aiff"});
                                     }
@@ -5256,7 +5256,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing " + joinedMatchedAppNames + "' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nINSTALLING " + joinedMatchedAppNames + "...\"; " + installCommands + "echo \"\n\nFINISHED INSTALLING " + joinedMatchedAppNames + "\" || echo \"\n\n!!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!\n\n>>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<\"; echo \"\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"QA Helper\";'"});
                         } else if (isWindows) {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -Command $Host.UI.RawUI.WindowTitle = 'QA Helper  —  Installing " + joinedMatchedAppNames + "'; Write-Output \\\"`n  Installing " + joinedMatchedAppNames + "...`n`n`n\\\"; try {" + installCommands + "Write-Output \\\"`n`n  Finished Installing " + joinedMatchedAppNames + "`n\\\" } catch { Write-Host \\\"`n`n  ERROR INSTALLING APP: $_\\\" -ForegroundColor Red; Write-Host \\\"`n`n  !!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!`n`n  >>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<`n\\\" -ForegroundColor Red } $Host.UI.RawUI.FlushInputBuffer(); Read-Host -Prompt '  PRESS ENTER TO CLOSE THIS WINDOW'"});
+                            Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -Command $Host.UI.RawUI.WindowTitle = 'QA Helper  —  Installing " + joinedMatchedAppNames + "'; Write-Output \\\"`n  Installing " + joinedMatchedAppNames + "...`n`n`n\\\"; try {" + installCommands + "Write-Output \\\"`n`n  Finished Installing " + joinedMatchedAppNames + "`n\\\" } catch { Write-Host \\\"`n`n  ERROR INSTALLING APP: $_\\\" -ForegroundColor Red; Write-Host \\\"`n`n  !!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!`n`n  >>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<`n\\\" -ForegroundColor Red } $Host.UI.RawUI.FlushInputBuffer(); Read-Host -Prompt '  PRESS ENTER TO CLOSE THIS WINDOW'"});
                         }
 
                         TimeUnit.SECONDS.sleep(1);
@@ -5722,7 +5722,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
 
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \"Web Browser\" \"\\Install\\Diagnostic Tools\\Web Browser (PE).exe\""}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \"Web Browser\" \"\\Install\\Diagnostic Tools\\Web Browser (PE).exe\""}).waitFor();
                             } catch (IOException | InterruptedException openWebBrowserPEexception) {
                                 if (isTestMode) {
                                     System.out.println("openWebBrowserPEexception: " + openWebBrowserPEexception);
@@ -5794,7 +5794,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         Runtime.getRuntime().exec((isWindows
                                                 // Based On: https://stackoverflow.com/a/58548853
                                                 // This new method is much better than the previous AppActivate method (which seems to not work with Legacy Edge), but still also do the AppActive method since it seems to maybe not work as well on Windows 11.
-                                                ? new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
+                                                ? new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
                                                     + "[DllImport(\\\"user32.dll\\\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n"
                                                     + "[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);\n"
                                                     + "[DllImport(\\\"user32.dll\\\")] public static extern bool IsIconic(IntPtr hWnd);\n"
@@ -7562,7 +7562,7 @@ public class QAHelper extends javax.swing.JFrame {
             }
         } else if (actionsEnabled && isWindows && isWindowsPE) {
             try {
-                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START \\Windows\\System32\\cmd.exe"});
+                Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START \\Windows\\System32\\cmd.exe"});
 
                 if (isWindowsPE) {
                     setState(Frame.ICONIFIED);
@@ -8285,7 +8285,7 @@ public class QAHelper extends javax.swing.JFrame {
                             return "mac-windows-done";
                         } else {
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "\"OpenHardwareMonitor\" \"\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe\"" : (isWindowsPE ? "\\Windows\\System32\\Taskmgr.exe" : "\\Windows\\System32\\resmon.exe"))});
+                                Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "\"OpenHardwareMonitor\" \"\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe\"" : (isWindowsPE ? "\\Windows\\System32\\Taskmgr.exe" : "\\Windows\\System32\\resmon.exe"))});
                             } catch (IOException openResourceOrTaskManagerException) {
                                 if (isTestMode) {
                                     System.out.println("openResourceOrTaskManagerException: " + openResourceOrTaskManagerException);
@@ -8294,7 +8294,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             try {
                                 for (int thread = 0; thread < computerSpecs.getThreadCount(); thread++) {
-                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "While (Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine) { <# QA Helper CPU Stress Test #> }"});
+                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "While (Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine) { <# QA Helper CPU Stress Test #> }"});
                                     TimeUnit.MILLISECONDS.sleep(100); // To allow CPU to ramp up
                                 }
 
@@ -8319,7 +8319,7 @@ public class QAHelper extends javax.swing.JFrame {
                             TimeUnit.SECONDS.sleep(1); // Sleep for a second to make sure the finishing progress has time to show before being closed.
 
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
                             } catch (IOException terminatePowerShellStressProcessesException) {
                                 if (isTestMode) {
                                     System.out.println("terminatePowerShellStressProcessesException: " + terminatePowerShellStressProcessesException);
@@ -8345,7 +8345,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     // TODO: MSAcpi_ThermalZoneTemperature is not CPU but some general temp. Also not available on all computers and requires admin. Also SLOW
                                     /*
-                                    String[] systemTemps = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance MSAcpi_ThermalZoneTemperature -Namespace ROOT\\WMI -Property CurrentTemperature,CriticalTripPoint | Format-List CurrentTemperature,CriticalTripPoint"}).getOutputLines();
+                                    String[] systemTemps = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance MSAcpi_ThermalZoneTemperature -Namespace ROOT\\WMI -Property CurrentTemperature,CriticalTripPoint | Format-List CurrentTemperature,CriticalTripPoint"}).getOutputLines();
 
                                     String currentSystemTempInfo = "";
 
@@ -8433,7 +8433,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         if (!isWindowsPE || new File("\\Windows\\System32\\taskkill.exe").exists()) {
                                             Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\taskkill.exe", "/im", (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor.exe" : (isWindowsPE ? "Taskmgr.exe" : "perfmon.exe")), "/t"}).waitFor(); // Even though we launch resmon.exe the running executable is perfmon.exe
                                         } else {
-                                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor" : "Taskmgr")}).waitFor();
+                                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name " + (new File("\\Install\\Diagnostic Tools\\OpenHardwareMonitor\\OpenHardwareMonitor.exe").exists() ? "OpenHardwareMonitor" : "Taskmgr")}).waitFor();
                                         }
                                     } catch (IOException | InterruptedException quitTaskManagerException) {
                                         if (isTestMode) {
@@ -8585,14 +8585,14 @@ public class QAHelper extends javax.swing.JFrame {
                 if (new File("\\Install\\Diagnostic Tools\\CrystalDiskInfo\\DiskInfo64.exe").exists()) {
                     try {
                         // tasklist doesn't exist in WinPE, do use PowerShell Get-Process instead
-                        if ((isWindowsPE ? new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-Process | Where-Object Name -eq 'DiskInfo64').Name"}) : new CommandReader(new String[]{"\\Windows\\System32\\tasklist.exe", "/nh", "/fi", "IMAGENAME eq DiskInfo64.exe"})).getFirstOutputLineContaining("DiskInfo64").isEmpty()) {
+                        if ((isWindowsPE ? new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-Process | Where-Object Name -eq 'DiskInfo64').Name"}) : new CommandReader(new String[]{"\\Windows\\System32\\tasklist.exe", "/nh", "/fi", "IMAGENAME eq DiskInfo64.exe"})).getFirstOutputLineContaining("DiskInfo64").isEmpty()) {
                             try {
                                 Runtime.getRuntime().exec(new String[]{"\\Install\\Diagnostic Tools\\CrystalDiskInfo\\DiskInfo64.exe"});
                             } catch (IOException launchDiskCheckException) { // Fallback to launching via "cmd.exe /c START" to allow elevated permissions prompt when needed when running on test systems without being in Audit mode or WinPE.
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START \"CrystalDiskInfo\" \"\\Install\\Diagnostic Tools\\CrystalDiskInfo\\DiskInfo64.exe\""});
+                                Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START \"CrystalDiskInfo\" \"\\Install\\Diagnostic Tools\\CrystalDiskInfo\\DiskInfo64.exe\""});
                             }
                         } else {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate(' CrystalDiskInfo')"}); // NOTE: Window title starts with a SPACE and will have the version number at the end, but AppActivate will match the closest window with the same PREFIX (which is why the SPACE must be included).
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate(' CrystalDiskInfo')"}); // NOTE: Window title starts with a SPACE and will have the version number at the end, but AppActivate will match the closest window with the same PREFIX (which is why the SPACE must be included).
                         }
 
                         if (isWindowsPE) {
@@ -8677,7 +8677,7 @@ public class QAHelper extends javax.swing.JFrame {
                         if (isLinux) {
                             Runtime.getRuntime().exec(new String[]{"/usr/bin/eject", thisDiscDriveLogicalName});
                         } else {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Shell.Application).NameSpace(17).ParseName('" + thisDiscDriveLogicalName + "').InvokeVerb('Eject')"});
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Shell.Application).NameSpace(17).ParseName('" + thisDiscDriveLogicalName + "').InvokeVerb('Eject')"});
                         }
                     }
                 } else if (isMacOS) {
@@ -8802,7 +8802,7 @@ public class QAHelper extends javax.swing.JFrame {
                     } else if (isWindows) {
                         osCompanySiteName = "Microsoft.com";
 
-                        String[] allNetworkInterfaces = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-NetAdapter -Physical | Format-List Name,PhysicalMediaType"}).getOutputLines();
+                        String[] allNetworkInterfaces = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-NetAdapter -Physical | Format-List Name,PhysicalMediaType"}).getOutputLines();
 
                         String thisNetworkDeviceName = "";
                         for (String thisNetworkInterfaceLine : allNetworkInterfaces) {
@@ -8859,7 +8859,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     } else if (isWindows) {
                                         ethernetNetworkDeviceIDs.forEach((thisEthernetNetworkDeviceID) -> {
                                             try {
-                                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Enable-NetAdapter '" + thisEthernetNetworkDeviceID + "'"}).waitFor();
+                                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Enable-NetAdapter '" + thisEthernetNetworkDeviceID + "'"}).waitFor();
                                             } catch (IOException | InterruptedException enableEthernetAdapterException) {
                                                 if (isTestMode) {
                                                     System.out.println("enableEthernetAdapterException: " + enableEthernetAdapterException);
@@ -8884,7 +8884,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             }
                                         } else {
                                             ethernetCableConnected = (isWindows
-                                                    ? !new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-NetAdapter '" + thisEthernetNetworkDeviceID + "').Status"}).getFirstOutputLine().equals("Disconnected")
+                                                    ? !new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-NetAdapter '" + thisEthernetNetworkDeviceID + "').Status"}).getFirstOutputLine().equals("Disconnected")
                                                     : !new CommandReader(new String[]{"/usr/sbin/ipconfig", "getifaddr", thisEthernetNetworkDeviceID}).getFirstOutputLine().isEmpty());
                                         }
 
@@ -9048,7 +9048,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         if (wiFiIsOff) {
                                             wiFiNetworkDeviceIDs.forEach(thisWiFiNetworkDeviceID -> {
                                                 try {
-                                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Enable-NetAdapter '" + thisWiFiNetworkDeviceID + "'"}).waitFor();
+                                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Enable-NetAdapter '" + thisWiFiNetworkDeviceID + "'"}).waitFor();
                                                 } catch (IOException | InterruptedException enableWiFiAdapterException) {
                                                     if (isTestMode) {
                                                         System.out.println("enableWiFiAdapterException: " + enableWiFiAdapterException);
@@ -10446,7 +10446,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\taskkill.exe", "/im", "SndVol.exe", "/t"}).waitFor();
                                 } else {
                                     // taskkill does not exist in WinPE (unless it has been manually copied in), no need to make it hard a requirement when I can just use PowerShell (PowerShell just takes longer so we'll still use taskkill when it's available).
-                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name SndVol"}).waitFor();
+                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name SndVol"}).waitFor();
                                 }
                             } catch (IOException | InterruptedException quitSoundMixerException) {
                                 if (isTestMode) {
@@ -10519,7 +10519,7 @@ public class QAHelper extends javax.swing.JFrame {
                             Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\taskkill.exe", "/im", "SndVol.exe", "/t"}).waitFor();
                         } else {
                             // taskkill does not exist in WinPE (unless it has been manually copied in), no need to make it hard a requirement when I can just use PowerShell (PowerShell just takes longer so we'll still use taskkill when it's available).
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name SndVol"}).waitFor();
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Process -Name SndVol"}).waitFor();
                         }
                     } catch (IOException | InterruptedException quitSoundMixerException) {
                         if (isTestMode) {
@@ -11486,7 +11486,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
                             } else if (isWindows) {
                                 try {
-                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
+                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
                                 } catch (IOException | InterruptedException quitRecordingPropertiesException) {
                                     if (isTestMode) {
                                         System.out.println("quitRecordingPropertiesException: " + quitRecordingPropertiesException);
@@ -11614,7 +11614,7 @@ public class QAHelper extends javax.swing.JFrame {
                 } else {
                     if (isWindows) {
                         try {
-                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$WscriptShell = New-Object -ComObject Wscript.Shell; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }; Start-Sleep -Milliseconds 500; if ($WscriptShell.AppActivate('Sound')) { $WscriptShell.SendKeys('%{F4}') }"}).waitFor(); // Try closing Sound window twice in case the Properties windows is open.
                         } catch (IOException | InterruptedException quitRecordingPropertiesException) {
                             if (isTestMode) {
                                 System.out.println("quitRecordingPropertiesException: " + quitRecordingPropertiesException);
@@ -11988,7 +11988,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     }
                                 } else if (isWindows) {
                                     try {
-                                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START microsoft.windows.camera:"}).waitFor();
+                                        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START microsoft.windows.camera:"}).waitFor();
                                         TimeUnit.SECONDS.sleep(1); // Sleep 1 extra second to make sure app is fully loaded.
 
                                         publish("running");
@@ -11997,7 +11997,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             TimeUnit.SECONDS.sleep(1);
 
                                             if (i == 0) {
-                                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate('Camera')"});
+                                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate('Camera')"});
                                             } else if ((i >= (cameraTestDurationSeconds / 2)) && new CommandReader(new String[]{"\\Windows\\System32\\tasklist.exe", "/nh", "/fi", "WINDOWTITLE eq Camera"}).getFirstOutputLineContaining("ApplicationFrameHost.exe").isEmpty()) {
                                                 playAlertSound("error");
                                                 break;
@@ -12225,7 +12225,7 @@ public class QAHelper extends javax.swing.JFrame {
                         String runningJarInfoFirstPart = runningJarInfo.split(" -jar ")[0];
                         javaPath = runningJarInfoFirstPart.substring(runningJarInfoFirstPart.indexOf(" ") + 1);
                     } else if (isWindows) {
-                        javaPath = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" | Select-Object -First 1).Path"}).getFirstOutputLine();
+                        javaPath = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" | Select-Object -First 1).Path"}).getFirstOutputLine();
                         if (javaPath.endsWith("java.exe") && new File(javaPath.replace("java.exe", "javaw.exe")).exists()) {
                             javaPath = javaPath.replace("java.exe", "javaw.exe");
                         }
@@ -12275,7 +12275,7 @@ public class QAHelper extends javax.swing.JFrame {
                 if ((keyboardTestJarTempPath != null) && new File(keyboardTestJarTempPath).exists()) {
                     try {
                         if (isWindows) {
-                            keyboardTestAlreadyRunning = (new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%Keyboard_Test%.jar%'\\\" -Property Name,CommandLine).CommandLine"}).getOutputLines().length > 0);
+                            keyboardTestAlreadyRunning = (new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%Keyboard_Test%.jar%'\\\" -Property Name,CommandLine).CommandLine"}).getOutputLines().length > 0);
                         } else {
                             keyboardTestAlreadyRunning = (new CommandReader(new String[]{"/usr/bin/pgrep", "-fl", "Keyboard_Test"}).getOutputLinesContaining((isMacOS ? "/java" : " java")).length > 0);
                         }
@@ -12285,7 +12285,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 Runtime.getRuntime().exec((isWindows
                                         // Based On: https://stackoverflow.com/a/58548853
                                         // This new method is much better than the previous AppActivate method, but still also do the AppActive method since it seems to maybe not work as well on Windows 11.
-                                        ? new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
+                                        ? new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$focusWindowFunctionTypes = Add-Type -PassThru -Name FocusWindow -MemberDefinition @'\n"
                                             + "[DllImport(\\\"user32.dll\\\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n"
                                             + "[DllImport(\\\"user32.dll\\\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);\n"
                                             + "[DllImport(\\\"user32.dll\\\")] public static extern bool IsIconic(IntPtr hWnd);\n"
@@ -12784,7 +12784,7 @@ public class QAHelper extends javax.swing.JFrame {
                     // Although, Get-PnpDevice can still filter ConfigManagerErrorCode by their Error Code integers (rather than having to use the Problem Strings) as I do in the following code:
                     // Ignore ConfigManagerErrorCode 45 because it only indicates the disconnected status of a device and is not a problem.
                     // Ignore ConfigManagerErrorCode 24 for PS/2 Keyboard or PS/2 Mouse because it just means a PS/2 Keyboard or PS/2 Mouse is not plugged in.
-                    String[] pnpDevicesWithErrorCodes = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding; Get-PnpDevice | Where-Object { ($_.ConfigManagerErrorCode -ne 0)" + (isTestMode ? "" : " -and ($_.ConfigManagerErrorCode -ne 45) -and (($_.ConfigManagerErrorCode -ne 24) -or (($_.Caption -notlike '*PS/2 Keyboard*') -and ($_.Caption -notlike '*PS/2 Mouse*')))") + " } | Format-List Caption,ConfigManagerErrorCode,DeviceID"}).getOutputLines();
+                    String[] pnpDevicesWithErrorCodes = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding; Get-PnpDevice | Where-Object { ($_.ConfigManagerErrorCode -ne 0)" + (isTestMode ? "" : " -and ($_.ConfigManagerErrorCode -ne 45) -and (($_.ConfigManagerErrorCode -ne 24) -or (($_.Caption -notlike '*PS/2 Keyboard*') -and ($_.Caption -notlike '*PS/2 Mouse*')))") + " } | Format-List Caption,ConfigManagerErrorCode,DeviceID"}).getOutputLines();
                     int numberOfPnPDevicesWithErrorCodes = 0;
 
                     String pnpDevicesWithErrors = "";
@@ -13588,7 +13588,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                             try {
                                                 // If "\Install\DPK\REVERTED" was not an empty folder (if the "Logs" folder was renamed), need to make sure that gets delete since delete() doesn't handle that.
-                                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "RMDIR /S /Q \"\\Install\\DPK\\REVERTED\\\""}).waitFor(); // Easier to just use batch to delete a folder and contents than using Java.
+                                                Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "RMDIR /S /Q \"\\Install\\DPK\\REVERTED\\\""}).waitFor(); // Easier to just use batch to delete a folder and contents than using Java.
                                             } catch (IOException rmdirDPKrevertedException) {
                                                 if (isTestMode) {
                                                     System.out.println("rmdirDPKrevertedException: " + rmdirDPKrevertedException);
@@ -13598,7 +13598,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             if (new File("\\Install\\DPK\\Logs\\").exists()) {
                                                 // If reverted, delete logs so that a previous DPK in an oa3tool-assemble.xml is no re-used.
                                                 try {
-                                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "RMDIR /S /Q \"\\Install\\DPK\\Logs\\\""}).waitFor(); // Easier to just use batch to delete a folder and contents than using Java.
+                                                    Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "RMDIR /S /Q \"\\Install\\DPK\\Logs\\\""}).waitFor(); // Easier to just use batch to delete a folder and contents than using Java.
                                                 } catch (IOException rmdirDPKlogsException) {
                                                     if (isTestMode) {
                                                         System.out.println("rmdirDPKlogsException: " + rmdirDPKlogsException);
@@ -13739,14 +13739,14 @@ public class QAHelper extends javax.swing.JFrame {
         }
 
         // (New-Object System.Net.Sockets.TcpClient).ConnectAsync().Wait() is MUCH faster than Test-NetConnection to check a port: https://copdips.com/2019/09/fast-tcp-port-check-in-powershell.html
-        if (mscServerAddress.matches("^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$") && new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+        if (mscServerAddress.matches("^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$") && new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
             "((New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + mscServerAddress + "', '" + mscPort + "').Wait(100) -and (New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + mscServerAddress + "', '" + sftpPort + "').Wait(100))"
         }).getFirstOutputLine().equals("True")) {
             return mscServerAddress;
         }
 
         String mscServerAddressPrefix = "192.168.2.";
-        mscServerAddress = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+        mscServerAddress = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
             "for ($ipSuffix = 1; $ipSuffix -le 254; $ipSuffix ++) { try { "
             + "if ((New-Object System.Net.Sockets.TcpClient).ConnectAsync(\\\"" + mscServerAddressPrefix + "$ipSuffix\\\", '" + mscPort + "').Wait(20) -and "
             + "(New-Object System.Net.Sockets.TcpClient).ConnectAsync(\\\"" + mscServerAddressPrefix + "$ipSuffix\\\", '" + sftpPort + "').Wait(20)) { "
@@ -13819,7 +13819,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                     boolean alreadyRetrievedDPK = new File(dpkLogsPath + "oa3tool-assemble.xml").exists();
 
-                    if (alreadyRetrievedDPK || new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + mscServerAddress + "', '" + mscPort + "').Wait(100)"}).getFirstOutputLine().equals("True")) { // (New-Object System.Net.Sockets.TcpClient).ConnectAsync().Wait() is MUCH faster than Test-NetConnection to check a port: https://copdips.com/2019/09/fast-tcp-port-check-in-powershell.html
+                    if (alreadyRetrievedDPK || new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + mscServerAddress + "', '" + mscPort + "').Wait(100)"}).getFirstOutputLine().equals("True")) { // (New-Object System.Net.Sockets.TcpClient).ConnectAsync().Wait() is MUCH faster than Test-NetConnection to check a port: https://copdips.com/2019/09/fast-tcp-port-check-in-powershell.html
                         if (!new File(dpkLogsPath).exists()) {
                             new File(dpkLogsPath).mkdirs();
                         }
@@ -14264,7 +14264,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                 return "DPK ERROR: FAILED TO LOCATE SFTP SERVER TO UPLOAD CBR";
                                                             }
 
-                                                            if (!new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + sftpAddress + "', '" + sftpPort + "').Wait(100)"}).getFirstOutputLine().equals("True")) { // (New-Object System.Net.Sockets.TcpClient).ConnectAsync().Wait() is MUCH faster than Test-NetConnection to check a port: https://copdips.com/2019/09/fast-tcp-port-check-in-powershell.html
+                                                            if (!new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object System.Net.Sockets.TcpClient).ConnectAsync('" + sftpAddress + "', '" + sftpPort + "').Wait(100)"}).getFirstOutputLine().equals("True")) { // (New-Object System.Net.Sockets.TcpClient).ConnectAsync().Wait() is MUCH faster than Test-NetConnection to check a port: https://copdips.com/2019/09/fast-tcp-port-check-in-powershell.html
                                                                 return "DPK ERROR: FAILED TO CONNECT TO SFTP TO UPLOAD CBR";
                                                             }
 
@@ -14315,7 +14315,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                                             try {
                                                                 // Must set ACL to restrict access to private key or sftp will fail.
-                                                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$sftpPrivateKeyACL = Get-Acl '" + sftpPrivateKeyPath + "'\n"
+                                                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "$sftpPrivateKeyACL = Get-Acl '" + sftpPrivateKeyPath + "'\n"
                                                                     + "$sftpPrivateKeyACL.SetAccessRuleProtection($true, $false)\n"
                                                                     + "$sftpPrivateKeyACL.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('Administrators', 'FullControl', 'Allow')))\n"
                                                                     + "$sftpPrivateKeyACL.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('SYSTEM', 'FullControl', 'Allow')))\n"
@@ -15256,7 +15256,7 @@ public class QAHelper extends javax.swing.JFrame {
                     if (new CommandReader(new String[]{"\\Windows\\System32\\tasklist.exe", "/nh", "/fi", "IMAGENAME eq msinfo32.exe"}).getFirstOutputLineContaining("msinfo32.exe").isEmpty()) {
                         Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\msinfo32.exe"});
                     } else {
-                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate('System Information')"});
+                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(New-Object -ComObject Wscript.Shell).AppActivate('System Information')"});
                     }
                 } else if (isLinux) {
                     if (new File("/usr/bin/mintreport").exists()) { // Open System Reports (which contains a detailed "System information" section).
@@ -15509,7 +15509,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                 }
                                                             } else if (isWindows) {
                                                                 try {
-                                                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                                                     TimeUnit.SECONDS.sleep(2);
                                                                 } catch (IOException | InterruptedException stopComputerException) {
                                                                     if (isTestMode) {
@@ -15544,7 +15544,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                 }
                                                             } else if (isWindows) {
                                                                 try {
-                                                                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
+                                                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
                                                                     TimeUnit.SECONDS.sleep(2);
                                                                 } catch (IOException | InterruptedException restartComputerException) {
                                                                     if (isTestMode) {
@@ -15761,7 +15761,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         } else if (isWindows) {
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                 TimeUnit.SECONDS.sleep(2);
                             } catch (IOException | InterruptedException stopComputerException) {
                                 if (isTestMode) {
@@ -15796,7 +15796,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
                         } else if (isWindows) {
                             try {
-                                Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
                                 TimeUnit.SECONDS.sleep(2);
                             } catch (IOException | InterruptedException restartComputerException) {
                                 if (isTestMode) {
@@ -15868,7 +15868,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                         }
                                                     } else if (isWindows) {
                                                         try {
-                                                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                                             TimeUnit.SECONDS.sleep(2);
                                                         } catch (IOException | InterruptedException stopComputerException) {
                                                             if (isTestMode) {
@@ -16356,7 +16356,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                 } else if (successfullyUpdatedStatusDialogResponseString.equals("Run \"Complete Windows\" Script & Shut Down")) {
                                                                     if (isWindows && new File("\\Install\\Scripts\\Complete Windows.ps1").exists()) {
                                                                         try {
-                                                                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\""});
+                                                                            Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\""});
                                                                             TimeUnit.SECONDS.sleep(1);
                                                                             writeToHelperLogFile("Ran Complete Windows");
                                                                             logSpecsAction("Ran Complete Windows");
@@ -16387,7 +16387,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                         }
                                                                     } else if (isWindows) {
                                                                         try {
-                                                                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
+                                                                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Stop-Computer"}).waitFor();
                                                                             TimeUnit.SECONDS.sleep(2);
                                                                         } catch (IOException | InterruptedException stopComputerException) {
                                                                             if (isTestMode) {
@@ -16423,7 +16423,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                                         }
                                                                     } else if (isWindows) {
                                                                         try {
-                                                                            Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
+                                                                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Restart-Computer"}).waitFor();
                                                                             TimeUnit.SECONDS.sleep(2);
                                                                         } catch (IOException | InterruptedException restartComputerException) {
                                                                             if (isTestMode) {
@@ -16966,7 +16966,7 @@ public class QAHelper extends javax.swing.JFrame {
                 try {
                     new File(System.getProperty("user.home") + "\\Desktop\\QA Helper.lnk").delete();
 
-                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Setup Windows.ps1\""});
+                    Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Setup Windows.ps1\""});
                     System.exit(0);
                 } catch (IOException reRunSetupWindowsException) {
                     if (isTestMode) {
@@ -16983,7 +16983,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && isLoggedIn && isWindows && !isWindowsPE && new File("\\Install\\Scripts\\Complete Windows.ps1").exists()) {
             if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to run the \"Complete Windows\" script and shut down this computer?</b></html>", "ExecHelper  -  Confirm Run \"Complete Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                 try {
-                    Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\""});
+                    Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\""});
                     TimeUnit.SECONDS.sleep(1);
                     writeToHelperLogFile("Ran Complete Windows (Manual)");
                     logSpecsAction("Ran Complete Windows (Manual)");
@@ -17027,7 +17027,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (canManuallyCacheDrivers) {
                 if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to cache the currently installed drivers for this computer model?</b></html>", "ExecHelper  -  Confirm Cache Drivers", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("Toolbox", qaHelperWindow).toImageIcon(32)) == JOptionPane.YES_OPTION) {
                     try {
-                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\" OnlyCacheDrivers"});
+                        Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Complete Windows.ps1\" OnlyCacheDrivers"});
                     } catch (IOException runCacheDriversException) {
                         if (isTestMode) {
                             System.out.println("runCacheDriversException: " + runCacheDriversException);

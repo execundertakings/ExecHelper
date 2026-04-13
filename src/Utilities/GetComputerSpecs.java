@@ -1887,15 +1887,15 @@ public final class GetComputerSpecs {
             } else if (isWindows) {
                 // Windows Info
 
-                boolean isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"\\Windows\\System32\\reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
+                boolean isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
 
-                String windowsBuildNumber = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_OperatingSystem -Property BuildNumber).BuildNumber"}).getFirstOutputLine();
+                String windowsBuildNumber = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_OperatingSystem -Property BuildNumber).BuildNumber"}).getFirstOutputLine();
                 if (windowsBuildNumber.equals("22000")) {
                     // On Windows 11 21H2 (Build 22000), the very first "Get-PhysicalDisk" load when OS boots is returning nothing, so always do one load in advance so that the next full specs load always works.
                     // This appears to NO LONGER be an issue on Windows 11 22H2 (Build 22621).
 
                     try {
-                        Runtime.getRuntime().exec(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-PhysicalDisk"}).waitFor();
+                        Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-PhysicalDisk"}).waitFor();
                     } catch (IOException | InterruptedException loadPhysicalDiskException) {
                         if (isTestMode) {
                             System.out.println("loadPhysicalDiskException: " + loadPhysicalDiskException);
@@ -1904,7 +1904,7 @@ public final class GetComputerSpecs {
                 }
 
                 // MUCH faster to run all commands in a single PowerShell call than to call PowerShell for each command!
-                String[] windowsHardwareInfo = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                String[] windowsHardwareInfo = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
                     "[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding;" // Some values may contain multi-byte characters such as "®" which will be transliterated to "r" (which cannot be easily isolated for removal) unless the console output encoding is explicitly set to UTF-8: https://stackoverflow.com/a/49481797
                     // Win32_OperatingSystem
                     + "Write-Output 'Windows Hardware Info Class = Win32_OperatingSystem';"
@@ -4241,7 +4241,7 @@ public final class GetComputerSpecs {
                                     if (isLinux) {
                                         downloadedMarketingModelName = new CommandReader(new String[]{"/usr/bin/curl", "-m", "5", "-sfL", "https://support-sp.apple.com/sp/product?cc=" + macSerialConfigCode}).getFirstOutputLineContaining("<configCode>");
                                     } else if (isWindows) {
-                                        downloadedMarketingModelName = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3; (Invoke-RestMethod -Uri 'https://support-sp.apple.com/sp/product?cc=" + macSerialConfigCode + "' -UseBasicParsing -TimeoutSec 5).root.configCode"}).getFirstOutputLine();
+                                        downloadedMarketingModelName = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3; (Invoke-RestMethod -Uri 'https://support-sp.apple.com/sp/product?cc=" + macSerialConfigCode + "' -UseBasicParsing -TimeoutSec 5).root.configCode"}).getFirstOutputLine();
                                     } else {
                                         downloadedMarketingModelName = new WebReader("https://support-sp.apple.com/sp/product?cc=" + macSerialConfigCode).getFirstOutputLineContaining("<configCode>");
                                     }
@@ -4266,7 +4266,7 @@ public final class GetComputerSpecs {
                                     if (isLinux) {
                                         downloadedMarketingModelName = new CommandReader(new String[]{"/usr/bin/curl", "-m", "10", "-sfL", "https://km.support.apple.com/kb/index?page=categorydata&serialnumber=" + serial}).getFirstOutputLineContaining("\"name\": \""); // I have seen this URL API timeout after 5 seconds when called multiple times rapidly (likely because of rate limiting), so give it a 10 second timeout which seems to always work.
                                     } else if (isWindows) {
-                                        downloadedMarketingModelName = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3; (Invoke-RestMethod -Uri 'https://km.support.apple.com/kb/index?page=categorydata&serialnumber=" + serial + "' -UseBasicParsing -TimeoutSec 10).name"}).getFirstOutputLine();
+                                        downloadedMarketingModelName = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3; (Invoke-RestMethod -Uri 'https://km.support.apple.com/kb/index?page=categorydata&serialnumber=" + serial + "' -UseBasicParsing -TimeoutSec 10).name"}).getFirstOutputLine();
                                     } else {
                                         downloadedMarketingModelName = new WebReader("https://km.support.apple.com/kb/index?page=categorydata&serialnumber=" + serial).getOutputLinesAsString();
                                     }
@@ -5208,7 +5208,7 @@ public final class GetComputerSpecs {
                 isLicensed = true;
             }
 
-            String[] productKeyInfoFromBIOS = new CommandReader(new String[]{"\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance SoftwareLicensingService -Property OA3xOriginalProductKeyDescription,OA3xOriginalProductKey | Format-List OA3xOriginalProductKeyDescription,OA3xOriginalProductKey"}).getOutputLines();
+            String[] productKeyInfoFromBIOS = new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance SoftwareLicensingService -Property OA3xOriginalProductKeyDescription,OA3xOriginalProductKey | Format-List OA3xOriginalProductKeyDescription,OA3xOriginalProductKey"}).getOutputLines();
 
             String originalProductKeyFromBIOS = "";
 

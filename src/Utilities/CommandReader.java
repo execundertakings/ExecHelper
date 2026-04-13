@@ -34,7 +34,7 @@ public class CommandReader {
     private final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
 
     public CommandReader(String commandString) {
-        initCommandReader((isWindows ? new String[]{"\\Windows\\System32\\cmd.exe", "/c", commandString} : new String[]{"/bin/sh", "-c", commandString}));
+        initCommandReader((isWindows ? new String[]{"cmd.exe", "/c", commandString} : new String[]{"/bin/sh", "-c", commandString}));
     }
 
     public CommandReader(String[] commandArray) {
