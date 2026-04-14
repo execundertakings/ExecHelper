@@ -48,7 +48,7 @@ public class CommandReader {
             commandReader = null;
             // Ignore Error
 
-            //JOptionPane.showMessageDialog(null, "<html><b>Failed To Perform Command</b><br/><br/>" + Arrays.toString(command) + "</html>", "QA Helper  —  Command Error", JOptionPane.ERROR_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "<html><b>Failed To Perform Command</b><br/><br/>" + Arrays.toString(command) + "</html>", "Exec Helper  —  Command Error", JOptionPane.ERROR_MESSAGE);
             //System.out.println("commandReaderException: " + commandReaderException);
         }
     }

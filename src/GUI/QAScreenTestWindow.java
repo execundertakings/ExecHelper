@@ -115,7 +115,7 @@ public class QAScreenTestWindow extends javax.swing.JFrame {
         btnChangeColor = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("QA Helper  —  Solid Colors Screen Test");
+        setTitle("Exec Helper  —  Solid Colors Screen Test");
         setAlwaysOnTop(true);
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);

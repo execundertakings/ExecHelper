@@ -81,7 +81,7 @@ public class QACreditsWindow extends javax.swing.JFrame {
 
                     switch (licenseFilename) {
                         case "QAHelper-MIT":
-                            licenseHeader = "<b>QA Helper</b> - <u>MIT License</u><br/>Copyright &copy; 2018 PCs for People<br/>Copyright &copy; 2018-" + currentYear + " Free Geek";
+                            licenseHeader = "<b>Exec Helper</b> - <u>MIT License</u><br/>Copyright &copy; 2018 PCs for People<br/>Copyright &copy; 2018-" + currentYear + " Free Geek";
                             break;
                         case "Twemoji-CCBY4":
                             licenseHeader = "<b>App &amp; UI Icons:</b><br/><i>Twemoji</i> licensed under <u>CC-BY 4.0</u><br/>Copyright &copy; 2021 Twitter, Inc and other contributors";
@@ -127,7 +127,7 @@ public class QACreditsWindow extends javax.swing.JFrame {
 
                     JOptionPane.showMessageDialog(this, new Object[]{
                         "<html>" + licenseHeader + "<br/><br/></html>",
-                        licenseScrollPane}, "QA Helper  —  License", JOptionPane.PLAIN_MESSAGE);
+                        licenseScrollPane}, "Exec Helper  —  License", JOptionPane.PLAIN_MESSAGE);
                 } else {
                     try {
                         Desktop.getDesktop().browse(hyperlinkEvent.getURL().toURI());
@@ -171,7 +171,7 @@ public class QACreditsWindow extends javax.swing.JFrame {
         menTogglePeripheralTestMode = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("QA Helper  —  Credits");
+        setTitle("Exec Helper  —  Credits");
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);
         setName("creditsFrame"); // NOI18N
@@ -181,7 +181,7 @@ public class QACreditsWindow extends javax.swing.JFrame {
         appIconLabel.setIcon(new TwemojiImage("AppIcon", this).toImageIcon(48, false));
         appIconLabel.setPreferredSize(new java.awt.Dimension(48, 48));
 
-        appNameLabel.setText("<html><b style='font-size: larger'>QA Helper</b></html>");
+        appNameLabel.setText("<html><b style='font-size: larger'>Exec Helper</b></html>");
 
         versionLabel.setText("<html><b>Version:</b> YYYY.MM.DD-R</html>");
 
@@ -298,7 +298,7 @@ public class QACreditsWindow extends javax.swing.JFrame {
         }
 
         String[] confirmTogglePeripheralTestModeDialogButtons = new String[]{(isPeripheralTestMode ? "Disable" : "Enable") + (isWindowsPE ? " IPDT Installation Mode" : " Peripheral Test Mode"), "Cancel"};
-        int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>Are you sure you want to " + (isPeripheralTestMode ? "<i>disable</i>" : "<u>enable</u>") + (isWindowsPE ? " IPDT (Intel Processor Diagnostic Tool) Installation Mode" : " Peripheral Test Mode") + "?</b><br/><br/>" + (isWindowsPE ? "After IPDT Installation Mode has been " + (isPeripheralTestMode ? "disabled" : "enabled") + ", QA Helper will quit to continue the installation process." : "After Peripheral Test Mode has been " + (isPeripheralTestMode ? "disabled" : "enabled") + ", QA Helper will quit and you will need to manually re-launch it.") + "</html>", "QA Helper  —  Confirm " + (isPeripheralTestMode ? "Disable" : "Enable") + (isWindowsPE ? " IPDT Installation Mode" : " Peripheral Test Mode"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmTogglePeripheralTestModeDialogButtons, confirmTogglePeripheralTestModeDialogButtons[0]);
+        int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>Are you sure you want to " + (isPeripheralTestMode ? "<i>disable</i>" : "<u>enable</u>") + (isWindowsPE ? " IPDT (Intel Processor Diagnostic Tool) Installation Mode" : " Peripheral Test Mode") + "?</b><br/><br/>" + (isWindowsPE ? "After IPDT Installation Mode has been " + (isPeripheralTestMode ? "disabled" : "enabled") + ", Exec Helper will quit to continue the installation process." : "After Peripheral Test Mode has been " + (isPeripheralTestMode ? "disabled" : "enabled") + ", Exec Helper will quit and you will need to manually re-launch it.") + "</html>", "Exec Helper  —  Confirm " + (isPeripheralTestMode ? "Disable" : "Enable") + (isWindowsPE ? " IPDT Installation Mode" : " Peripheral Test Mode"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, confirmTogglePeripheralTestModeDialogButtons, confirmTogglePeripheralTestModeDialogButtons[0]);
         if (linuxWarningDialogReturn == JOptionPane.YES_OPTION) {
             if (isPeripheralTestMode) {
                 for (File thisPeripheralTestModeFlagPath : peripheralTestModeFlagPaths) {

@@ -181,7 +181,7 @@ public class QATouchscreenTestWindow extends javax.swing.JFrame {
         zoneH10btn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("QA Helper  —  Touchscreen Test");
+        setTitle("Exec Helper  —  Touchscreen Test");
         setAlwaysOnTop(true);
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setName("touchScreenTestFrame"); // NOI18N

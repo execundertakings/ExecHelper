@@ -24,7 +24,7 @@
 # If you are building on an Apple Silicon Mac, run this string under Rosetta using "arch -x86_64 bash script.sh" (or on an Intel Mac) to get the binaries needed to make a Universal Binary.
 
 # AFTER YOU CREATE THE ALTERNATE APP BINARIES, COPY THAT STRIPPED APP BINARIES TO THE FOLLOWING FOLDER ON THE BUILD MAC:
-# /Users/Shared/Mac Deployment/QA Helper Universal Binary Parts/Java [JAVA VERSION] [ALTERNATE ARCHITECTURE] App Binaries
+# /Users/Shared/Mac Deployment/Exec Helper Universal Binary Parts/Java [JAVA VERSION] [ALTERNATE ARCHITECTURE] App Binaries
 
 PATH='/usr/bin:/bin:/usr/sbin:/sbin'
 
@@ -38,7 +38,7 @@ is_apple_silicon="$([[ "$(arch)" == 'arm'* ]] && echo 'true' || echo 'false')" #
 script_title="CREATING $($is_apple_silicon && echo 'APPLE SILICON' || echo 'INTEL') BINARIES TO CREATE UNIVERSAL BINARY WHEN BUILDING ON $($is_apple_silicon && echo 'INTEL' || echo 'APPLE SILICON')"
 echo "${script_title}"
 
-univeral_binary_parts_base_path='/Users/Shared/Mac Deployment/QA Helper Universal Binary Parts'
+univeral_binary_parts_base_path='/Users/Shared/Mac Deployment/Exec Helper Universal Binary Parts'
 if [[ ! -d "${univeral_binary_parts_base_path}" ]]; then
 	mkdir -p "${univeral_binary_parts_base_path}"
 fi
@@ -76,7 +76,7 @@ rm -f "${TMPDIR}/${jdk_archive_filename}"
 
 if [[ -f "${PROJECT_PATH}/dist/QA_Helper.jar" ]]; then
 	echo -e '\nCOPYING "QA_Helper.jar"...'
-	ditto "${PROJECT_PATH}/dist/QA_Helper.jar" "${alternate_app_binaries_for_universal_binary_path}/QA Helper JAR/QA_Helper.jar" || exit 1
+	ditto "${PROJECT_PATH}/dist/QA_Helper.jar" "${alternate_app_binaries_for_universal_binary_path}/Exec Helper JAR/QA_Helper.jar" || exit 1
 else
 	qa_helper_jar_download_url='https://apps.freegeek.org/qa-helper/download/QAHelper-jar.zip'
 	echo -e "\nDOWNLOADING \"${qa_helper_jar_download_url}\"..."
@@ -84,7 +84,7 @@ else
 	curl --connect-timeout 5 --progress-bar -fL "${qa_helper_jar_download_url}" -o "${TMPDIR}/QAHelper-jar.zip" || exit 1
 
 	echo -e '\nUNARCHIVING "QAHelper-jar.zip"...'
-	ditto -xk --noqtn "${TMPDIR}/QAHelper-jar.zip" "${alternate_app_binaries_for_universal_binary_path}/QA Helper JAR" || exit 1
+	ditto -xk --noqtn "${TMPDIR}/QAHelper-jar.zip" "${alternate_app_binaries_for_universal_binary_path}/Exec Helper JAR" || exit 1
 	rm -f "${TMPDIR}/QAHelper-jar.zip"
 fi
 
@@ -94,15 +94,15 @@ echo -e '\nCREATING APP...'
 "${jdk_path}/Contents/Home/bin/jpackage" \
 	--type 'app-image' \
 	--verbose \
-	--name 'QA Helper' \
-	--input "${alternate_app_binaries_for_universal_binary_path}/QA Helper JAR" \
+	--name 'Exec Helper' \
+	--input "${alternate_app_binaries_for_universal_binary_path}/Exec Helper JAR" \
 	--main-jar 'QA_Helper.jar' \
 	--runtime-image "${jdk_path}" \
 	--dest "${alternate_app_binaries_for_universal_binary_path}" || exit 1
 
-# Move "runtime" to "Frameworks/Java.runtime" to match actual QA Helper structure changes.
-mkdir "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app/Contents/Frameworks"
-mv "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app/Contents/runtime" "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app/Contents/Frameworks/Java.runtime"
+# Move "runtime" to "Frameworks/Java.runtime" to match actual Exec Helper structure changes.
+mkdir "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/Frameworks"
+mv "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/runtime" "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/Frameworks/Java.runtime"
 
 echo -e '\nREMOVING ALL EXCEPT BINARIES FROM APP...'
 
@@ -115,15 +115,15 @@ while IFS='' read -rd '' this_app_file_path; do
 			exit 1
 		fi
 	fi
-done < <(find "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app" -type f -print0)
+done < <(find "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app" -type f -print0)
 
-touch "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app"
+touch "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app"
 
-rm -rf "${alternate_app_binaries_for_universal_binary_path}/QA Helper JAR"
+rm -rf "${alternate_app_binaries_for_universal_binary_path}/Exec Helper JAR"
 rm -rf "${jdk_path}"
 
 if [[ $1 != '--no-reveal' ]]; then
-	open -R "${alternate_app_binaries_for_universal_binary_path}/QA Helper.app"
+	open -R "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app"
 fi
 
 echo -e "\nDONE ${script_title}\n"

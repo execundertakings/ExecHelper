@@ -126,7 +126,7 @@ public class StatusHistoryWindow extends javax.swing.JFrame {
 
                 switch (thisSpecKey) {
                     case "ID":
-                        setTitle("QA Helper  —  Status History for " + thisSpecValue.toUpperCase());
+                        setTitle("Exec Helper  —  Status History for " + thisSpecValue.toUpperCase());
                         break;
                     case "Status":
                         specsDisplayHTML += "<div style='padding: 10px;'><b>" + thisSpecKey + ":</b><br/>" + thisSpecValue + "</div>";
@@ -268,7 +268,7 @@ public class StatusHistoryWindow extends javax.swing.JFrame {
         loggedSpecsEditorPane = new javax.swing.JEditorPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("QA Helper  —  Status History");
+        setTitle("Exec Helper  —  Status History");
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(800, 300));

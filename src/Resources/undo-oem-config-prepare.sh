@@ -3,7 +3,7 @@
 
 #
 # Created by Pico Mitchell (of Free Geek) on 03/22/19
-# For QA Helper
+# For Exec Helper
 #
 # MIT License
 #
@@ -43,9 +43,9 @@ sudo rm -rf '/lib/systemd/system/oem-config.target' '/lib/systemd/system/oem-con
 
 echo 'autologin-user=oem' | sudo tee -a '/etc/lightdm/lightdm.conf' > /dev/null # Re-enable auto-login.
 
-# Add line to QA Helper log that "oem-config-prepare" was undone.
+# Add line to Exec Helper log that "oem-config-prepare" was undone.
 if [[ ! -d '/usr/local/share/build-info' ]]; then
-	mkdir '/usr/local/share/build-info' # This folder (and the "qa-helper-log.txt" file) may or may not already exist depending on whether or not anything else was previously verified in QA Helper.
+	mkdir '/usr/local/share/build-info' # This folder (and the "qa-helper-log.txt" file) may or may not already exist depending on whether or not anything else was previously verified in Exec Helper.
 fi
 echo "Undo: oem-config-prepare - $(date '+%m/%d/%Y %T')" >> '/usr/local/share/build-info/qa-helper-log.txt'
 

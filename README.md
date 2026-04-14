@@ -1,4 +1,4 @@
-# Java QA Helper
+# Java Exec Helper
 
 Cross-platform Java application to display and log computer specs and perform guided testing.
 

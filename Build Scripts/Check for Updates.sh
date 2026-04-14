@@ -48,7 +48,7 @@ if [[ "${BUILD_VERSION}" != *'-0' ]]; then # Only check for updates when buildin
 			if [[ "${LATEST_NETBEANS_VERSION}" != "${INSTALLED_NETBEANS_VERSION}" ]]; then
 				if osascript -e "display dialog \"NetBeans version ${LATEST_NETBEANS_VERSION} is now available!
 
-NetBeans version ${INSTALLED_NETBEANS_VERSION} is currently installed.\" buttons {\"Continue Build with NetBeans ${INSTALLED_NETBEANS_VERSION}\", \"Download NetBeans ${LATEST_NETBEANS_VERSION}\"} cancel button 1 default button 2 with title \"Newer NetBeans Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+NetBeans version ${INSTALLED_NETBEANS_VERSION} is currently installed.\" buttons {\"Continue Build with NetBeans ${INSTALLED_NETBEANS_VERSION}\", \"Download NetBeans ${LATEST_NETBEANS_VERSION}\"} cancel button 1 default button 2 with title \"Newer NetBeans Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 					echo '  OPENING DOWNLOAD NEWER NETBEANS LINK'
 					open "https://netbeans.apache.org/$(curl -m 5 -sfL 'https://netbeans.apache.org' | xmllint --html --xpath 'string(//a[@class="button success"]/@href)' - 2> /dev/null)"
 				fi
@@ -83,7 +83,7 @@ NetBeans version ${INSTALLED_NETBEANS_VERSION} is currently installed.\" buttons
 				if [[ "${LATEST_JDK_VERSION}" != "${INSTALLED_JDK_VERSION}" ]]; then
 					osascript -e "display dialog \"JDK version ${LATEST_JDK_VERSION} is now available!
 
-JDK version ${INSTALLED_JDK_VERSION} is currently installed.\" buttons {\"Continue Build\"} default button 1 with title \"Newer JDK Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null
+JDK version ${INSTALLED_JDK_VERSION} is currently installed.\" buttons {\"Continue Build\"} default button 1 with title \"Newer JDK Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null
 				fi
 			else
 				echo -e '  FAILED TO GET LATEST JDK VERSION'
@@ -112,7 +112,7 @@ JDK version ${INSTALLED_JDK_VERSION} is currently installed.\" buttons {\"Contin
 			if [[ "${LATEST_FLATLAF_VERSION}" != "${INSTALLED_FLATLAF_VERSION}" ]]; then
 				if osascript -e "display dialog \"FlatLaf version ${LATEST_FLATLAF_VERSION} is now available!
 
-FlatLaf version ${INSTALLED_FLATLAF_VERSION} is currently installed.\" buttons {\"Continue Build with FlatLaf ${INSTALLED_FLATLAF_VERSION}\", \"Download FlatLaf ${LATEST_FLATLAF_VERSION}\"} cancel button 1 default button 2 with title \"Newer FlatLaf Available for QA Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+FlatLaf version ${INSTALLED_FLATLAF_VERSION} is currently installed.\" buttons {\"Continue Build with FlatLaf ${INSTALLED_FLATLAF_VERSION}\", \"Download FlatLaf ${LATEST_FLATLAF_VERSION}\"} cancel button 1 default button 2 with title \"Newer FlatLaf Available for Exec Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 					echo '  OPENING DOWNLOAD NEWER FLATLAF LINK'
 					open 'https://maven-badges.sml.io/maven-central/com.formdev/flatlaf'
 				fi
@@ -140,7 +140,7 @@ FlatLaf version ${INSTALLED_FLATLAF_VERSION} is currently installed.\" buttons {
 				if [[ "${LATEST_ORGJSON_VERSION}" != "${INSTALLED_ORGJSON_VERSION}" ]]; then
 					if osascript -e "display dialog \"org.json version ${LATEST_ORGJSON_VERSION} is now available!
 
-org.json version ${INSTALLED_ORGJSON_VERSION} is currently installed.\" buttons {\"Continue Build with org.json ${INSTALLED_ORGJSON_VERSION}\", \"Download org.json ${LATEST_ORGJSON_VERSION}\"} cancel button 1 default button 2 with title \"Newer org.json Available for QA Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+org.json version ${INSTALLED_ORGJSON_VERSION} is currently installed.\" buttons {\"Continue Build with org.json ${INSTALLED_ORGJSON_VERSION}\", \"Download org.json ${LATEST_ORGJSON_VERSION}\"} cancel button 1 default button 2 with title \"Newer org.json Available for Exec Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 						echo '  OPENING DOWNLOAD NEWER ORG.JSON LINK'
 						open 'https://maven-badges.sml.io/maven-central/org.json/json'
 					fi
@@ -175,7 +175,7 @@ org.json version ${INSTALLED_ORGJSON_VERSION} is currently installed.\" buttons 
 				if [[ "${LATEST_COMMONS_TEXT_VERSION}" != "${INSTALLED_COMMONS_TEXT_VERSION}" || "${LATEST_COMMONS_LANG_VERSION}" != "${INSTALLED_COMMONS_LANG_VERSION}" ]]; then
 					if osascript -e "display dialog \"Apache Commons Text Libraries versions ${LATEST_COMMONS_TEXT_VERSION}, ${LATEST_COMMONS_LANG_VERSION} are now available!
 
-Apache Commons Text Libraries versions ${INSTALLED_COMMONS_TEXT_VERSION}, ${INSTALLED_COMMONS_LANG_VERSION} are currently installed.\" buttons {\"Continue Build with Current Apache Commons Text Libraries\", \"Download Latest Apache Commons Text Libraries\"} cancel button 1 default button 2 with title \"Newer Apache Commons Text Libraries Available for QA Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+Apache Commons Text Libraries versions ${INSTALLED_COMMONS_TEXT_VERSION}, ${INSTALLED_COMMONS_LANG_VERSION} are currently installed.\" buttons {\"Continue Build with Current Apache Commons Text Libraries\", \"Download Latest Apache Commons Text Libraries\"} cancel button 1 default button 2 with title \"Newer Apache Commons Text Libraries Available for Exec Helper\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 						echo '  OPENING DOWNLOAD NEWER APACHE COMMONS TEXT LIBS LINKS'
 
 						if [[ "${LATEST_COMMONS_TEXT_VERSION}" != "${INSTALLED_COMMONS_TEXT_VERSION}" ]]; then
@@ -216,7 +216,7 @@ Apache Commons Text Libraries versions ${INSTALLED_COMMONS_TEXT_VERSION}, ${INST
 			if [[ "${LATEST_HDSENTINEL_LINUX_VERSION}" != "${INCLUDED_HDSENTINEL_LINUX_VERSION}" ]]; then
 				if osascript -e "display dialog \"HDSentinel for Linux version ${LATEST_HDSENTINEL_LINUX_VERSION} is now available!
 
-HDSentinel for Linux version ${INCLUDED_HDSENTINEL_LINUX_VERSION} is currently included.\" buttons {\"Continue Build with HDSentinel ${INCLUDED_HDSENTINEL_LINUX_VERSION}\", \"Download HDSentinel ${LATEST_HDSENTINEL_LINUX_VERSION}\"} cancel button 1 default button 2 with title \"Newer HDSentinel Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+HDSentinel for Linux version ${INCLUDED_HDSENTINEL_LINUX_VERSION} is currently included.\" buttons {\"Continue Build with HDSentinel ${INCLUDED_HDSENTINEL_LINUX_VERSION}\", \"Download HDSentinel ${LATEST_HDSENTINEL_LINUX_VERSION}\"} cancel button 1 default button 2 with title \"Newer HDSentinel Available\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 					echo '  OPENING DOWNLOAD NEWER HDSENTINEL LINK'
 					open 'https://www.hdsentinel.com/hard_disk_sentinel_linux.php'
 				fi

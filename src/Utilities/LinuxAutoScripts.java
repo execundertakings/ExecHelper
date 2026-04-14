@@ -113,13 +113,13 @@ public class LinuxAutoScripts {
 
                             if (!autoScriptsToRun.isEmpty()) {
                                 boolean isLinuxMATE = new File("/usr/bin/mate-terminal").exists();
-                                Runtime.getRuntime().exec(new String[]{"/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal", "--window" + (isLinuxMATE ? "" : "-with-profile-internal-id"), (isLinuxMATE ? "" : "0"), "--title", "QA Helper  —  Running " + scriptType + " Auto-Scripts", "--hide-menubar", "--geometry", "80x25+0+0", "-x", "/bin/bash", "-c", "if /usr/bin/pgrep -fn '/auto-scripts/.*\\+(user|root)\\.sh$' &> /dev/null; then echo '\nWAITING FOR SOME OTHER AUTO-SCRIPTS TO FINISH...\n'; fi; while /usr/bin/pgrep -fn '/auto-scripts/.*\\+(user|root)\\.sh$' &> /dev/null; do /bin/sleep 1; done; echo '\nRUNNING " + scriptType.toUpperCase() + " AUTO-SCRIPTS'; /usr/bin/wmctrl -a 'QA Helper'; " + autoScriptsToRun + "echo '\n\nFINISHED RUNNING " + scriptType.toUpperCase() + " AUTO-SCRIPTS\nTHIS TERMINAL WINDOW WILL CLOSE IN 15 SECONDS - OR PRESS ENTER TO CLOSE NOW'; " + touchDidRunOnceAutoScriptFlag + "read -t 15"});
+                                Runtime.getRuntime().exec(new String[]{"/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal", "--window" + (isLinuxMATE ? "" : "-with-profile-internal-id"), (isLinuxMATE ? "" : "0"), "--title", "Exec Helper  —  Running " + scriptType + " Auto-Scripts", "--hide-menubar", "--geometry", "80x25+0+0", "-x", "/bin/bash", "-c", "if /usr/bin/pgrep -fn '/auto-scripts/.*\\+(user|root)\\.sh$' &> /dev/null; then echo '\nWAITING FOR SOME OTHER AUTO-SCRIPTS TO FINISH...\n'; fi; while /usr/bin/pgrep -fn '/auto-scripts/.*\\+(user|root)\\.sh$' &> /dev/null; do /bin/sleep 1; done; echo '\nRUNNING " + scriptType.toUpperCase() + " AUTO-SCRIPTS'; /usr/bin/wmctrl -a 'Exec Helper'; " + autoScriptsToRun + "echo '\n\nFINISHED RUNNING " + scriptType.toUpperCase() + " AUTO-SCRIPTS\nTHIS TERMINAL WINDOW WILL CLOSE IN 15 SECONDS - OR PRESS ENTER TO CLOSE NOW'; " + touchDidRunOnceAutoScriptFlag + "read -t 15"});
                             }
                         }
                     }
                 }
             } catch (IOException | URISyntaxException autoScriptsException) {
-                JOptionPane.showMessageDialog(null, "<html><b>Failed to Run <i>" + scriptType + "</i> Auto-Scripts</b></html>", "QA Helper  —  " + scriptType + " Auto-Scripts Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "<html><b>Failed to Run <i>" + scriptType + "</i> Auto-Scripts</b></html>", "Exec Helper  —  " + scriptType + " Auto-Scripts Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

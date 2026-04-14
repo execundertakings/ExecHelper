@@ -72,7 +72,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
                     boolean isLinuxUbiquityMode = (linuxBootArguments.contains("automatic-ubiquity") || linuxBootArguments.contains("only-ubiquity"));
 
                     if (isLinuxUbiquityMode && !new File("/tmp/detailed_hostname.txt").exists()) {
-                        // Do not allow QA Helper to be closed while loading in Linux Ubiquity Mode if the detailed_hostname file hasn't already been created, because we need it!
+                        // Do not allow Exec Helper to be closed while loading in Linux Ubiquity Mode if the detailed_hostname file hasn't already been created, because we need it!
                         allowClosingLoadingWindowToQuit = false;
                     }
                 } catch (IOException getLinuxBootArgsException) {
@@ -81,7 +81,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
             }
         } else if (osName.startsWith("Windows")) {
             if (!new File("\\Install\\Drivers Cache Model Name.txt").exists()) {
-                // Do not allow QA Helper to be closed while loading in Windows if the Drivers Cache Model Name file hasn't already been created, because we need it!
+                // Do not allow Exec Helper to be closed while loading in Windows if the Drivers Cache Model Name file hasn't already been created, because we need it!
                 allowClosingLoadingWindowToQuit = false;
             }
 
@@ -115,7 +115,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
             titleText = "Loading";
         }
 
-        String newTitle = "QA Helper  —  " + titleText;
+        String newTitle = "Exec Helper  —  " + titleText;
         if (!getTitle().equals(newTitle)) {
             setTitle(newTitle);
         }
@@ -123,7 +123,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
         lblIcon.setIcon(new TwemojiImage(((iconName == null) ? "AppIcon" : iconName), this).toImageIcon(false));
 
         if (loadingText != null && !loadingText.isEmpty()) {
-            lblLoadingText.setText("<html><b style='font-size: larger'>" + loadingText.replace("QA Helper", "<i>QA Helper</i>" + (isWindowsPE ? "&nbsp;" : "")) + "</b></html>");
+            lblLoadingText.setText("<html><b style='font-size: larger'>" + loadingText.replace("Exec Helper", "<i>Exec Helper</i>" + (isWindowsPE ? "&nbsp;" : "")) + "</b></html>");
         }
 
         if (!System.getProperty("os.name").startsWith("Windows")) {
@@ -258,7 +258,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
         btnSetVolumeTo100Percent = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("QA Helper  —  Loading");
+        setTitle("Exec Helper  —  Loading");
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(416, 0));
@@ -270,7 +270,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
         lblIcon.setPreferredSize(new java.awt.Dimension(64, 64));
 
         lblLoadingText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblLoadingText.setText("<html><b style='font-size: larger'><i>QA Helper</i> is Loading Computer Specs</b></html>");
+        lblLoadingText.setText("<html><b style='font-size: larger'><i>Exec Helper</i> is Loading Computer Specs</b></html>");
 
         loadingProgressBar.setIndeterminate(true);
 
@@ -479,7 +479,7 @@ public final class QALoadingWindow extends javax.swing.JFrame {
 
             if (!headphonesAreConnected && !acpiListenerGotHeadphoneState && new File("/proc/asound/card" + outputCard + "/codec#0").exists()) {
                 // This method of headphone detection is not reliable and does not work on all computer.
-                // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when QA Helper launched.
+                // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when Exec Helper launched.
 
                 try {
                     List<String> outputCardCodecInfoLines = Files.readAllLines(Paths.get("/proc/asound/card" + outputCard + "/codec#0"));

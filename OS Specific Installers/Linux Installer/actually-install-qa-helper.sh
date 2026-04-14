@@ -3,7 +3,7 @@
 
 #
 # Created by Pico Mitchell (of Free Geek) on 02/22/19
-# For QA Helper
+# For Exec Helper
 # Last Updated: 11/3/25
 #
 # MIT License
@@ -82,14 +82,14 @@ elif [[ "$(uname)" == 'Darwin' ]]; then # Installer for macOS (not actually used
 		osascript -e 'tell application id "org.freegeek.QA-Helper" to quit' &> /dev/null
 
 		rm -f "${TMPDIR}${qa_helper_mac_zip_name}"
-		rm -rf "${install_dir}/QA Helper.app"
-		rm -f "${HOME}/Desktop/QA Helper.app"
+		rm -rf "${install_dir}/Exec Helper.app"
+		rm -f "${HOME}/Desktop/Exec Helper.app"
 
 		echo -e 'FINISHED UNINSTALLING QA HELPER'
 	fi
 
 	if ! $UNINSTALL; then
-		if $FORCE_UPDATE || [[ ! -e "${install_dir}/QA Helper.app" ]]; then
+		if $FORCE_UPDATE || [[ ! -e "${install_dir}/Exec Helper.app" ]]; then
 			echo -e '\n\nINSTALLING QA HELPER...\n'
 
 			osascript -e 'tell application id "org.freegeek.QA-Helper" to quit' &> /dev/null
@@ -105,20 +105,20 @@ elif [[ "$(uname)" == 'Darwin' ]]; then # Installer for macOS (not actually used
 					fi
 
 					echo -e '\nUNARCHIVING QA HELPER AND MOVING TO INSTALL LOCATION:'
-					rm -rf "${install_dir}/QA Helper.app"
+					rm -rf "${install_dir}/Exec Helper.app"
 					ditto -xk --noqtn "${TMPDIR}${qa_helper_mac_zip_name}" "${install_dir}"
 					rm -f "${TMPDIR}${qa_helper_mac_zip_name}"
 
-					if [[ -e "${install_dir}/QA Helper.app" ]]; then
-						touch "${install_dir}/QA Helper.app"
+					if [[ -e "${install_dir}/Exec Helper.app" ]]; then
+						touch "${install_dir}/Exec Helper.app"
 						break
 					fi
 				fi
 			done
 
-			if [[ -e "${install_dir}/QA Helper.app" ]]; then
-				rm -rf "${HOME}/Desktop/QA Helper.app"
-				ln -s "${install_dir}/QA Helper.app" "${HOME}/Desktop/QA Helper.app"
+			if [[ -e "${install_dir}/Exec Helper.app" ]]; then
+				rm -rf "${HOME}/Desktop/Exec Helper.app"
+				ln -s "${install_dir}/Exec Helper.app" "${HOME}/Desktop/Exec Helper.app"
 
 				echo -e '\n\nQA HELPER IS INSTALLED: YOU CAN LAUNCH QA HELPER FROM THE DESKTOP'
 			else
@@ -160,8 +160,8 @@ else # Installer for Linux
 		echo -e '\n\nUNINSTALLING QA HELPER...\n'
 
 		if pgrep -f 'QA_Helper.jar' &> /dev/null; then
-			wmctrl -F -c 'QA Helper  —  Loading'
-			wmctrl -F -c 'QA Helper'
+			wmctrl -F -c 'Exec Helper  —  Loading'
+			wmctrl -F -c 'Exec Helper'
 		fi
 
 		rm -rf "${install_dir}" || sudo rm -rf "${install_dir}"
@@ -191,8 +191,8 @@ else # Installer for Linux
 			echo -e '\n\nINSTALLING QA HELPER JAVA APPLET...\n'
 
 			if pgrep -f 'QA_Helper.jar' &> /dev/null; then
-				wmctrl -F -c 'QA Helper  —  Loading'
-				wmctrl -F -c 'QA Helper'
+				wmctrl -F -c 'Exec Helper  —  Loading'
+				wmctrl -F -c 'Exec Helper'
 			fi
 
 			for (( jar_download_attempt = 0; jar_download_attempt < 5; jar_download_attempt ++ )); do
@@ -316,7 +316,7 @@ else # Installer for Linux
 
 					rm -f '/tmp/launch-qa-helper' || sudo rm -f '/tmp/launch-qa-helper'
 					sudo -u "${install_user}" touch '/tmp/launch-qa-helper' || touch '/tmp/launch-qa-helper'
-					launch_qa_helper_source="#!/bin/bash\n\nif [[ -d '${install_dir}' ]]; then\n\tif ! pgrep -f 'QA_Helper.jar' &> /dev/null; then\n\t\t'${install_dir}/java-jre/bin/java' -jar '${install_dir}/QA_Helper.jar'\n\telif [[ \"\$1\" != 'no-focus' ]]; then\n\t\twmctrl -a 'QA Helper'\n\tfi\nfi"
+					launch_qa_helper_source="#!/bin/bash\n\nif [[ -d '${install_dir}' ]]; then\n\tif ! pgrep -f 'QA_Helper.jar' &> /dev/null; then\n\t\t'${install_dir}/java-jre/bin/java' -jar '${install_dir}/QA_Helper.jar'\n\telif [[ \"\$1\" != 'no-focus' ]]; then\n\t\twmctrl -a 'Exec Helper'\n\tfi\nfi"
 					echo -e "${launch_qa_helper_source}" | sudo -u "${install_user}" tee '/tmp/launch-qa-helper' > /dev/null || echo -e "${launch_qa_helper_source}" > '/tmp/launch-qa-helper'
 
 					rm -f "${install_dir}/launch-qa-helper" || sudo rm -f "${install_dir}/launch-qa-helper"
@@ -342,7 +342,7 @@ else # Installer for Linux
 					
 					rm -f '/tmp/qa-helper.desktop' || sudo rm -f '/tmp/qa-helper.desktop'
 					sudo -u "${install_user}" touch '/tmp/qa-helper.desktop' || touch '/tmp/qa-helper.desktop'
-					qa_helper_desktop_source="[Desktop Entry]\nVersion=1.0\nName=QA Helper\nGenericName=QA Helper\nComment=Launch QA Helper (App Icon is \"Robot Face\" from Twemoji by Twitter licensed under CC-BY 4.0)\nExec=${install_dir}/launch-qa-helper\nIcon=${icon_file_path}\nTerminal=false\nType=Application\nCategories=Utility;Application;"
+					qa_helper_desktop_source="[Desktop Entry]\nVersion=1.0\nName=Exec Helper\nGenericName=Exec Helper\nComment=Launch Exec Helper (App Icon is \"Robot Face\" from Twemoji by Twitter licensed under CC-BY 4.0)\nExec=${install_dir}/launch-qa-helper\nIcon=${icon_file_path}\nTerminal=false\nType=Application\nCategories=Utility;Application;"
 					echo -e "${qa_helper_desktop_source}" | sudo -u "${install_user}" tee '/tmp/qa-helper.desktop' > /dev/null || echo -e "${qa_helper_desktop_source}" > '/tmp/qa-helper.desktop'
 
 					# Only setup autostart for OEM user.

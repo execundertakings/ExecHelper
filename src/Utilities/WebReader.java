@@ -93,7 +93,7 @@ public class WebReader {
 
     private void initWebReader(String url, String username, String password, String bearerToken, String jsonBody, HashMap<String, String> formFields, String requestMethod, int connectTimeoutSeconds, int readTimeoutSeconds) {
         try {
-            // NOTE: Cannot use newer HttpClient because all existing Linux and Windows installs of QA Helper use a jlink JRE which doesn't include "java.net.http" module,
+            // NOTE: Cannot use newer HttpClient because all existing Linux and Windows installs of Exec Helper use a jlink JRE which doesn't include "java.net.http" module,
             // and would be a bigger hassle to automate updating the jlink JRE than use the older HttpURLConnection.
 
             webConnection = (HttpURLConnection) URI.create(url).toURL().openConnection();
@@ -221,7 +221,7 @@ public class WebReader {
             webReader = null;
             // Ignore Error
 
-            //JOptionPane.showMessageDialog(null, "<html><b>Failed To Load URL</b><br/><br/>" + url + "</html>", "QA Helper  —  Web Reader Error", JOptionPane.ERROR_MESSAGE);
+            //JOptionPane.showMessageDialog(null, "<html><b>Failed To Load URL</b><br/><br/>" + url + "</html>", "Exec Helper  —  Web Reader Error", JOptionPane.ERROR_MESSAGE);
             System.out.println("webReaderException: " + webReaderException);
         }
     }

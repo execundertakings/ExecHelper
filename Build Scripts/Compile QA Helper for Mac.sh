@@ -108,7 +108,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 		tccutil reset All "${qa_helper_app_id}" &> /dev/null # Clear all TCC permissions so that we're always re-prompted when testing to be sure that works properly.
 
-		rm -rf "${PROJECT_PATH}/dist/QA Helper.app"
+		rm -rf "${PROJECT_PATH}/dist/Exec Helper.app"
 		rm -rf "${PROJECT_PATH}/dist/jlink-jre"
 
 		echo -e "\nBuilding JRE Version ${this_jdk_full_version}..."
@@ -126,7 +126,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			--compress "$( (( this_jdk_major_version >= 21 )) && echo 'zip-9' || echo '2' )" \
 			--output "${PROJECT_PATH}/dist/jlink-jre"
 
-			# NOTE: DO NOT INCLUDE "--strip-native-commands" because we need the "java" binary within the app to be able to extract Keyboard_Test.jar from the QA_Helper.jar and run it with the JRE included within the QA Helper app.
+			# NOTE: DO NOT INCLUDE "--strip-native-commands" because we need the "java" binary within the app to be able to extract Keyboard_Test.jar from the QA_Helper.jar and run it with the JRE included within the Exec Helper app.
 
 		find "${PROJECT_PATH}/dist/jlink-jre" -name '.DS_Store' -type f -print -delete
 
@@ -136,7 +136,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 		app_version_and_type_display="${app_version} $([[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && echo '(Universal Binary)' || echo 'for El Capitan')"
 
-		echo -e "\nBuilding QA Helper Version ${app_version_and_type_display}..."
+		echo -e "\nBuilding Exec Helper Version ${app_version_and_type_display}..."
 
 		chmod -R +rX "${PROJECT_PATH}/macOS Build Resources"
 
@@ -170,32 +170,32 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 		rm -rf "${PROJECT_PATH}/dist/jlink-jre"
 
-		plutil -replace 'CFBundleShortVersionString' -string "${app_version}" "${PROJECT_PATH}/dist/QA Helper.app/Contents/Info.plist"
+		plutil -replace 'CFBundleShortVersionString' -string "${app_version}" "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Info.plist"
 
 		if [[ -f "${PROJECT_PATH}/macOS Build Resources/Assets.car" ]]; then
-			ditto "${PROJECT_PATH}/macOS Build Resources/Assets.car" "${PROJECT_PATH}/dist/QA Helper.app/Contents/Resources/Assets.car"
+			ditto "${PROJECT_PATH}/macOS Build Resources/Assets.car" "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Resources/Assets.car"
 		fi
 
-		# Move "QA Helper.app/Contents/runtime" folder to "QA Helper.app/Contents/Frameworks/Java.runtime" (jpackager and OpenJDK 11 used "PlugIns" folder),
+		# Move "Exec Helper.app/Contents/runtime" folder to "Exec Helper.app/Contents/Frameworks/Java.runtime" (jpackager and OpenJDK 11 used "PlugIns" folder),
 		# so that Notarization doesn't fail with "The signature of the binary is invalid" error. See links below for references:
 		# https://developer.apple.com/forums/thread/116831?answerId=361112022#361112022 & https://developer.apple.com/forums/thread/129703?answerId=410259022#410259022
 		# https://developer.apple.com/library/archive/technotes/tn2206/_index.html#//apple_ref/doc/uid/DTS40007919-CH1-TNTAG201
-		mkdir "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks"
-		mv "${PROJECT_PATH}/dist/QA Helper.app/Contents/runtime" "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime"
-		sed -i '' $'2i\\\napp.runtime=$ROOTDIR/Contents/Frameworks/Java.runtime\n' "${PROJECT_PATH}/dist/QA Helper.app/Contents/app/QA Helper.cfg"
+		mkdir "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks"
+		mv "${PROJECT_PATH}/dist/Exec Helper.app/Contents/runtime" "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks/Java.runtime"
+		sed -i '' $'2i\\\napp.runtime=$ROOTDIR/Contents/Frameworks/Java.runtime\n' "${PROJECT_PATH}/dist/Exec Helper.app/Contents/app/Exec Helper.cfg"
 
-		# Move JAR from "QA Helper.app/Contents/app/QA_Helper.jar" to "QA Helper.app/Contents/Java/QA_Helper.jar" to match previous location used by jpackager and OpenJDK 11
+		# Move JAR from "Exec Helper.app/Contents/app/QA_Helper.jar" to "Exec Helper.app/Contents/Java/QA_Helper.jar" to match previous location used by jpackager and OpenJDK 11
 		# This is necessary for old versions to be able to check downloaded JAR version when auto-updating.
-		mkdir "${PROJECT_PATH}/dist/QA Helper.app/Contents/Java"
-		mv "${PROJECT_PATH}/dist/QA Helper.app/Contents/app/QA_Helper.jar" "${PROJECT_PATH}/dist/QA Helper.app/Contents/Java/QA_Helper.jar"
+		mkdir "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Java"
+		mv "${PROJECT_PATH}/dist/Exec Helper.app/Contents/app/QA_Helper.jar" "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Java/QA_Helper.jar"
 		# Suppress ShellCheck warning about expressions not expanding in single quotes since it is intentional.
 		# shellcheck disable=SC2016
-		sed -i '' 's|$APPDIR/QA_Helper.jar|$ROOTDIR/Contents/Java/QA_Helper.jar|' "${PROJECT_PATH}/dist/QA Helper.app/Contents/app/QA Helper.cfg"
+		sed -i '' 's|$APPDIR/QA_Helper.jar|$ROOTDIR/Contents/Java/QA_Helper.jar|' "${PROJECT_PATH}/dist/Exec Helper.app/Contents/app/Exec Helper.cfg"
 
 		should_notarize="$([[ "${app_version}" == *'-0' ]] && echo 'false' || echo 'true')" # DO NOT offer to Notarize for testing builds (which have versions ending in "-0").
 
 		if [[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]]; then
-			echo -e "\nMaking QA Helper Version ${app_version} Universal..."
+			echo -e "\nMaking Exec Helper Version ${app_version} Universal..."
 
 			# Also update app LSMinimumSystemVersion to match JVMMinimumSystemVersion (which should be 10.12.0 for Java 17-21).
 			jvm_minimum_system_version="$(PlistBuddy -c 'Print :JavaVM:JVMMinimumSystemVersion' "${this_jdk_path}/Contents/Info.plist" 2> /dev/null)"
@@ -205,11 +205,11 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			fi
 
 			if [[ -n "${jvm_minimum_system_version}" ]]; then
-				plutil -replace 'LSMinimumSystemVersion' -string "${jvm_minimum_system_version}" "${PROJECT_PATH}/dist/QA Helper.app/Contents/Info.plist"
+				plutil -replace 'LSMinimumSystemVersion' -string "${jvm_minimum_system_version}" "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Info.plist"
 			fi
 
 			alternate_app_binaries_for_universal_binary_name="Java ${this_jdk_full_version} $($IS_APPLE_SILICON && echo 'Intel' || echo 'Apple Silicon') App Binaries"
-			alternate_app_binaries_for_universal_binary="/Users/Shared/Mac Deployment/QA Helper Universal Binary Parts/${alternate_app_binaries_for_universal_binary_name}/QA Helper.app" # Get alternate arch folder from what is running.
+			alternate_app_binaries_for_universal_binary="/Users/Shared/Mac Deployment/Exec Helper Universal Binary Parts/${alternate_app_binaries_for_universal_binary_name}/Exec Helper.app" # Get alternate arch folder from what is running.
 			# If building on an Intel Mac, the files within the "alternate_app_binaries_for_universal_binary" folder must be created by running
 			# the "Create Alternate App Binaries for Mac Univeral Binary.sh" script (within the "Build Scripts" folder) on an Apple Silicon Mac
 			# in advance and then copying the resulting files into the "Java [VERSION] Apple Silicon App Binaries" folder.
@@ -225,7 +225,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			if [[ -d "${alternate_app_binaries_for_universal_binary}" ]]; then
 				while IFS='' read -rd '' this_app_file_path; do
 					if [[ "$(file "${this_app_file_path}")" == *'Mach-O 64-bit'* ]]; then
-						this_alternate_app_binaries_for_universal_binary_file_path="${alternate_app_binaries_for_universal_binary}${this_app_file_path#*/dist/QA Helper.app}"
+						this_alternate_app_binaries_for_universal_binary_file_path="${alternate_app_binaries_for_universal_binary}${this_app_file_path#*/dist/Exec Helper.app}"
 						this_alternate_app_binaries_for_universal_binary_file_arch="$(lipo -archs "${this_alternate_app_binaries_for_universal_binary_file_path}" 2> /dev/null)"
 
 						if [[ -n "${this_alternate_app_binaries_for_universal_binary_file_arch}" ]]; then
@@ -275,9 +275,9 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 							exit 9
 						fi
 					fi
-				done < <(find "${PROJECT_PATH}/dist/QA Helper.app" -type f -print0)
+				done < <(find "${PROJECT_PATH}/dist/Exec Helper.app" -type f -print0)
 
-				touch "${PROJECT_PATH}/dist/QA Helper.app"
+				touch "${PROJECT_PATH}/dist/Exec Helper.app"
 			else
 				>&2 echo -e "\n!!! MISSING \"${alternate_app_binaries_for_universal_binary_name}\" TO CREATE UNIVERSAL BINARY !!!"
 				afplay '/System/Library/Sounds/Basso.aiff'
@@ -288,15 +288,15 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 		rm -f "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
 
-		find "${PROJECT_PATH}/dist/QA Helper.app" -name '.DS_Store' -type f -print -delete
-		xattr -crs "${PROJECT_PATH}/dist/QA Helper.app" # "codesign" can fail if there are any xattr's (even though there should never be any).
+		find "${PROJECT_PATH}/dist/Exec Helper.app" -name '.DS_Store' -type f -print -delete
+		xattr -crs "${PROJECT_PATH}/dist/Exec Helper.app" # "codesign" can fail if there are any xattr's (even though there should never be any).
 
-		echo -e "\nCode Signing QA Helper Version ${app_version_and_type_display}..."
+		echo -e "\nCode Signing Exec Helper Version ${app_version_and_type_display}..."
 
 		# NOTE: The following code manually signs each executable and compiled code file (such as "dylib" files) within "Java.runtime".
-		# "--deep" IS NOT being used since it is deprecated in macOS 13 Ventura (and it does not sign every executable and compiled code file within "QA Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/lib/" anyways).
+		# "--deep" IS NOT being used since it is deprecated in macOS 13 Ventura (and it does not sign every executable and compiled code file within "Exec Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/lib/" anyways).
 	
-		jre_bundle_id="$(PlistBuddy -c 'Print :CFBundleIdentifier' "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime/Contents/Info.plist" 2> /dev/null)"
+		jre_bundle_id="$(PlistBuddy -c 'Print :CFBundleIdentifier' "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks/Java.runtime/Contents/Info.plist" 2> /dev/null)"
 		if [[ "${jre_bundle_id}" != *'QA-Helper'* ]]; then
 			jre_bundle_id="${qa_helper_app_id}"
 		fi
@@ -323,7 +323,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		# BUT, I'm NOT using all the entitlements that are specified above because I found that they aren't needed (through trial-and-error) for this app and the documentation from Apple states many of these are overzealous and should only be used if needed.
 
 		# NOTE: It appears Java 16 for the El Capitan version needs "com.apple.security.cs.allow-unsigned-executable-memory" BUT at least Java 17 & 19 (and presumably newer) for the Univeral version only needs "com.apple.security.cs.allow-jit" (never tested changing this entitlement for Java 18).
-		# Through testing, QA Helper with Java 17 & 19 and only "com.apple.security.cs.allow-jit" launched and worked fine. If QA Helper with Java 16 only has "com.apple.security.cs.allow-jit" it will fail to launch, so "com.apple.security.cs.allow-unsigned-executable-memory" is definitely still needed for the El Capitan builds with Java 16.
+		# Through testing, Exec Helper with Java 17 & 19 and only "com.apple.security.cs.allow-jit" launched and worked fine. If Exec Helper with Java 16 only has "com.apple.security.cs.allow-jit" it will fail to launch, so "com.apple.security.cs.allow-unsigned-executable-memory" is definitely still needed for the El Capitan builds with Java 16.
 		PlistBuddy \
 			-c "Add :$([[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && echo 'com.apple.security.cs.allow-jit' || echo 'com.apple.security.cs.allow-unsigned-executable-memory') bool true" \
 			-c 'Add :com.apple.security.device.audio-input bool true' \
@@ -333,30 +333,30 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			if [[ "${this_java_bin_path}" == *'/java' ]]; then # Only need to keep the "java" binary, and can delete any others, such as "keytool".
 				if lipo -archs "${this_java_bin_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 					echo "  Code Signing: ${this_java_bin_path#*/dist/}"
-					codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app"
+					codesign -fs - "${PROJECT_PATH}/dist/Exec Helper.app"
 				fi
 			else
 				echo "  Deleting: ${this_java_bin_path#*/dist/}"
 				rm "${this_java_bin_path}"
 			fi
-		done < <(find "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/bin" -type f -print0)
+		done < <(find "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/bin" -type f -print0)
 
 		while IFS='' read -rd '' this_java_lib_path; do
 			if lipo -archs "${this_java_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 				echo "  Code Signing: ${this_java_lib_path#*/dist/}"
 				codesign -fs - "${this_java_lib_path}"
 			fi
-		done < <(find "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/lib" -type f -print0)
+		done < <(find "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks/Java.runtime/Contents/Home/lib" -type f -print0)
 
-		echo '  Code Signing: QA Helper.app/Contents/Frameworks/Java.runtime'
-		codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app/Contents/Frameworks/Java.runtime"
+		echo '  Code Signing: Exec Helper.app/Contents/Frameworks/Java.runtime'
+		codesign -fs - "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Frameworks/Java.runtime"
 
 		# Starting with FlatLaf 3.3, there are native libraries within the JAR that must be signed for Notarization to work: https://github.com/JFormDesigner/FlatLaf/releases/tag/3.3 & https://github.com/JFormDesigner/FlatLaf/issues/800
-		# If the FlatLaf native libraries are NOT signed, Notarization will fail with an error stating that "The binary is not signed with a valid Developer ID certificate." for "QAHelper-mac-universal-NOTARIZATION-SUBMISSION.zip/QA Helper.app/Contents/Java/QA_Helper.jar/com/formdev/flatlaf/natives/libflatlaf-macos-x86_64.dylib" (and also the "libflatlaf-macos-arm64.dylib" file).
+		# If the FlatLaf native libraries are NOT signed, Notarization will fail with an error stating that "The binary is not signed with a valid Developer ID certificate." for "QAHelper-mac-universal-NOTARIZATION-SUBMISSION.zip/Exec Helper.app/Contents/Java/QA_Helper.jar/com/formdev/flatlaf/natives/libflatlaf-macos-x86_64.dylib" (and also the "libflatlaf-macos-arm64.dylib" file).
 		did_sign_jar_libs=false
 		rm -rf "${TMPDIR}/QA_Helper-JAR"
 		mkdir -p "${TMPDIR}/QA_Helper-JAR"
-		(cd "${TMPDIR}/QA_Helper-JAR" && "${this_jdk_path}/Contents/Home/bin/jar" -xf "${PROJECT_PATH}/dist/QA Helper.app/Contents/Java/QA_Helper.jar")
+		(cd "${TMPDIR}/QA_Helper-JAR" && "${this_jdk_path}/Contents/Home/bin/jar" -xf "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Java/QA_Helper.jar")
 
 		if [[ -f "${TMPDIR}/QA_Helper-JAR/Resources/Keyboard_Test.jar" ]]; then
 			rm -rf "${TMPDIR}/Keyboard_Test-JAR"
@@ -365,7 +365,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 			while IFS='' read -rd '' this_jar_lib_path; do
 				if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
-					echo "  Code Signing: QA Helper.app/Contents/Java/QA_Helper.jar/Resources/Keyboard_Test.jar/${this_jar_lib_path#*/Keyboard_Test-JAR/}"
+					echo "  Code Signing: Exec Helper.app/Contents/Java/QA_Helper.jar/Resources/Keyboard_Test.jar/${this_jar_lib_path#*/Keyboard_Test-JAR/}"
 					codesign -fs - "${this_java_lib_path}"
 					did_sign_jar_libs=true
 				fi
@@ -378,19 +378,19 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 
 		while IFS='' read -rd '' this_jar_lib_path; do
 			if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
-				echo "  Code Signing: QA Helper.app/Contents/Java/QA_Helper.jar/${this_jar_lib_path#*/QA_Helper-JAR/}"
+				echo "  Code Signing: Exec Helper.app/Contents/Java/QA_Helper.jar/${this_jar_lib_path#*/QA_Helper-JAR/}"
 				codesign -fs - "${this_java_lib_path}"
 				did_sign_jar_libs=true
 			fi
 		done < <(find "${TMPDIR}/QA_Helper-JAR" -type f -print0)
 		
 		if $did_sign_jar_libs; then
-			(cd "${TMPDIR}/QA_Helper-JAR" && "${this_jdk_path}/Contents/Home/bin/jar" -c -m 'META-INF/MANIFEST.MF' -f "${PROJECT_PATH}/dist/QA Helper.app/Contents/Java/QA_Helper.jar" .)
+			(cd "${TMPDIR}/QA_Helper-JAR" && "${this_jdk_path}/Contents/Home/bin/jar" -c -m 'META-INF/MANIFEST.MF' -f "${PROJECT_PATH}/dist/Exec Helper.app/Contents/Java/QA_Helper.jar" .)
 		fi
 		rm -rf "${TMPDIR}/QA_Helper-JAR"
 
-		echo '  Code Signing: QA Helper.app'
-		codesign -fs - "${PROJECT_PATH}/dist/QA Helper.app"
+		echo '  Code Signing: Exec Helper.app'
+		codesign -fs - "${PROJECT_PATH}/dist/Exec Helper.app"
 
 
 		if false; then # notarization skipped (no Developer ID cert)
@@ -399,13 +399,13 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			qa_helper_mac_zip_path_for_notarization="${PROJECT_PATH}/dist/${qa_helper_mac_zip_name/.zip/-NOTARIZATION-SUBMISSION.zip}"
 			rm -rf "${qa_helper_mac_zip_path_for_notarization}"
 
-			echo -e "\nZipping QA Helper Version ${app_version_and_type_display} for Notarization..."
-			ditto -ck --keepParent "${PROJECT_PATH}/dist/QA Helper.app" "${qa_helper_mac_zip_path_for_notarization}"
+			echo -e "\nZipping Exec Helper Version ${app_version_and_type_display} for Notarization..."
+			ditto -ck --keepParent "${PROJECT_PATH}/dist/Exec Helper.app" "${qa_helper_mac_zip_path_for_notarization}"
 
 			notarization_submission_log_path="${TMPDIR}/QAHelper_notarization_submission.log"
 			rm -rf "${notarization_submission_log_path}"
 
-			echo -e "\nNotarizing QA Helper Version ${app_version_and_type_display}..."
+			echo -e "\nNotarizing Exec Helper Version ${app_version_and_type_display}..."
 			xcrun notarytool submit "${qa_helper_mac_zip_path_for_notarization}" --keychain-profile 'notarytool App Specific Password' --wait | tee "${notarization_submission_log_path}" # Show live log since it may take a moment AND save to file to extract submission ID from to be able to load full notarization log.
 			notarytool_exit_code="$?"
 			rm -f "${qa_helper_mac_zip_path_for_notarization}"
@@ -421,8 +421,8 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 				exit 10
 			fi
 
-			echo -e "\nStapling Notarization Ticket to QA Helper Version ${app_version_and_type_display}..."
-			xcrun stapler staple "${PROJECT_PATH}/dist/QA Helper.app"
+			echo -e "\nStapling Notarization Ticket to Exec Helper Version ${app_version_and_type_display}..."
+			xcrun stapler staple "${PROJECT_PATH}/dist/Exec Helper.app"
 			stapler_exit_code="$?"
 
 			if (( stapler_exit_code != 0 )); then
@@ -430,13 +430,13 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 				exit 11
 			fi
 
-			echo -e "\nAssessing Notarized QA Helper Version ${app_version_and_type_display}..."
-			spctl_assess_output="$(spctl -avv "${PROJECT_PATH}/dist/QA Helper.app" 2>&1)"
+			echo -e "\nAssessing Notarized Exec Helper Version ${app_version_and_type_display}..."
+			spctl_assess_output="$(spctl -avv "${PROJECT_PATH}/dist/Exec Helper.app" 2>&1)"
 			spctl_assess_exit_code="$?"
 
 			echo "${spctl_assess_output}"
 
-			if ! codesign -vv --deep --strict -R '=notarized' --check-notarization "${PROJECT_PATH}/dist/QA Helper.app" || (( spctl_assess_exit_code != 0 )) || [[ "${spctl_assess_output}" != *$'\nsource=Notarized Developer ID\n'* ]]; then # Double-check that the app got assessed to be signed with "Notarized Developer ID".
+			if ! codesign -vv --deep --strict -R '=notarized' --check-notarization "${PROJECT_PATH}/dist/Exec Helper.app" || (( spctl_assess_exit_code != 0 )) || [[ "${spctl_assess_output}" != *$'\nsource=Notarized Developer ID\n'* ]]; then # Double-check that the app got assessed to be signed with "Notarized Developer ID".
 				# Verifying notarization with "codesign": https://developer.apple.com/forums/thread/128683?answerId=404727022#404727022 & https://developer.apple.com/forums/thread/130560
 				# Information about using "--deep" and "--strict" options during "codesign" verification:
 					# https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/resolving_common_notarization_issues#3087735
@@ -448,21 +448,21 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 				exit 12
 			fi
 
-			echo -e "\nZipping Notarized QA Helper Version ${app_version_and_type_display}..."
-			ditto -ck --keepParent --sequesterRsrc --zlibCompressionLevel 9 "${PROJECT_PATH}/dist/QA Helper.app" "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
+			echo -e "\nZipping Notarized Exec Helper Version ${app_version_and_type_display}..."
+			ditto -ck --keepParent --sequesterRsrc --zlibCompressionLevel 9 "${PROJECT_PATH}/dist/Exec Helper.app" "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
 
 			open -R "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
 
-			echo -e "\nSuccessfully Notarized QA Helper Version ${app_version_and_type_display}!"
+			echo -e "\nSuccessfully Notarized Exec Helper Version ${app_version_and_type_display}!"
 
-			osascript -e 'activate' -e "display dialog \"Successfully Notarized & Zipped\nQA Helper Version ${app_version_and_type_display}!\" with title \"Successfully Notarized QA Helper\" buttons {\"OK\"} default button 1 with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null
+			osascript -e 'activate' -e "display dialog \"Successfully Notarized & Zipped\nExec Helper Version ${app_version_and_type_display}!\" with title \"Successfully Notarized Exec Helper\" buttons {\"OK\"} default button 1 with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null
 		fi
 
-		open -na "${PROJECT_PATH}/dist/QA Helper.app"
+		open -na "${PROJECT_PATH}/dist/Exec Helper.app"
 
 		if [[ "${app_version}" == *'-0' ]]; then # DO NOT offer to build for El Captian for testing builds (which have versions ending in "-0").
 			break
-		elif [[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && osascript -e 'activate' -e "display dialog \"Also build QA Helper version ${app_version}\nfor El Capitan?\" buttons {\"Yes\", \"No\"} cancel button 1 default button 2 with title \"Build QA Helper for El Capitan\" with icon (\"${PROJECT_PATH}/macOS Build Resources/QA Helper.icns\" as POSIX file)" &> /dev/null; then
+		elif [[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && osascript -e 'activate' -e "display dialog \"Also build Exec Helper version ${app_version}\nfor El Capitan?\" buttons {\"Yes\", \"No\"} cancel button 1 default button 2 with title \"Build Exec Helper for El Capitan\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
 			break
 		fi
 	done

@@ -8,7 +8,7 @@
 # which is automatically deployed to Cloudflare Pages within ~2 minutes
 # by the com.executiveundertakings.publicfiles LaunchAgent.
 #
-# Run this after a successful build from "Compile QA Helper for Mac.sh".
+# Run this after a successful build from "Compile Exec Helper for Mac.sh".
 #
 # The LaunchAgent watches for ANY file change (including in qa-updates/)
 # and triggers a Wrangler deploy automatically. You can also force an
@@ -28,7 +28,7 @@ DIST_PATH="${PROJECT_PATH}/dist"
 
 # ── Verify at least one ZIP was built ────────────────────────────────────────
 if [[ ! -f "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" && ! -f "${DIST_PATH}/QAHelper-mac-universal.zip" ]]; then
-    >&2 echo '!!! No built ZIPs found in dist/ — run "Compile QA Helper for Mac.sh" first !!!'
+    >&2 echo '!!! No built ZIPs found in dist/ — run "Compile Exec Helper for Mac.sh" first !!!'
     exit 1
 fi
 

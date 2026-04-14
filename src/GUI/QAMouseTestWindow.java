@@ -160,7 +160,7 @@ public final class QAMouseTestWindow extends javax.swing.JDialog {
         fieldDropDown = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("QA Helper  —  Mouse Test");
+        setTitle("Exec Helper  —  Mouse Test");
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(465, 615));

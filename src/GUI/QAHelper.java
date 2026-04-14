@@ -229,7 +229,7 @@ public class QAHelper extends javax.swing.JFrame {
         String[] osVersionParts = System.getProperty("os.version").replaceAll("[^0-9.]", "").split("\\.");
 
         if (isMacOS) {
-            System.setProperty("apple.awt.application.name", "QA Helper"); // To not show "QAHelper" class name in App menu.
+            System.setProperty("apple.awt.application.name", "Exec Helper"); // To not show "QAHelper" class name in App menu.
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("apple.awt.application.appearance", "system"); // Allow titlebar to change to match light/dark mode (https://github.com/JFormDesigner/FlatLaf/commit/3facbc0900d4330b9aadc44077d3f7fb7e686074#diff-6178310587a0e4e1bf1132df43249c4f95d84e7b7e30d4762918c9d8bcfe1851).
         }
@@ -389,14 +389,14 @@ public class QAHelper extends javax.swing.JFrame {
                 if (isWindows) {
                     multipleInstancesRunning = (new CommandReader(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine).CommandLine"}).getOutputLines().length > multipleInstanceMinimum);
                 } else {
-                    // GUI.QAHelper catches when it's run from NetBeans, QA_Helper.jar catches when the .jar is launched, /QA Helper.app catches when the Mac app is run. Ignore any non-java or non-"QA Helper.app" processes to ignore sudo launches or bash scripts (such as when auto-updating), etc.
-                    multipleInstancesRunning = (new CommandReader(new String[]{"/usr/bin/pgrep", "-fl", "(GUI\\.QAHelper|QA_Helper\\.jar|/QA Helper\\.app)"}).getOutputLinesContaining((isMacOS ? new String[]{"QA Helper.app/Contents/MacOS/QA Helper", "/java"} : new String[]{" java"})).length > multipleInstanceMinimum);
+                    // GUI.QAHelper catches when it's run from NetBeans, QA_Helper.jar catches when the .jar is launched, /Exec Helper.app catches when the Mac app is run. Ignore any non-java or non-"Exec Helper.app" processes to ignore sudo launches or bash scripts (such as when auto-updating), etc.
+                    multipleInstancesRunning = (new CommandReader(new String[]{"/usr/bin/pgrep", "-fl", "(GUI\\.QAHelper|QA_Helper\\.jar|/Exec Helper\\.app)"}).getOutputLinesContaining((isMacOS ? new String[]{"Exec Helper.app/Contents/MacOS/Exec Helper", "/java"} : new String[]{" java"})).length > multipleInstanceMinimum);
                 }
 
                 if (multipleInstancesRunning) {
                     if (isMacOS) {
                         // Show alert instead of focusing on macOS because it's better when I'm debugging and it's also more complicated to focus the running instance when it may not be a .app
-                        JOptionPane.showMessageDialog(null, "<html><b>Only one instance of <i>QA Helper</i> is allowed to run at a time.</b></html>", "ExecHelper  -  Launch Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "<html><b>Only one instance of <i>Exec Helper</i> is allowed to run at a time.</b></html>", "ExecHelper  -  Launch Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         try {
                             Runtime.getRuntime().exec((isWindows
@@ -417,9 +417,9 @@ public class QAHelper extends javax.swing.JFrame {
                                         + "}\n"
                                         + "}\n"
                                         + "}\n"
-                                        + "$WshellScript = (New-Object -ComObject Wscript.Shell); if (-not $WshellScript.AppActivate('QA Helper')) { $WshellScript.AppActivate('QA Helper  —  Loading') }"
+                                        + "$WshellScript = (New-Object -ComObject Wscript.Shell); if (-not $WshellScript.AppActivate('Exec Helper')) { $WshellScript.AppActivate('Exec Helper  —  Loading') }"
                                     }
-                                    : new String[]{"/bin/sh", "-c", "/usr/bin/wmctrl -Fa 'QA Helper' || /usr/bin/wmctrl -Fa 'QA Helper  —  Loading'"})).waitFor();
+                                    : new String[]{"/bin/sh", "-c", "/usr/bin/wmctrl -Fa 'Exec Helper' || /usr/bin/wmctrl -Fa 'Exec Helper  —  Loading'"})).waitFor();
                         } catch (IOException | InterruptedException focusQAHelperException) {
                             System.out.println("focusQAHelperException: " + focusQAHelperException);
                         }
@@ -455,7 +455,7 @@ public class QAHelper extends javax.swing.JFrame {
                 //System.out.println("Printing loadAppException Stack Trace:");
                 //loadAppException.printStackTrace();
 
-                JOptionPane.showMessageDialog(null, "<html><b>Error Loading <i>QA Helper</i></b></html>", "ExecHelper  -  Load Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "<html><b>Error Loading <i>Exec Helper</i></b></html>", "ExecHelper  -  Load Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
         });
@@ -634,7 +634,7 @@ public class QAHelper extends javax.swing.JFrame {
                         boolean isWindowsPE = ((new File("\\Windows\\System32\\startnet.cmd").exists() || new File("\\Windows\\System32\\winpeshl.ini").exists()) && !new CommandReader(new String[]{"reg.exe", "query", "HKLM\\SYSTEM\\Setup", "/v", "FactoryPreInstallInProgress"}).getFirstOutputLineContaining("0x1").isEmpty());
 
                         try {
-                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
+                            Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# Exec Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
                         } catch (IOException | InterruptedException quitPowershellStressException) {
                             if (isTestMode) {
                                 System.out.println("quitPowershellStressException: " + quitPowershellStressException);
@@ -747,11 +747,11 @@ public class QAHelper extends javax.swing.JFrame {
 
             if (new File("/usr/bin/ibus-daemon").exists()) { // NOTE: "ibus-daemon" WILL BE INSTALLED/RUNNING ON MINT BY DEFAULT ONLY GETS INSTALLED WHEN ZOOM IS INSTALLED AND IT'S NOW INSTALLED BY DEFAULT ON OUR CUSTOM MINT IMAGES.
                 try {
-                    // On Linux, when "ibus-deamon" is installed (which gets pre-installed in our custom images as part of the "ibus" dependency for Zoom), the keyboard could become unresponsive in QA Helper (or any Java app) if dialog boxes are opened and closed too rapidly.
+                    // On Linux, when "ibus-deamon" is installed (which gets pre-installed in our custom images as part of the "ibus" dependency for Zoom), the keyboard could become unresponsive in Exec Helper (or any Java app) if dialog boxes are opened and closed too rapidly.
                     // This would happen sporadically when some technicians would hit enter rapidly to quickly verify the bottom row tasks that had already performed which rapidly opens and closes dialog boxes.
                     // After lots of investigation and testing, I determined the issue was specific to opening and closing dialog boxes and not related to keys being hit rapidly and would happen across every version of Java that I tested and did not have to do with FlatLaf.
                     // With more investigation, I traced the issue back to "ibus-daemon" (thanks to https://youtrack.jetbrains.com/issue/IDEA-23472) and found that simply reloading it at least once after boot seems to make this issue never happen.
-                    // I'm not sure why it is that the issue would only happen with the "ibus-deamon" instance that loaded on boot, but always reloading "ibus-daemon" when QA Helper launches successfully avoids the issue while nothing else I tried worked.
+                    // I'm not sure why it is that the issue would only happen with the "ibus-deamon" instance that loaded on boot, but always reloading "ibus-daemon" when Exec Helper launches successfully avoids the issue while nothing else I tried worked.
 
                     Runtime.getRuntime().exec(new String[]{"/usr/bin/ibus-daemon", "-rd"});
                 } catch (IOException ibusDaemonReloadException) {
@@ -765,7 +765,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (!linuxReleaseDescription.startsWith("Linux Mint") || ((desktopSession != null) && !desktopSession.equals("cinnamon") && !desktopSession.equals("mate"))) {
                 playAlertSound("error");
                 String[] linuxWarningDialogButtons = new String[]{"Continue", "Quit"};
-                int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> only supports <i>Linux Mint</i> with either the <u>Cinnamon</u> or <u>MATE</u> desktop environment.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Linux Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, linuxWarningDialogButtons, linuxWarningDialogButtons[0]);
+                int linuxWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>Exec Helper</i> only supports <i>Linux Mint</i> with either the <u>Cinnamon</u> or <u>MATE</u> desktop environment.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Linux Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, linuxWarningDialogButtons, linuxWarningDialogButtons[0]);
                 if (linuxWarningDialogReturn == JOptionPane.NO_OPTION || linuxWarningDialogReturn == -1) {
                     System.exit(0);
                 }
@@ -822,7 +822,7 @@ public class QAHelper extends javax.swing.JFrame {
             });
 
             try {
-                // Need to check if is macOS Sierra or newer to know if can support QA Helpers built with Java 17 and newer.
+                // Need to check if is macOS Sierra or newer to know if can support Exec Helpers built with Java 17 and newer.
 
                 String macOSversion = System.getProperty("os.version"); // This is enough for the basic version check even though is does not show the full version on Big Sur (11.5.2 shows as just 11.5).
 
@@ -842,7 +842,7 @@ public class QAHelper extends javax.swing.JFrame {
 
             isMacTestBoot = (new File("/Applications/Test Boot Setup.app").exists() && new File("/Users/Staff").exists() && new File("/Users/Tester").exists());
 
-            // Set Touch Bar settings to NOT be "App Controls" for QA Helper because Java alert buttons don't show in the Touch Bar anyway and fullControlStrip is better for a full Touch Bar test during Keyboard Test.
+            // Set Touch Bar settings to NOT be "App Controls" for Exec Helper because Java alert buttons don't show in the Touch Bar anyway and fullControlStrip is better for a full Touch Bar test during Keyboard Test.
             if (new CommandReader(new String[]{"/usr/bin/defaults", "read", "com.apple.touchbar.agent", "PresentationModePerApp"}).getFirstOutputLineContaining("\"org.freegeek.QA-Helper\" = fullControlStrip;").isEmpty()) {
                 try {
                     Runtime.getRuntime().exec(new String[]{"/usr/bin/defaults", "write", "com.apple.touchbar.agent", "PresentationModePerApp", "-dict-add", "org.freegeek.QA-Helper", "fullControlStrip"}).waitFor();
@@ -866,7 +866,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (!isWindows11 && !osName.startsWith("Windows 10")) {
                 playAlertSound("error");
                 String[] windowsWarningDialogButtons = new String[]{"Continue", "Quit"};
-                int windowsWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>QA Helper</i> does not support versions of <i>Windows</i> other than <u>Windows 10</u> or <u>Windows 11</u>.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Windows Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, windowsWarningDialogButtons, windowsWarningDialogButtons[0]);
+                int windowsWarningDialogReturn = JOptionPane.showOptionDialog(null, "<html><b>This version of <i>Exec Helper</i> does not support versions of <i>Windows</i> other than <u>Windows 10</u> or <u>Windows 11</u>.</b><br/><br/><i>If you continue, some things may not work correctly or may not work at all.</i></html>", "ExecHelper  -  Windows Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, windowsWarningDialogButtons, windowsWarningDialogButtons[0]);
                 if (windowsWarningDialogReturn == JOptionPane.NO_OPTION || windowsWarningDialogReturn == -1) {
                     System.exit(0);
                 }
@@ -1129,7 +1129,7 @@ public class QAHelper extends javax.swing.JFrame {
         } catch (Exception requestForegroundException) {
             //if (isTestMode) System.out.println("requestForegroundException: " + requestForegroundException); // Don't show this cuz never works and just litters when actually debugging.
 
-            if (!isWindows || !isWindowsPE) { // No need to for this extra focus in WinPE since it's always on top. Also, it causes some disruption because of its delay in running after being called when QA Helper may have since ICONIFIED itself. 
+            if (!isWindows || !isWindowsPE) { // No need to for this extra focus in WinPE since it's always on top. Also, it causes some disruption because of its delay in running after being called when Exec Helper may have since ICONIFIED itself. 
                 try {
                     Runtime.getRuntime().exec((isWindows
                             // Based On: https://stackoverflow.com/a/58548853
@@ -1149,9 +1149,9 @@ public class QAHelper extends javax.swing.JFrame {
                                 + "}\n"
                                 + "}\n"
                                 + "}\n"
-                                + "$WshellScript = (New-Object -ComObject Wscript.Shell); if (-not $WshellScript.AppActivate('QA Helper')) { $WshellScript.AppActivate('QA Helper  —  Loading') }"
+                                + "$WshellScript = (New-Object -ComObject Wscript.Shell); if (-not $WshellScript.AppActivate('Exec Helper')) { $WshellScript.AppActivate('Exec Helper  —  Loading') }"
                             }
-                            : (isLinux ? new String[]{"/bin/sh", "-c", "/usr/bin/wmctrl -Fa 'QA Helper' || /usr/bin/wmctrl -Fa 'QA Helper  —  Loading'"}
+                            : (isLinux ? new String[]{"/bin/sh", "-c", "/usr/bin/wmctrl -Fa 'Exec Helper' || /usr/bin/wmctrl -Fa 'Exec Helper  —  Loading'"}
                             : new String[]{"/usr/bin/osascript", "-e", "if (application id \"org.freegeek.QA-Helper\" is running) then tell application id \"org.freegeek.QA-Helper\" to activate"}))
                     );
                 } catch (IOException focusQAHelperException) {
@@ -1394,7 +1394,7 @@ public class QAHelper extends javax.swing.JFrame {
                         }
                     }
 
-                    String fullEmailMessage = "<b>QA Helper Version:</b> " + appVersion + (isPeripheralTestMode ? " (Peripheral Test Mode)" : "") + "<br/>"
+                    String fullEmailMessage = "<b>Exec Helper Version:</b> " + appVersion + (isPeripheralTestMode ? " (Peripheral Test Mode)" : "") + "<br/>"
                             + "<b>Java Version:</b> " + System.getProperty("java.version") + "<br/><br/>"
                             + "<b>OS:</b> " + (((computerSpecs != null) && !computerSpecs.getFullOS().equals("N/A")) ? computerSpecs.getFullOS() : (System.getProperty("os.name") + " " + System.getProperty("os.version"))) + "<br/>"
                             + "<b>Serial:</b> " + ((computerSpecs != null) ? escapeSingleLineSpecStringForHTML((deviceTypeIsMotherboard ? computerSpecs.getFullMotherboardSerial() : computerSpecs.getFullSerial())) : "Specs Not Loaded") + "<br/><br/>"
@@ -1409,9 +1409,9 @@ public class QAHelper extends javax.swing.JFrame {
                     LinkedHashMap<String, String> sendEmailParameters = new LinkedHashMap<>();
                     sendEmailParameters.put("key", privateStrings.getEmailPrivateKey());
                     sendEmailParameters.put("from_email", privateStrings.getEmailFromAddress());
-                    sendEmailParameters.put("from_name", "QA Helper " + emailType);
+                    sendEmailParameters.put("from_name", "Exec Helper " + emailType);
                     sendEmailParameters.put("to_email", privateStrings.getEmailToAddress());
-                    sendEmailParameters.put("subject", "QA Helper " + emailType);
+                    sendEmailParameters.put("subject", "Exec Helper " + emailType);
                     sendEmailParameters.put("body", fullEmailMessage);
 
                     String sendEmailResult = new WebReader(privateStrings.getFreeGeekAPIurl("email", isTestMode), sendEmailParameters).getOutputLinesAsString();
@@ -1437,7 +1437,7 @@ public class QAHelper extends javax.swing.JFrame {
             setActionsEnabled(false);
 
             if (reloadSpecs || (isLinux && (adminPassword.equals("*UNKNOWN*") || !new CommandReader("printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk echo '<CORRECT>'").getFirstOutputLine().equals("<CORRECT>")))) {
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Loading Computer Specs", "Loading");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Loading Computer Specs", "Loading");
 
                 boolean wasFirstLoad = isFirstLoad;
 
@@ -1464,7 +1464,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                 try {
                                     // I've noticed a cellular modem may not be listed immediately on boot, but it will be shortly after running a manual scan (which is asyncronous).
-                                    // So, always start a scan when QA Helper is launched, to hopefully have the cellular modem available by the time "mmcli --list-modems" is run during specs load.
+                                    // So, always start a scan when Exec Helper is launched, to hopefully have the cellular modem available by the time "mmcli --list-modems" is run during specs load.
                                     // NOTE: It doesn't seem like this actually helps detect cellular modems any faster, but it doesn't hurt so keeping in anyways.
 
                                     Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/mmcli --scan-modems"});
@@ -1567,7 +1567,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             loadingWindow.closeWindow();
 
-                            JOptionPane.showMessageDialog(null, "<html><b><i>Free Geek Setup</i> Hasn't Been Run Yet</b><br/><br/>Please run <i>Free Geek Setup</i> and then try running <i>QA Helper</i> again.</html>", "ExecHelper  -  Free Geek Setup Not Run", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(null, "<html><b><i>Free Geek Setup</i> Hasn't Been Run Yet</b><br/><br/>Please run <i>Free Geek Setup</i> and then try running <i>Exec Helper</i> again.</html>", "ExecHelper  -  Free Geek Setup Not Run", JOptionPane.ERROR_MESSAGE);
 
                             try {
                                 Runtime.getRuntime().exec(new String[]{"/usr/bin/open", "-na", "/Users/fg-demo/Applications/Free Geek Setup.app"});
@@ -1724,12 +1724,12 @@ public class QAHelper extends javax.swing.JFrame {
                                         }
 
                                         if (false && isWindows && (computerSpecs.getSerialIsMAC() || computerSpecs.getFullSerial().isEmpty() || computerSpecs.getFullSerial().equals("N/A"))) { // ExecHelper: DPK serial check disabled — EU uses MAS for activation, not DPK licensing
-                                            String[] noSerialDialogButtons = new String[]{"Shut Down", "Reboot", "Keep Using QA Helper"};
+                                            String[] noSerialDialogButtons = new String[]{"Shut Down", "Reboot", "Keep Using Exec Helper"};
 
                                             playAlertSound("error");
                                             int noSerialDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>No Serial Number to License Windows with Digital Product Key</b><br/><br/>Since this computer does not have a computer or motherboard serial number available via software,<br/><u>it cannot have a Digital Product Key applied to it to license Windows.</u></html>", "ExecHelper  -  No Serial Number to License Windows", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, noSerialDialogButtons, noSerialDialogButtons[0]);
 
-                                            String noSerialDialogResponseString = "Keep Using QA Helper";
+                                            String noSerialDialogResponseString = "Keep Using Exec Helper";
                                             if (noSerialDialogResponse > -1) {
                                                 noSerialDialogResponseString = noSerialDialogButtons[noSerialDialogResponse];
                                             }
@@ -1895,7 +1895,7 @@ public class QAHelper extends javax.swing.JFrame {
                 JPasswordField passwordField = new JPasswordField();
                 passwordField.putClientProperty("JTextField.showClearButton", true);
 
-                JCheckBox saveAdminPasswordCheckbox = new JCheckBox("Save Admin Password in QA Helper's encrypted configuration file for future use.");
+                JCheckBox saveAdminPasswordCheckbox = new JCheckBox("Save Admin Password in Exec Helper's encrypted configuration file for future use.");
                 saveAdminPasswordCheckbox.setSelected(true);
 
                 Object[] passwordPromptFields = new Object[]{
@@ -2032,7 +2032,7 @@ public class QAHelper extends javax.swing.JFrame {
                     String latestVersion = new WebReader(CustomStrings.LATEST_VERSION_URL, getLatestVersionParameters, 5).getFirstOutputLine();
 
                     if (compareAppVersions(appVersion, latestVersion) == 1) {
-                        loadingWindow.setLoadingTextAndDisplay("QA Helper is Updating Itself", "Updating", "CounterclockwiseArrowsButton");
+                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is Updating Itself", "Updating", "CounterclockwiseArrowsButton");
 
                         String tempDirectory = System.getProperty("java.io.tmpdir");
                         if (!tempDirectory.endsWith(isWindows ? "\\" : "/")) {
@@ -2113,7 +2113,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/bin/mv -f '" + appUpdateJarTempFilePath.replace("'", "'\\''") + "' '" + launchPath.replace("'", "'\\''") + "'"}).waitFor(); // Would not get moved with sudo when app was quit before this command for some reason.
                                 }
                                 if (!isWindows && new File(launchPath).exists() && !new File(appUpdateJarTempFilePath).exists()) {
-                                    Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "/bin/sleep 0.5; while [[ \"$(/usr/bin/pgrep -fl 'QA_Helper\\.jar')\" == *java* ]]; do " + (isLinux ? "/usr/bin/wmctrl -Fc 'QA Helper  —  Updating' || /usr/bin/wmctrl -Fc 'QA Helper  —  Loading' || /usr/bin/wmctrl -Fc 'QA Helper'; " : "") + "/bin/sleep 0.5; done; '" + javaPath.replace("'", "'\\''") + "' -jar '" + launchPath.replace("'", "'\\''") + "' & disown"});
+                                    Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", "/bin/sleep 0.5; while [[ \"$(/usr/bin/pgrep -fl 'QA_Helper\\.jar')\" == *java* ]]; do " + (isLinux ? "/usr/bin/wmctrl -Fc 'Exec Helper  —  Updating' || /usr/bin/wmctrl -Fc 'Exec Helper  —  Loading' || /usr/bin/wmctrl -Fc 'Exec Helper'; " : "") + "/bin/sleep 0.5; done; '" + javaPath.replace("'", "'\\''") + "' -jar '" + launchPath.replace("'", "'\\''") + "' & disown"});
 
                                     System.exit(0);
                                 } else if (isWindows && new File(launchPath).exists() && new File(appUpdateJarTempFilePath).exists()) {
@@ -2125,9 +2125,9 @@ public class QAHelper extends javax.swing.JFrame {
                                                 + "\n"
                                                 + ":WaitForQuit" + "\n"
                                                 + "\\Windows\\System32\\timeout.exe /t 1 /nobreak >NUL" + "\n"
-                                                + "\\Windows\\System32\\tasklist.exe /nh /fi \"WINDOWTITLE eq QA Helper*\" | \\Windows\\System32\\find.exe \"No tasks are running\" >NUL" + "\n"
+                                                + "\\Windows\\System32\\tasklist.exe /nh /fi \"WINDOWTITLE eq Exec Helper*\" | \\Windows\\System32\\find.exe \"No tasks are running\" >NUL" + "\n"
                                                 + "IF ERRORLEVEL 1 (" + "\n"
-                                                + "\t" + "\\Windows\\System32\\taskkill.exe /fi \"WINDOWTITLE eq QA Helper*\" >NUL" + "\n"
+                                                + "\t" + "\\Windows\\System32\\taskkill.exe /fi \"WINDOWTITLE eq Exec Helper*\" >NUL" + "\n"
                                                 + "\t" + "GOTO WaitForQuit" + "\n"
                                                 + ")" + "\n"
                                                 + "\n"
@@ -2136,7 +2136,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 + "IF EXIST \"" + appUpdateJarTempFilePath + "\" (" + "\n"
                                                 + "\t" + "\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -NonInteractive -Command Start-Process -WindowStyle Hidden -Verb RunAs \"" + windowsQAhelperUpdateFinisherFile.getPath() + "\"" + "\n"
                                                 + ") ELSE (" + "\n"
-                                                + "\t" + "START \"QA Helper Launcher\" \"" + javaPath + "\" -jar \"" + launchPath + "\"" + "\n"
+                                                + "\t" + "START \"Exec Helper Launcher\" \"" + javaPath + "\" -jar \"" + launchPath + "\"" + "\n"
                                                 + ")" + "\n"
                                                 + "\n"
                                                 + "EXIT 0"
@@ -2149,7 +2149,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     }
 
                                     if (windowsQAhelperUpdateFinisherFile.exists()) {
-                                        // Need to create a CMD file and launch it with Start-Process so it doesn't get killed when QA Helper quits
+                                        // Need to create a CMD file and launch it with Start-Process so it doesn't get killed when Exec Helper quits
                                         Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Start-Process -WindowStyle Hidden '" + windowsQAhelperUpdateFinisherFile.getPath() + "'"}).waitFor();
 
                                         System.exit(0);
@@ -2157,13 +2157,13 @@ public class QAHelper extends javax.swing.JFrame {
                                         loadingWindow.closeWindow();
                                         playAlertSound("error");
                                         sendErrorEmail("App Update Error - Failed to create update finisher command file.");
-                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>Failed to create update finisher command file.</i></html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
+                                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>Exec Helper</i></b><br/><br/><i>Failed to create update finisher command file.</i></html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
                                     }
                                 } else {
                                     loadingWindow.closeWindow();
                                     playAlertSound("error");
                                     sendErrorEmail("App Update Error");
-                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>QA Helper</i></b><br/><br/><i>You must re-download and re-install QA Helper.</i><br/><br/>Click \"OK\" to go to \"" + CustomStrings.UPDATE_BASE_URL + "\" to re-download QA Helper.</html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Error Updating <i>Exec Helper</i></b><br/><br/><i>You must re-download and re-install Exec Helper.</i><br/><br/>Click \"OK\" to go to \"" + CustomStrings.UPDATE_BASE_URL + "\" to re-download Exec Helper.</html>", "ExecHelper  -  Update Error", JOptionPane.ERROR_MESSAGE);
 
                                     if (isLinux) {
                                         try {
@@ -2205,7 +2205,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 playAlertSound("error");
                             }
 
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Loading Computer Specs", "Loading");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Loading Computer Specs", "Loading");
 
                             if (isWindows) {
                                 new File(tempDirectory, "QA_Helper.jar").delete();
@@ -2254,7 +2254,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 String nameOfMe = "ExecHelper";
                                 String updatedAppFileName = nameOfMe + ".app";
 
-                                // If is macOS Sierra or newer, allow to update to QA Helper built with Java 17 or newer (and is a Universal Binary).
+                                // If is macOS Sierra or newer, allow to update to Exec Helper built with Java 17 or newer (and is a Universal Binary).
                                 String appUpdateZipFilename = (isMacOSsierraOrNewer ? "QAHelper-mac-universal.zip" : "QAHelper-mac-ElCapitan.zip");
 
                                 String appUpdateZipFilePath = tempDirectory + appUpdateZipFilename;
@@ -2545,7 +2545,7 @@ public class QAHelper extends javax.swing.JFrame {
             if (isPeripheralTestMode) {
                 forceShowAllTests = true;
             } else {
-                helperLogFilePath = (isLinux ? linuxBuildInfoPath + "qa-helper-log.txt" : (isWindows ? windowsBuildInfoPath : macBuildInfoPath) + "QA Helper Log.txt");
+                helperLogFilePath = (isLinux ? linuxBuildInfoPath + "qa-helper-log.txt" : (isWindows ? windowsBuildInfoPath : macBuildInfoPath) + "Exec Helper Log.txt");
 
                 if (new File(helperLogFilePath).exists()) {
                     try {
@@ -2619,7 +2619,7 @@ public class QAHelper extends javax.swing.JFrame {
                         }
                     }
 
-                    // Never hide login and tasks in Windows since QA Helper will never be shown in demo mode.
+                    // Never hide login and tasks in Windows since Exec Helper will never be shown in demo mode.
                     hideLoginAndTasks = (!isLinuxUbiquityMode && !isWindows && !undidOemConfigAfterLastStatus && lastStatus.equals(statusNames[12]));
 
                     if (!pid.equals("N/A")) {
@@ -2937,7 +2937,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
             }
 
-            // Never hide login and tasks in Windows since QA Helper will never be shown in demo mode.
+            // Never hide login and tasks in Windows since Exec Helper will never be shown in demo mode.
             hideLoginAndTasks = (!isLinuxUbiquityMode && !isWindows && !undidOemConfigAfterLastStatus && currentStatusAndTech[0].equals(statusNames[12]));
 
             boolean shouldShowReopenRepairMenuItem = (!currentStatusAndTech[0].equals(statusNames[3]) && !currentStatusAndTech[0].equals("UNKNOWN STATUS"));
@@ -4575,7 +4575,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                 return null;
                                             }
 
-                                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Logging In", "Working", "Key");
+                                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Logging In", "Working", "Key");
                                         }
                                     }
 
@@ -4600,7 +4600,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     allowSettingConditionGrade = !pid.startsWith("FG"); // ExecHelper: Enable grade selection for all non-FG IDs (EU prefix etc.)
                                     if (allowSettingConditionGrade && fgConditionGradesAndDescriptions.containsKey(loggedConditionGrade) && (!loggedConditionGrade.equals("B") || !loggedSetByVersion.isEmpty())) {
                                         // For Free Geek IDs, ignore default condition grade of "B" if specs have not been logged yet,
-                                        // or were logged by a version of QA Helper (or FG API/Specs) older than SOME FUTURE VERSION
+                                        // or were logged by a version of Exec Helper (or FG API/Specs) older than SOME FUTURE VERSION
                                         // which did not have the option to set Condition Grade (and older than SOME FUTURE VERSION did not fill the EXTRA "Set By" field).
 
                                         currentConditionGrade = loggedConditionGrade;
@@ -4915,7 +4915,7 @@ public class QAHelper extends javax.swing.JFrame {
                         + "<br/>Device Type: " + escapeSingleLineSpecStringForHTML(manualDeviceType); // Just want device type, don't need all the detail of "computerSpecs.getChassisType()".
                 // Can also specify HIDDEN EXTRA fields as HTML comments (which are not visible in PCsCRM), separated by newlines instead of "<br/>" tags (to not add a visible extra empty lines when viewed in PCsCRM).
                 //+ "\n<!-- Device Type: " + manualDeviceType + " -->" // Just want device type, don't need all the detail of "computerSpecs.getChassisType()".
-                //+ "\n<!-- Set By: QA Helper " + appVersion + " @ " + Instant.now().toString() + " -->"; // SOME FUTURE VERSION is the first version which set the HIDDEN EXTRA "Set By" field.
+                //+ "\n<!-- Set By: Exec Helper " + appVersion + " @ " + Instant.now().toString() + " -->"; // SOME FUTURE VERSION is the first version which set the HIDDEN EXTRA "Set By" field.
 
                 updateSpecs.put("Brand", escapeSingleLineSpecStringForHTML((deviceTypeIsMotherboard ? computerSpecs.getMotherboardBrand() : computerSpecs.getBrand()), 150));
                 updateSpecs.put("Model", escapeSingleLineSpecStringForHTML((deviceTypeIsMotherboard ? computerSpecs.getMotherboardModel() : computerSpecs.getModel()), 150));
@@ -5010,7 +5010,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
 
                     if (newStatusName != null) {
-                        if (pid.startsWith("FG") && (newStatusName.equals(statusNames[12]) || deviceTypeIsMotherboard)) { // Only add to Recent IDs when settings "statusNames[12]" or any status when "deviceTypeIsMotherboard" since those will never be set to "statusNames[12]" via QA Helper and will be completed on FG Specs.
+                        if (pid.startsWith("FG") && (newStatusName.equals(statusNames[12]) || deviceTypeIsMotherboard)) { // Only add to Recent IDs when settings "statusNames[12]" or any status when "deviceTypeIsMotherboard" since those will never be set to "statusNames[12]" via Exec Helper and will be completed on FG Specs.
                             (new SwingWorker<Void, Void>() {
                                 @Override
                                 protected Void doInBackground() throws Exception {
@@ -5052,14 +5052,14 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
                             }).execute();
 
-                            if (!deviceTypeIsMotherboard) { // If Motherboard, QA Helper IS NOT setting "statusNames[12]" here and only added to Recent IDs above and therefore DO NOT want added to Production Log here since will be added when "statusNames[12]" is set by FG Specs.
+                            if (!deviceTypeIsMotherboard) { // If Motherboard, Exec Helper IS NOT setting "statusNames[12]" here and only added to Recent IDs above and therefore DO NOT want added to Production Log here since will be added when "statusNames[12]" is set by FG Specs.
                                 addToFreeGeekProductionLog(); // IMPORTANT: Intentionally having this function BLOCK until it returns.
                             }
                         }
 
                         undidOemConfigAfterLastStatus = false;
 
-                        // Never hide login and tasks in Windows since QA Helper will never be shown in demo mode.
+                        // Never hide login and tasks in Windows since Exec Helper will never be shown in demo mode.
                         hideLoginAndTasks = (!isLinuxUbiquityMode && !isWindows && newStatusName.equals(statusNames[12]));
 
                         (new SwingWorker<Void, Void>() {
@@ -5254,9 +5254,9 @@ public class QAHelper extends javax.swing.JFrame {
                         if (isLinux) {
                             String possibleSudo = (!adminPassword.equals("*UNKNOWN*") ? "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk " : "");
 
-                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing " + joinedMatchedAppNames + "' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nINSTALLING " + joinedMatchedAppNames + "...\"; " + installCommands + "echo \"\n\nFINISHED INSTALLING " + joinedMatchedAppNames + "\" || echo \"\n\n!!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!\n\n>>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<\"; echo \"\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"QA Helper\";'"});
+                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing " + joinedMatchedAppNames + "' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nINSTALLING " + joinedMatchedAppNames + "...\"; " + installCommands + "echo \"\n\nFINISHED INSTALLING " + joinedMatchedAppNames + "\" || echo \"\n\n!!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!\n\n>>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<\"; echo \"\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"Exec Helper\";'"});
                         } else if (isWindows) {
-                            Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -Command $Host.UI.RawUI.WindowTitle = 'QA Helper  —  Installing " + joinedMatchedAppNames + "'; Write-Output \\\"`n  Installing " + joinedMatchedAppNames + "...`n`n`n\\\"; try {" + installCommands + "Write-Output \\\"`n`n  Finished Installing " + joinedMatchedAppNames + "`n\\\" } catch { Write-Host \\\"`n`n  ERROR INSTALLING APP: $_\\\" -ForegroundColor Red; Write-Host \\\"`n`n  !!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!`n`n  >>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<`n\\\" -ForegroundColor Red } $Host.UI.RawUI.FlushInputBuffer(); Read-Host -Prompt '  PRESS ENTER TO CLOSE THIS WINDOW'"});
+                            Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -Command $Host.UI.RawUI.WindowTitle = 'Exec Helper  —  Installing " + joinedMatchedAppNames + "'; Write-Output \\\"`n  Installing " + joinedMatchedAppNames + "...`n`n`n\\\"; try {" + installCommands + "Write-Output \\\"`n`n  Finished Installing " + joinedMatchedAppNames + "`n\\\" } catch { Write-Host \\\"`n`n  ERROR INSTALLING APP: $_\\\" -ForegroundColor Red; Write-Host \\\"`n`n  !!! ERROR DURING APP INSTALLATIONS - SOME APPS WERE NOT INSTALLED !!!`n`n  >>> SEE ERROR MESSAGES ABOVE FOR MORE DETAILS <<<`n\\\" -ForegroundColor Red } $Host.UI.RawUI.FlushInputBuffer(); Read-Host -Prompt '  PRESS ENTER TO CLOSE THIS WINDOW'"});
                         }
 
                         TimeUnit.SECONDS.sleep(1);
@@ -5264,7 +5264,7 @@ public class QAHelper extends javax.swing.JFrame {
                         String terminalOrPowerShell = (isLinux ? "Terminal" : "PowerShell");
 
                         focusWindow();
-                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started Installing " + joinedMatchedAppNames + " in " + terminalOrPowerShell + "</b><br/><br/><i>You can continue using QA Helper while " + joinedMatchedAppNames + " installs in " + terminalOrPowerShell + ".</i><br/><br/>When " + joinedMatchedAppNames + " is done installing, " + terminalOrPowerShell + " will stay open and you can press enter in the " + terminalOrPowerShell + " window to close it.</html>", "ExecHelper  -  App Install", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started Installing " + joinedMatchedAppNames + " in " + terminalOrPowerShell + "</b><br/><br/><i>You can continue using Exec Helper while " + joinedMatchedAppNames + " installs in " + terminalOrPowerShell + ".</i><br/><br/>When " + joinedMatchedAppNames + " is done installing, " + terminalOrPowerShell + " will stay open and you can press enter in the " + terminalOrPowerShell + " window to close it.</html>", "ExecHelper  -  App Install", JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException | InterruptedException installOptionalAppException) {
                         if (isTestMode) {
                             System.out.println("installOptionalAppException: " + installOptionalAppException);
@@ -5301,7 +5301,7 @@ public class QAHelper extends javax.swing.JFrame {
                             File waitForTerminalPIDtempFile = File.createTempFile("qa_helper-wait_for_terminal_pid", ".txt");
                             waitForTerminalPIDtempFile.deleteOnExit();
 
-                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing \"oem-config-gtk\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"oem-config-gtk\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y oem-config-gtk; echo \"\n\nFINISHED INSTALLING \\\"oem-config-gtk\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing \"oem-config-gtk\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"oem-config-gtk\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y oem-config-gtk; echo \"\n\nFINISHED INSTALLING \\\"oem-config-gtk\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                             String waitForTerminalPID = "";
 
@@ -5465,7 +5465,7 @@ public class QAHelper extends javax.swing.JFrame {
                             loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                             setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Setting Product Type", "Working", "Laptop");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Setting Product Type", "Working", "Laptop");
 
                             final String setProductTypeID = selectedProductTypeID;
 
@@ -5546,7 +5546,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (isLoggedIn) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Opening Inventory Manager on PCsCRM.com", "Working", "Laptop");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Opening Inventory Manager on PCsCRM.com", "Working", "Laptop");
 
             (new SwingWorker<String, Void>() {
                 @Override
@@ -5752,7 +5752,7 @@ public class QAHelper extends javax.swing.JFrame {
                         String returnValue = get();
 
                         if (isWindowsPE) {
-                            // Do not focus window or present next prompt on WinRE since QA Helper should just be minimized to allow "Web Browser (PE)" to be frontmost instead.
+                            // Do not focus window or present next prompt on WinRE since Exec Helper should just be minimized to allow "Web Browser (PE)" to be frontmost instead.
                             setState(Frame.ICONIFIED);
                         } else {
                             focusWindow();
@@ -6002,7 +6002,7 @@ public class QAHelper extends javax.swing.JFrame {
         specValueRightClickMenu.add(menSearchSpecValue);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("QA Helper");
+        setTitle("Exec Helper");
         setIconImages(new TwemojiImage("AppIcon", this).toImageIconsForFrame());
         setLocationByPlatform(true);
         setName("mainFrame"); // NOI18N
@@ -7213,7 +7213,7 @@ public class QAHelper extends javax.swing.JFrame {
                 loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Logging Current Computer Specs", "Working", "Memo");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Logging Current Computer Specs", "Working", "Memo");
 
                 (new SwingWorker<String[], Void>() {
                     @Override
@@ -7268,7 +7268,7 @@ public class QAHelper extends javax.swing.JFrame {
                     loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                     setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                    loadingWindow.setLoadingTextAndDisplay("QA Helper is Reopening Repair", "Working", "HammerAndWrench");
+                    loadingWindow.setLoadingTextAndDisplay("Exec Helper is Reopening Repair", "Working", "HammerAndWrench");
 
                     (new SwingWorker<String[], Void>() {
                         @Override
@@ -7336,7 +7336,7 @@ public class QAHelper extends javax.swing.JFrame {
                     loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                     setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                    loadingWindow.setLoadingTextAndDisplay("QA Helper is Preparing for Shipping to End User", "Working", "Receipt");
+                    loadingWindow.setLoadingTextAndDisplay("Exec Helper is Preparing for Shipping to End User", "Working", "Receipt");
 
                     (new SwingWorker<Boolean, Void>() {
                         @Override
@@ -7352,11 +7352,11 @@ public class QAHelper extends javax.swing.JFrame {
                                 if (get()) {
                                     playAlertSound("success");
 
-                                    String[] runOemConfigDialogButtons = new String[]{"Shut Down", "Reboot", "Quit", "Keep Using QA Helper"};
+                                    String[] runOemConfigDialogButtons = new String[]{"Shut Down", "Reboot", "Quit", "Keep Using Exec Helper"};
 
                                     int runOemConfigDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Prepared for Shipping to End User</b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Prepared for Shipping to End User", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, runOemConfigDialogButtons, runOemConfigDialogButtons[0]);
 
-                                    String runOemConfigDialogResponseString = "Keep Using QA Helper";
+                                    String runOemConfigDialogResponseString = "Keep Using Exec Helper";
                                     if (runOemConfigDialogResponse > -1) {
                                         runOemConfigDialogResponseString = runOemConfigDialogButtons[runOemConfigDialogResponse];
                                     }
@@ -7530,12 +7530,12 @@ public class QAHelper extends javax.swing.JFrame {
                     ArrayList<String> discDriveLogicalNames = computerSpecs.getDiscDriveLogicalNames();
                     setDriveRegionCommands = discDriveLogicalNames.stream().map((thisDiscDriveLogicalName) -> "/usr/sbin/regionset " + thisDiscDriveLogicalName + "; ").reduce(setDriveRegionCommands, String::concat);
 
-                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Set DVD Drive Region' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nSETTING DVD DRIVE REGION\n\n\"; /usr/bin/sudo /bin/rm -rf ~/.dvdcss/; /usr/bin/sudo /usr/local/bin/apt install --no-install-recommends -y regionset; echo \"\n\"; " + setDriveRegionCommands + "echo \"\n\nFINISHED SETTING DVD DRIVE REGION\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"QA Helper\";'"});
+                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Set DVD Drive Region' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nSETTING DVD DRIVE REGION\n\n\"; /usr/bin/sudo /bin/rm -rf ~/.dvdcss/; /usr/bin/sudo /usr/local/bin/apt install --no-install-recommends -y regionset; echo \"\n\"; " + setDriveRegionCommands + "echo \"\n\nFINISHED SETTING DVD DRIVE REGION\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"Exec Helper\";'"});
 
                     TimeUnit.SECONDS.sleep(1);
 
                     focusWindow();
-                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started DVD Drive Region Set in a Terminal</b><br/><br/><i>You can continue using QA Helper while setting the DVD drive region in the Terminal.</i><br/><br/>When you are done setting the DVD drive region in the Terminal, you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  Set DVD Drive Region", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started DVD Drive Region Set in a Terminal</b><br/><br/><i>You can continue using Exec Helper while setting the DVD drive region in the Terminal.</i><br/><br/>When you are done setting the DVD drive region in the Terminal, you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  Set DVD Drive Region", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException | InterruptedException setDvdDriveRegionException) {
                     if (isTestMode) {
                         System.out.println("setDvdDriveRegionException: " + setDvdDriveRegionException);
@@ -7680,7 +7680,7 @@ public class QAHelper extends javax.swing.JFrame {
                 loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Logging In", "Working", "Key");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Logging In", "Working", "Key");
 
                 (new SwingWorker<String[], Void>() {
                     @Override
@@ -7926,7 +7926,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && !isLoggedIn && !txtUsername.getText().trim().isEmpty() && (pswPassword.getPassword().length > 0) && !txtPID.getText().replaceAll("\\s", "").isEmpty()) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Checking ID", "Working", "IDButton");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Checking ID", "Working", "IDButton");
 
             (new SwingWorker<Void, Void>() {
                 @Override
@@ -8031,7 +8031,7 @@ public class QAHelper extends javax.swing.JFrame {
                     setState(Frame.ICONIFIED);
                 }
 
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Setting Up CPU Stress Test", "Testing", "Brain");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Setting Up CPU Stress Test", "Testing", "Brain");
 
                 (new SwingWorker<String, String>() {
                     @Override
@@ -8082,7 +8082,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             File waitForTerminalPIDtempFile = File.createTempFile("qa_helper-wait_for_terminal_pid", ".txt");
                                             waitForTerminalPIDtempFile.deleteOnExit();
 
-                                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing \"stress-ng\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"stress-ng\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y stress-ng; echo \"\n\nFINISHED INSTALLING \\\"stress-ng\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing \"stress-ng\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"stress-ng\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y stress-ng; echo \"\n\nFINISHED INSTALLING \\\"stress-ng\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                                             String waitForTerminalPID = "";
 
@@ -8147,14 +8147,14 @@ public class QAHelper extends javax.swing.JFrame {
                                         do {
                                             TimeUnit.SECONDS.sleep(5);
                                             publish("progress");
-                                        } while (loadingWindow.isVisible() && loadingWindow.getLoadingText().startsWith("QA Helper is Stressing CPU") && !new CommandReader(new String[]{"/usr/bin/pgrep", "stress-ng"}).getFirstOutputLine().isEmpty());
+                                        } while (loadingWindow.isVisible() && loadingWindow.getLoadingText().startsWith("Exec Helper is Stressing CPU") && !new CommandReader(new String[]{"/usr/bin/pgrep", "stress-ng"}).getFirstOutputLine().isEmpty());
 
                                         return null;
                                     }
 
                                     @Override
                                     protected void process(java.util.List<String> tasks) {
-                                        if (loadingWindow.isVisible() && loadingWindow.getLoadingText().startsWith("QA Helper is Stressing CPU")) {
+                                        if (loadingWindow.isVisible() && loadingWindow.getLoadingText().startsWith("Exec Helper is Stressing CPU")) {
                                             boolean firstUpdate = loadingWindow.isIndeterminate();
 
                                             loadingWindow.setLoadingProgressText(new CommandReader(new String[]{"/usr/bin/sensors"}).getOutputLinesAsString());
@@ -8179,7 +8179,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             File waitForTerminalPIDtempFile = File.createTempFile("qa_helper-wait_for_terminal_pid", ".txt");
                                             waitForTerminalPIDtempFile.deleteOnExit();
 
-                                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Uninstalling \"stress-ng\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nUNINSTALLING \\\"stress-ng\\\"\n\n\"; /usr/local/bin/apt purge --auto-remove -y stress-ng; echo \"\n\nFINISHED UNINSTALLING \\\"stress-ng\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Uninstalling \"stress-ng\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nUNINSTALLING \\\"stress-ng\\\"\n\n\"; /usr/local/bin/apt purge --auto-remove -y stress-ng; echo \"\n\nFINISHED UNINSTALLING \\\"stress-ng\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                                             String waitForTerminalPID = "";
 
@@ -8294,7 +8294,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             try {
                                 for (int thread = 0; thread < computerSpecs.getThreadCount(); thread++) {
-                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "While (Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine) { <# QA Helper CPU Stress Test #> }"});
+                                    Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "While (Get-CimInstance Win32_Process -Filter \\\"Name LIKE 'java%.exe' AND CommandLine LIKE '%QA_Helper.jar%'\\\" -Property Name,CommandLine) { <# Exec Helper CPU Stress Test #> }"});
                                     TimeUnit.MILLISECONDS.sleep(100); // To allow CPU to ramp up
                                 }
 
@@ -8319,7 +8319,7 @@ public class QAHelper extends javax.swing.JFrame {
                             TimeUnit.SECONDS.sleep(1); // Sleep for a second to make sure the finishing progress has time to show before being closed.
 
                             try {
-                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# QA Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
+                                Runtime.getRuntime().exec(new String[]{"powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_Process -Filter \\\"Name = 'powershell.exe' AND CommandLine LIKE '%<# Exec Helper CPU Stress Test #>%'\\\" | Invoke-CimMethod -Name Terminate"}).waitFor();
                             } catch (IOException terminatePowerShellStressProcessesException) {
                                 if (isTestMode) {
                                     System.out.println("terminatePowerShellStressProcessesException: " + terminatePowerShellStressProcessesException);
@@ -8338,7 +8338,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     displayComputerSpecs();
                                     break;
                                 case "running":
-                                    loadingWindow.setLoadingTextAndDisplay("QA Helper is Stressing CPU for " + cpuStressTestDurationMinutes + " Minutes", "Testing", "Brain");
+                                    loadingWindow.setLoadingTextAndDisplay("Exec Helper is Stressing CPU for " + cpuStressTestDurationMinutes + " Minutes", "Testing", "Brain");
                                     break;
                                 case "windows-progress":
                                     boolean firstWindowsUpdate = loadingWindow.isIndeterminate();
@@ -8393,7 +8393,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 case "finishing":
                                     if (loadingWindow.isVisible()) {
                                         // Make sure to only do this if the window is still visible in case the multi-threaded timing make it so that we finish before this gets processed.
-                                        loadingWindow.setLoadingTextAndDisplay("QA Helper is Finishing CPU Stress Test", "Testing", "Brain");
+                                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is Finishing CPU Stress Test", "Testing", "Brain");
                                         loadingWindow.setLoadingProgressBarToMax(0);
                                         loadingWindow.setLoadingProgressText("");
                                     }
@@ -8755,7 +8755,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && !isWindowsPE) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is " + (isLinux ? "Preparing to Test Internet" : "Testing Internet"), "Testing", "SatelliteAntenna");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is " + (isLinux ? "Preparing to Test Internet" : "Testing Internet"), "Testing", "SatelliteAntenna");
 
             (new SwingWorker<String, String>() {
                 @Override
@@ -9563,9 +9563,9 @@ public class QAHelper extends javax.swing.JFrame {
                 protected void process(java.util.List<String> tasks) {
                     tasks.forEach((thisTask) -> {
                         if (thisTask.equals("wifi")) {
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Testing Wi-Fi", "Testing", "SatelliteAntenna");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Testing Wi-Fi", "Testing", "SatelliteAntenna");
                         } else if (thisTask.equals("ethernet")) {
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Testing Ethernet", "Testing", "SatelliteAntenna");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Testing Ethernet", "Testing", "SatelliteAntenna");
                         }
                     });
                 }
@@ -10066,7 +10066,7 @@ public class QAHelper extends javax.swing.JFrame {
             }, "ExecHelper  -  Audio Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("Loudspeaker", qaHelperWindow).toImageIcon());
 
             if (audioTestPromptReturn == JOptionPane.OK_OPTION) {
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Testing Audio", "Testing", true, "Loudspeaker");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Testing Audio", "Testing", true, "Loudspeaker");
                 loadingWindow.setLoadingProgressBarToMax(((isLinux && !isLinuxUbiquityMode) ? 0 : 6)); // Make intermediate for linux (not pre-install) since we may wait for Pulse to be ready.
 
                 (new SwingWorker<Void, String>() {
@@ -10199,7 +10199,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                             if (!headphonesAreConnected && !acpiListenerGotHeadphoneState && new File("/proc/asound/card" + outputCard + "/codec#0").exists()) {
                                 // This method of headphone detection is not reliable and does not work on all computer.
-                                // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when QA Helper launched.
+                                // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when Exec Helper launched.
 
                                 try {
                                     List<String> outputCardCodecInfoLines = Files.readAllLines(Paths.get("/proc/asound/card" + outputCard + "/codec#0"));
@@ -10759,7 +10759,7 @@ public class QAHelper extends javax.swing.JFrame {
                 }
 
                 if (microphoneTestPromptReturn == JOptionPane.OK_OPTION) {
-                    loadingWindow.setLoadingTextAndDisplay("QA Helper is Setting Up Recording", "Working", "StudioMicrophone");
+                    loadingWindow.setLoadingTextAndDisplay("Exec Helper is Setting Up Recording", "Working", "StudioMicrophone");
                     (new SwingWorker<Boolean, String>() {
                         @Override
                         protected Boolean doInBackground() throws Exception {
@@ -11263,7 +11263,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                     if (!headphonesAreConnected && !acpiListenerGotHeadphoneState && new File("/proc/asound/card" + outputCard + "/codec#0").exists()) {
                                         // This method of headphone detection is not reliable and does not work on all computer.
-                                        // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when QA Helper launched.
+                                        // But, still use it as a fallback if nothing has been logged yet by acpi_listen which started when Exec Helper launched.
 
                                         try {
                                             List<String> outputCardCodecInfoLines = Files.readAllLines(Paths.get("/proc/asound/card" + outputCard + "/codec#0"));
@@ -11512,7 +11512,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     case "recording":
                                     case "re-recording":
                                         boolean isReRecording = (thisTask.startsWith("re-"));
-                                        loadingWindow.setLoadingTextAndDisplay("QA Helper is " + (isReRecording ? "Re-" : "") + "Recording " + microphoneTestDurationSeconds + " Seconds of Audio", "Testing", "StudioMicrophone");
+                                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is " + (isReRecording ? "Re-" : "") + "Recording " + microphoneTestDurationSeconds + " Seconds of Audio", "Testing", "StudioMicrophone");
                                         loadingWindow.setLoadingProgressBarToMax(microphoneTestDurationSeconds);
 
                                         if (!isReRecording) {
@@ -11539,7 +11539,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         break;
                                     case "playback":
                                     case "re-playback":
-                                        loadingWindow.setLoadingTextAndDisplay("QA Helper is " + (thisTask.startsWith("re-") ? "Re-" : "") + "Playing Back " + microphoneTestDurationSeconds + " Second Recording", "Testing", true, "SpeakerHighVolume");
+                                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is " + (thisTask.startsWith("re-") ? "Re-" : "") + "Playing Back " + microphoneTestDurationSeconds + " Second Recording", "Testing", true, "SpeakerHighVolume");
                                         loadingWindow.setLoadingProgressBarToMax(microphoneTestDurationSeconds + (isLinux ? 1 : 0));
                                         break;
                                     default:
@@ -11588,7 +11588,7 @@ public class QAHelper extends javax.swing.JFrame {
                                     Collections.reverse(microphoneTestCompletedButtons);
 
                                     playAlertSound("error");
-                                    microphoneTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <b>Failed to Record Audio or Playback Recording</b>" + (isMacOS ? (((computerSpecs != null) && computerSpecs.getFullCPU().endsWith("+ T2 Security Chip")) ? "<br/><br/>Sometimes the recording fails on T2 Macs. Try again." : "<br/><br/>If you approved Microphone access and still got this error, quit and relaunch QA Helper and then try again.") : "") + "</html>", "ExecHelper  -  Microphone Test Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(32), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
+                                    microphoneTestCompletedDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html>" + new TwemojiImage("Warning", qaHelperWindow).toImgTag("left") + " <b>Failed to Record Audio or Playback Recording</b>" + (isMacOS ? (((computerSpecs != null) && computerSpecs.getFullCPU().endsWith("+ T2 Security Chip")) ? "<br/><br/>Sometimes the recording fails on T2 Macs. Try again." : "<br/><br/>If you approved Microphone access and still got this error, quit and relaunch Exec Helper and then try again.") : "") + "</html>", "ExecHelper  -  Microphone Test Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("StudioMicrophone", qaHelperWindow).toImageIcon(32), microphoneTestCompletedButtons.toArray(), microphoneTestCompletedButtons.get(0));
                                 }
 
                                 String microphoneTestCompletedDialogResponseString = "Continue";
@@ -11731,7 +11731,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }, "ExecHelper  -  Camera Test", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new TwemojiImage("MovieCamera", qaHelperWindow).toImageIcon());
 
                     if (cameraTestPromptReturn == JOptionPane.OK_OPTION) {
-                        loadingWindow.setLoadingTextAndDisplay("QA Helper is Setting Up Camera Test", "Testing", "MovieCamera");
+                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is Setting Up Camera Test", "Testing", "MovieCamera");
 
                         String webCamAppName = (useAlternateWebCamAppCheckbox.isSelected() ? "webcamoid" : "cheese");
 
@@ -11784,7 +11784,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     File waitForTerminalPIDtempFile = File.createTempFile("qa_helper-wait_for_terminal_pid", ".txt");
                                                     waitForTerminalPIDtempFile.deleteOnExit();
 
-                                                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing \"" + webCamAppName + "\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"" + webCamAppName + "\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y " + webCamAppName + "; echo \"\n\nFINISHED INSTALLING \\\"" + webCamAppName + "\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                                                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing \"" + webCamAppName + "\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING \\\"" + webCamAppName + "\\\"\n\n\"; /usr/local/bin/apt install --no-install-recommends -y " + webCamAppName + "; echo \"\n\nFINISHED INSTALLING \\\"" + webCamAppName + "\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                                                     String waitForTerminalPID = "";
 
@@ -11901,7 +11901,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     File waitForTerminalPIDtempFile = File.createTempFile("qa_helper-wait_for_terminal_pid", ".txt");
                                                     waitForTerminalPIDtempFile.deleteOnExit();
 
-                                                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Uninstalling \"" + webCamAppName + "\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nUNINSTALLING \\\"" + webCamAppName + "\\\"\n\n\"; /usr/local/bin/apt purge --auto-remove -y " + webCamAppName + "; echo \"\n\nFINISHED UNINSTALLING \\\"" + webCamAppName + "\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                                                    Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Uninstalling \"" + webCamAppName + "\"' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nUNINSTALLING \\\"" + webCamAppName + "\\\"\n\n\"; /usr/local/bin/apt purge --auto-remove -y " + webCamAppName + "; echo \"\n\nFINISHED UNINSTALLING \\\"" + webCamAppName + "\\\"\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                                                     String waitForTerminalPID = "";
 
@@ -12033,7 +12033,7 @@ public class QAHelper extends javax.swing.JFrame {
                                             break;
                                         case "running":
                                             loadingWindow.setAlwaysOnTop(false);
-                                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Testing Camera for " + cameraTestDurationSeconds + " Seconds", "Testing", "MovieCamera");
+                                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Testing Camera for " + cameraTestDurationSeconds + " Seconds", "Testing", "MovieCamera");
 
                                             (new SwingWorker<Void, String>() {
                                                 @Override
@@ -12058,7 +12058,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         case "finishing":
                                             if (loadingWindow.isVisible()) {
                                                 // Make sure to only do this if the window is still visible in case the multi-threaded timing make it so that we finish before this gets processed.
-                                                loadingWindow.setLoadingTextAndDisplay("QA Helper is Finishing Camera Test", "Testing", "MovieCamera");
+                                                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Finishing Camera Test", "Testing", "MovieCamera");
                                                 loadingWindow.setLoadingProgressBarToMax(0);
                                                 loadingWindow.setAlwaysOnTop(true);
                                             }
@@ -12313,7 +12313,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 currentScaleFactor = (currentScaleFactor / linuxInitialScaleFactor);
                             }
 
-                            String currentScaleFactorPercentage = Math.round(currentScaleFactor * 100) + "%"; // Pass scale factor percetage to Keyboard Test as argument which will be parsed and used so that it is launched with a matching scale factor to QA Helper.
+                            String currentScaleFactorPercentage = Math.round(currentScaleFactor * 100) + "%"; // Pass scale factor percetage to Keyboard Test as argument which will be parsed and used so that it is launched with a matching scale factor to Exec Helper.
                             Runtime.getRuntime().exec(new String[]{javaPath, "-jar", keyboardTestJarTempPath, currentScaleFactorPercentage});
                         }
                     } catch (IOException launchKeyboardTestAppError) {
@@ -12525,7 +12525,7 @@ public class QAHelper extends javax.swing.JFrame {
                 loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Logging Absolute Persistence/Computrace Enabled", "Working", "ControlKnobs");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Logging Absolute Persistence/Computrace Enabled", "Working", "ControlKnobs");
 
                 LinkedHashMap<String, String> logAbsoluteEnabledParameters = new LinkedHashMap<>();
                 logAbsoluteEnabledParameters.put("id", pid);
@@ -12733,7 +12733,7 @@ public class QAHelper extends javax.swing.JFrame {
                     try {
                         Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/driver-manager"});
 
-                        loadingWindow.setLoadingTextAndDisplay("QA Helper is Waiting for Driver Manager to Launch", "Working", "Toolbox");
+                        loadingWindow.setLoadingTextAndDisplay("Exec Helper is Waiting for Driver Manager to Launch", "Working", "Toolbox");
 
                         (new SwingWorker<Void, Void>() {
                             @Override
@@ -12773,7 +12773,7 @@ public class QAHelper extends javax.swing.JFrame {
         } else if (actionsEnabled && isWindows && !isWindowsPE) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Checking Drivers", "Working", "Toolbox");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Checking Drivers", "Working", "Toolbox");
 
             (new SwingWorker<String, Void>() {
                 @Override
@@ -13100,7 +13100,7 @@ public class QAHelper extends javax.swing.JFrame {
                     try {
                         String possibleSudo = (!adminPassword.equals("*UNKNOWN*") ? "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk " : "");
 
-                        Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Checking Firmware Updates' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nCHECKING FOR FIRMWARE UPDATES:\"; /usr/bin/fwupdmgr refresh --force; /usr/bin/fwupdmgr update; echo \"\n\nFINISHED CHECKING FOR FIRMWARE UPDATES\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                        Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Checking Firmware Updates' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nCHECKING FOR FIRMWARE UPDATES:\"; /usr/bin/fwupdmgr refresh --force; /usr/bin/fwupdmgr update; echo \"\n\nFINISHED CHECKING FOR FIRMWARE UPDATES\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"Exec Helper\"'"});
                         didLaunchSystemUpdates = true;
 
                         TimeUnit.SECONDS.sleep(1);
@@ -13108,7 +13108,7 @@ public class QAHelper extends javax.swing.JFrame {
                         focusWindow();
 
                         String[] softwareUpdateButtons = new String[]{"OK", "Also Install System Updates"};
-                        int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Checking for <i>Firmware Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while Firmware Updates are checked and prepared in the Terminal.</i><br/><br/>When Firmware Updates are done checking and preparing, you may need to reboot to install them.<br/><br/><br/><b>To save time during refurbishment, <u>installing <i>system updates</i> IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to also check for and install system updates anyway, click the \"Also Install System Updates\" button below.</i></html>", "ExecHelper  -  Firmware Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
+                        int softwareUpdateDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Checking for <i>Firmware Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using Exec Helper while Firmware Updates are checked and prepared in the Terminal.</i><br/><br/>When Firmware Updates are done checking and preparing, you may need to reboot to install them.<br/><br/><br/><b>To save time during refurbishment, <u>installing <i>system updates</i> IS NOT REQUIRED</u>.</b><br/><br/><i>If you would like to also check for and install system updates anyway, click the \"Also Install System Updates\" button below.</i></html>", "ExecHelper  -  Firmware Updates", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32), softwareUpdateButtons, softwareUpdateButtons[0]);
 
                         String softwareUpdateDialogResponseString = "OK";
                         if (softwareUpdateDialogResponse > -1) {
@@ -13141,12 +13141,12 @@ public class QAHelper extends javax.swing.JFrame {
                                 }
 
                                 // Run update commands 3 times to make sure that all possible updates are installed since some updates require others to be installed first.
-                                Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing System Updates' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nINSTALLING SYSTEM UPDATES\n\nSYSTEM UPDATE 1 OF 3:\"; " + systemUpdateCommand + "; echo \"\nSYSTEM UPDATE 2 OF 3:\"; " + systemUpdateCommand + "; echo \"\nAUTOREMOVE ONCE BEFORE LAST UPDATE CYCLE:\"; /usr/bin/sudo /usr/local/bin/apt autoremove -y; echo \"\nSYSTEM UPDATE 3 OF 3:\"; " + systemUpdateCommand + "; echo \"\n\nFINISHED INSTALLING SYSTEM UPDATES\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                                Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", possibleSudo + "/usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing System Updates' --hide-menubar --geometry '80x25+0+0' -x /bin/sh -c 'echo \"\nINSTALLING SYSTEM UPDATES\n\nSYSTEM UPDATE 1 OF 3:\"; " + systemUpdateCommand + "; echo \"\nSYSTEM UPDATE 2 OF 3:\"; " + systemUpdateCommand + "; echo \"\nAUTOREMOVE ONCE BEFORE LAST UPDATE CYCLE:\"; /usr/bin/sudo /usr/local/bin/apt autoremove -y; echo \"\nSYSTEM UPDATE 3 OF 3:\"; " + systemUpdateCommand + "; echo \"\n\nFINISHED INSTALLING SYSTEM UPDATES\n\nPRESS ENTER TO CLOSE THIS WINDOW\"; read line; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                                 TimeUnit.SECONDS.sleep(1);
 
                                 focusWindow();
-                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started <i>System Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using QA Helper while System Updates install in the Terminal.</i><br/><br/>When System Updates are done, the Terminal will stay open and you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
+                                JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Started <i>System Updates</i> in <i>Terminal</i></b><br/><br/><i>You can continue using Exec Helper while System Updates install in the Terminal.</i><br/><br/>When System Updates are done, the Terminal will stay open and you can press enter in the Terminal window to close it.</html>", "ExecHelper  -  System Updates", JOptionPane.INFORMATION_MESSAGE, new TwemojiImage("CounterclockwiseArrowsButton", qaHelperWindow).toImageIcon(32));
                             }
                         }
                     } catch (HeadlessException | IOException | InterruptedException | NumberFormatException installUpdatesViaTerminalException) {
@@ -13282,7 +13282,7 @@ public class QAHelper extends javax.swing.JFrame {
         if ((actionsEnabled || (evt == null) || evt.getActionCommand().equals(statusNames[12] + " License Issue")) && isWindows && !isWindowsPE) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Checking Windows License", "Working", "Window");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Checking Windows License", "Working", "Window");
 
             (new SwingWorker<String, Void>() {
                 @Override
@@ -13550,7 +13550,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         logSpecsAction("Manually Confirmed Existing COA");
                                         sendNoticeEmail("Manually Confirmed Existing COA");
 
-                                        boolean openManualWindowsLicense = (JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Since this computer has a Physical COA on it, manually license Windows with<br/>the Product Key on the Physical COA before applying a Refurbished DPK.</b><br/><br/>After you have manually licensed Windows, come back to QA Helper and<br/>click the \"Check Windows License / License Windows\" button again.<br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it,<br/>Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "ExecHelper  -  Manually License Windows", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), new String[]{"Open Windows Manual License Prompt", "Cancel"}, "Open Windows Manual License Prompt") == JOptionPane.YES_OPTION);
+                                        boolean openManualWindowsLicense = (JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Since this computer has a Physical COA on it, manually license Windows with<br/>the Product Key on the Physical COA before applying a Refurbished DPK.</b><br/><br/>After you have manually licensed Windows, come back to Exec Helper and<br/>click the \"Check Windows License / License Windows\" button again.<br/><br/><i>If this computer DOES NOT have a GML or COA sticker on it,<br/>Windows CANNOT be licensed with a Refurbished DPK.</i></html>", "ExecHelper  -  Manually License Windows", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, new TwemojiImage("Window", qaHelperWindow).toImageIcon(), new String[]{"Open Windows Manual License Prompt", "Cancel"}, "Open Windows Manual License Prompt") == JOptionPane.YES_OPTION);
 
                                         if (openManualWindowsLicense) {
                                             try {
@@ -13774,7 +13774,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (isLoggedIn && isWindows && !isWindowsPE && new File("\\Install\\DPK\\oa3tool.exe").exists()) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Retrieving Digital Product Key", "Working", "OldKey");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Retrieving Digital Product Key", "Working", "OldKey");
 
             (new SwingWorker<String, Void>() {
                 @Override
@@ -14065,7 +14065,7 @@ public class QAHelper extends javax.swing.JFrame {
             setActionsEnabled(false);
 
             if ((newProductKey.length() == 29) && (dpkTypeCode.length() == 17) && dpkTypeCode.endsWith("-DPK")) {
-                loadingWindow.setLoadingTextAndDisplay("QA Helper is Licensing Windows", "Working", "OldKey");
+                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Licensing Windows", "Working", "OldKey");
 
                 final String productKeyEnding = newProductKey.substring(newProductKey.length() - 5);
 
@@ -14607,7 +14607,7 @@ public class QAHelper extends javax.swing.JFrame {
                         if (!didCancelPasswordPrompt) {
                             final String adminPasswordForRemoteManagement = possibleAdminPasswordForRemoteManagement;
                             if (new CommandReader("/usr/bin/dscl . -authonly '" + shortAdminUsernameForRemoteManagement.replace("'", "'\\''") + "' '" + adminPasswordForRemoteManagement.replace("'", "'\\''") + "' && echo '<CORRECT>'").getFirstOutputLine().equals("<CORRECT>")) {
-                                loadingWindow.setLoadingTextAndDisplay("QA Helper is Checking Remote Management", "Working", "LockedWithKey");
+                                loadingWindow.setLoadingTextAndDisplay("Exec Helper is Checking Remote Management", "Working", "LockedWithKey");
 
                                 (new SwingWorker<String[], Void>() {
                                     @Override
@@ -14668,7 +14668,7 @@ public class QAHelper extends javax.swing.JFrame {
                                                     ArrayList<String> remoteManagementOrganizationContactInfo = new ArrayList<>();
 
                                                     LinkedHashMap<String, String> logRemoteManagedMacParameters = new LinkedHashMap<>();
-                                                    logRemoteManagedMacParameters.put("source", "QA Helper");
+                                                    logRemoteManagedMacParameters.put("source", "Exec Helper");
                                                     logRemoteManagedMacParameters.put("pid", pid);
                                                     logRemoteManagedMacParameters.put("model", computerSpecs.getMacShortModelName() + " (" + computerSpecs.getMacModelIdentifier() + ")");
                                                     logRemoteManagedMacParameters.put("serial", computerSpecs.getSerial());
@@ -14910,7 +14910,7 @@ public class QAHelper extends javax.swing.JFrame {
                     loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                     setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                    loadingWindow.setLoadingTextAndDisplay("QA Helper is Saving " + conditionAndNotesOrOnlyNotes, "Working", "Memo");
+                    loadingWindow.setLoadingTextAndDisplay("Exec Helper is Saving " + conditionAndNotesOrOnlyNotes, "Working", "Memo");
 
                     (new SwingWorker<String[], Void>() {
                         @Override
@@ -15194,7 +15194,7 @@ public class QAHelper extends javax.swing.JFrame {
                             }
 
                             playAlertSound("error");
-                            int printSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SENDING SPECS TO PRINTER:</b><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "<br/><br/><pre>" + sendToPrinterResponse + "</pre><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the local network to be able to print to local printers.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Print Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
+                            int printSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SENDING SPECS TO PRINTER:</b><br/>" + (selectedPrinterName.isEmpty() ? selectedPrinterIP : (selectedPrinterName + " (" + selectedPrinterIP + ")")) + "<br/><br/><pre>" + sendToPrinterResponse + "</pre><br/>" + (isMacOS ? "<b><i>Exec Helper must be granted access to the local network to be able to print to local printers.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Print Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
                             if (printSpecsErrorResponse != JOptionPane.YES_OPTION) {
                                 break;
                             }
@@ -15209,7 +15209,7 @@ public class QAHelper extends javax.swing.JFrame {
                                 : "\\Install\\");
                     }
 
-                    String saveSpecsFilename = "QA Helper Specs.txt";
+                    String saveSpecsFilename = "Exec Helper Specs.txt";
 
                     File saveSpecsDirectory = new File(saveSpecsDirectoryPath);
                     saveSpecsDirectory.mkdirs();
@@ -15232,7 +15232,7 @@ public class QAHelper extends javax.swing.JFrame {
                         break;
                     } else {
                         playAlertSound("error");
-                        int saveSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SAVING SPECS INTO THE FOLLOWING FILE:</b><br/><br/>" + saveSpecsFile.getPath() + "<br/><br/>" + (isMacOS ? "<b><i>QA Helper must be granted access to the Desktop to be able to save the file.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Save Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
+                        int saveSpecsErrorResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>ERROR SAVING SPECS INTO THE FOLLOWING FILE:</b><br/><br/>" + saveSpecsFile.getPath() + "<br/><br/>" + (isMacOS ? "<b><i>Exec Helper must be granted access to the Desktop to be able to save the file.</i></b><br/><br/>" : "") + "<i>Please Try Again</i></html>", "ExecHelper  -  Save Specs Error", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, new String[]{"Try Again", "Cancel"}, "Try Again");
                         if (saveSpecsErrorResponse != JOptionPane.YES_OPTION) {
                             break;
                         }
@@ -15250,7 +15250,7 @@ public class QAHelper extends javax.swing.JFrame {
 
     private void btnSystemInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSystemInfoActionPerformed
         // Intentionally allow opening System Info even if actions are not enabled, except when running CPU Stress Test.
-        if (!isWindowsPE && (!loadingWindow.isVisible() || !loadingWindow.getLoadingText().startsWith("QA Helper is Stressing CPU"))) {
+        if (!isWindowsPE && (!loadingWindow.isVisible() || !loadingWindow.getLoadingText().startsWith("Exec Helper is Stressing CPU"))) {
             try {
                 if (isWindows) {
                     if (new CommandReader(new String[]{"\\Windows\\System32\\tasklist.exe", "/nh", "/fi", "IMAGENAME eq msinfo32.exe"}).getFirstOutputLineContaining("msinfo32.exe").isEmpty()) {
@@ -15296,7 +15296,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && isLoggedIn) {
             setActionsEnabled(false);
 
-            loadingWindow.setLoadingTextAndDisplay("QA Helper is Retrieving Status History", "Working", "MagnifyingGlassTiltedLeft");
+            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Retrieving Status History", "Working", "MagnifyingGlassTiltedLeft");
 
             (new SwingWorker<Void, Void>() {
                 @Override
@@ -15483,11 +15483,11 @@ public class QAHelper extends javax.swing.JFrame {
                                                     if (!isLinuxUbiquityMode && !isWindowsPE) {
                                                         markedAsSoldDialogButtons.add("Quit");
                                                     }
-                                                    markedAsSoldDialogButtons.addAll(Arrays.asList("Shut Down", "Reboot", "Keep Using QA Helper"));
+                                                    markedAsSoldDialogButtons.addAll(Arrays.asList("Shut Down", "Reboot", "Keep Using Exec Helper"));
 
                                                     int markedAsSoldDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Marked ID \"" + pid + "\" as Sold" + ((showRunOemConfigPrepareCheckbox && runOemConfigPrepareCheckbox.isSelected()) ? " & Prepared for Shipping to End User" : "") + "</b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Marked as Sold", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, markedAsSoldDialogButtons.toArray(), markedAsSoldDialogButtons.get(0));
 
-                                                    String markedAsSoldResponseString = "Keep Using QA Helper";
+                                                    String markedAsSoldResponseString = "Keep Using Exec Helper";
                                                     if (markedAsSoldDialogResponse > -1) {
                                                         markedAsSoldResponseString = markedAsSoldDialogButtons.get(markedAsSoldDialogResponse);
                                                     }
@@ -15715,7 +15715,7 @@ public class QAHelper extends javax.swing.JFrame {
                     }
 
                     boolean continueToFGSpecsInsteadOfSetStatus = (deviceTypeIsMotherboard && pid.startsWith("FG"));
-                    String setStatusOrContinueOnFGSpecsButton = (continueToFGSpecsInsteadOfSetStatus ? "Quit QA Helper & Continue on FG Specs" : "Set Status to \"" + statusNames[12] + "\"");
+                    String setStatusOrContinueOnFGSpecsButton = (continueToFGSpecsInsteadOfSetStatus ? "Quit Exec Helper & Continue on FG Specs" : "Set Status to \"" + statusNames[12] + "\"");
 
                     if (!mustSetProductType) { // Set Product Type will come first if Product Type must be set, otherwise Set Status will come first.
                         doneTestingDialogButtons.add(setStatusOrContinueOnFGSpecsButton);
@@ -15826,7 +15826,7 @@ public class QAHelper extends javax.swing.JFrame {
                             loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                             setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Updating Status to " + statusNames[2], "Working", "CheckBoxWithCheck");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Updating Status to " + statusNames[2], "Working", "CheckBoxWithCheck");
 
                             (new SwingWorker<String[], Void>() {
                                 @Override
@@ -15844,7 +15844,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                                             loadingWindow.closeWindow();
                                             playAlertSound("success");
-                                            String[] successfullyUpdatedStatusDialogButtons = new String[]{((isLinuxUbiquityMode || isWindowsPE) ? "Install OS" : "Quit"), "Shut Down", "Keep Using QA Helper"};
+                                            String[] successfullyUpdatedStatusDialogButtons = new String[]{((isLinuxUbiquityMode || isWindowsPE) ? "Install OS" : "Quit"), "Shut Down", "Keep Using Exec Helper"};
 
                                             int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[2] + "</u></b><br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Status Updated", (!isMacOS ? JOptionPane.YES_NO_CANCEL_OPTION : JOptionPane.YES_NO_OPTION), JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckBoxWithCheck", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons, successfullyUpdatedStatusDialogButtons[0]);
                                             switch (successfullyUpdatedStatusDialogResponse) {
@@ -15933,7 +15933,7 @@ public class QAHelper extends javax.swing.JFrame {
                             loadingWindow.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                             setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
 
-                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Confirming Ready for " + statusNames[12], "Working", "CheckMarkButton");
+                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Confirming Ready for " + statusNames[12], "Working", "CheckMarkButton");
 
                             (new SwingWorker<String, Void>() {
                                 @Override
@@ -16022,7 +16022,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         }
                                     } else if (isWindows) {
                                         if (isTestMode && (new File(windowsBuildInfoPath + "fgFLAG-TEST").exists() || new File(windowsBuildInfoPath + "TESTING").exists())) {
-                                            // Do not confirm Windows license when both QA Helper AND Windows scripts are in test mode.
+                                            // Do not confirm Windows license when both Exec Helper AND Windows scripts are in test mode.
 
                                             loadingWindow.setAlwaysOnTop(false);
                                             playAlertSound("beep");
@@ -16183,7 +16183,7 @@ public class QAHelper extends javax.swing.JFrame {
                                         }
 
                                         if (qaCompleteAllowed && dpkGmrlStickerConfirmed) {
-                                            loadingWindow.setLoadingTextAndDisplay("QA Helper is Updating Status to " + statusNames[12], "Working", "CheckMarkButton");
+                                            loadingWindow.setLoadingTextAndDisplay("Exec Helper is Updating Status to " + statusNames[12], "Working", "CheckMarkButton");
 
                                             (new SwingWorker<String, Void>() {
                                                 @Override
@@ -16327,12 +16327,12 @@ public class QAHelper extends javax.swing.JFrame {
                                                             if (!didAddCompleteWindowsButton) {
                                                                 successfullyUpdatedStatusDialogButtons.addAll(Arrays.asList("Shut Down", "Reboot")); // Don't want separate Shut Down button when Complete Windows button is shown.
                                                             }
-                                                            successfullyUpdatedStatusDialogButtons.add("Keep Using QA Helper");
+                                                            successfullyUpdatedStatusDialogButtons.add("Keep Using Exec Helper");
 
                                                             for (;;) {
                                                                 int successfullyUpdatedStatusDialogResponse = JOptionPane.showOptionDialog(qaHelperWindow, "<html><b>Successfully Updated Status for ID \"" + pid + "\" to <u>" + statusNames[12] + "<u></b>" + oemConfigPrepareNote + updatedFreeGeekAdminPasswordNote + "<br/><br/><i>What would you like to do next?</i></html>", "ExecHelper  -  Status Updated", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, new TwemojiImage("CheckMarkButton", qaHelperWindow).toImageIcon(32), successfullyUpdatedStatusDialogButtons.toArray(), successfullyUpdatedStatusDialogButtons.get(0));
 
-                                                                String successfullyUpdatedStatusDialogResponseString = "Keep Using QA Helper";
+                                                                String successfullyUpdatedStatusDialogResponseString = "Keep Using Exec Helper";
                                                                 if (successfullyUpdatedStatusDialogResponse > -1) {
                                                                     successfullyUpdatedStatusDialogResponseString = successfullyUpdatedStatusDialogButtons.get(successfullyUpdatedStatusDialogResponse);
                                                                 }
@@ -16964,7 +16964,7 @@ public class QAHelper extends javax.swing.JFrame {
         if (actionsEnabled && isLoggedIn && isWindows && !isWindowsPE && new File("\\Install\\Scripts\\Setup Windows.ps1").exists()) {
             if (JOptionPane.showConfirmDialog(qaHelperWindow, "<html><b>Are you sure you want to re-run the \"Setup Windows\" script?</b></html>", "ExecHelper  -  Confirm Re-Run \"Setup Windows\" Script", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
                 try {
-                    new File(System.getProperty("user.home") + "\\Desktop\\QA Helper.lnk").delete();
+                    new File(System.getProperty("user.home") + "\\Desktop\\Exec Helper.lnk").delete();
 
                     Runtime.getRuntime().exec(new String[]{"cmd.exe", "/c", "START /MAX \\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo -NoProfile -WindowStyle Maximized -ExecutionPolicy Unrestricted -File \"\\Install\\Scripts\\Setup Windows.ps1\""});
                     System.exit(0);

@@ -363,7 +363,7 @@ public final class GetComputerSpecs {
                         }
                     } else {
                         os = "Mac OS X " + actualMacOSversion;
-                        // Don't bother adding the marketing names to these very old versions since QA Helper has never even been tested on older than 10.11.
+                        // Don't bother adding the marketing names to these very old versions since Exec Helper has never even been tested on older than 10.11.
                     }
                 } else {
                     os = "macOS " + actualMacOSversion;
@@ -483,7 +483,7 @@ public final class GetComputerSpecs {
                             waitForTerminalPIDtempFile.deleteOnExit();
 
                             boolean isLinuxMATE = new File("/usr/bin/mate-terminal").exists();
-                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'QA Helper  —  Installing Required Tools' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING REQUIRED TOOLS\n\n\"; /usr/local/bin/apt install --no-install-recommends -y " + String.join(" ", requiredLinuxToolsPackages) + "; echo \"\n\nFINISHED INSTALLING REQUIRED TOOLS\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"QA Helper\"'"});
+                            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk /usr/bin/" + (isLinuxMATE ? "mate" : "gnome") + "-terminal --window" + (isLinuxMATE ? "" : "-with-profile-internal-id '0'") + " --title 'Exec Helper  —  Installing Required Tools' --hide-menubar --geometry '80x25+0+0' -x /bin/bash -c 'orig_temp_owner=$(/usr/bin/stat -c %U " + waitForTerminalPIDtempFile.getPath() + "); /bin/chown root " + waitForTerminalPIDtempFile.getPath() + "; echo $$ > " + waitForTerminalPIDtempFile.getPath() + "; /bin/chown ${orig_temp_owner} " + waitForTerminalPIDtempFile.getPath() + "; echo \"\nINSTALLING REQUIRED TOOLS\n\n\"; /usr/local/bin/apt install --no-install-recommends -y " + String.join(" ", requiredLinuxToolsPackages) + "; echo \"\n\nFINISHED INSTALLING REQUIRED TOOLS\nTHIS TERMINAL WINDOW WILL CLOSE IN 5 SECONDS - OR PRESS ENTER TO CLOSE NOW\"; read -t 5; /usr/bin/wmctrl -a \"Exec Helper\"'"});
 
                             String waitForTerminalPID = "";
 
@@ -1067,7 +1067,7 @@ public final class GetComputerSpecs {
                                         //   But, starting with version 2.33, "lsblk" retrieves full model names from "udev": https://github.com/util-linux/util-linux/blob/master/Documentation/releases/v2.33-ReleaseNotes#L394
                                         //   Mint 20 was the first to ship with "lsblk" version 2.34 while Mint 19.3 shipped with version 2.31.1 which still retrieved truncated drive model names.
                                         //   Since we haven't installed Mint 19.3 for multiple years, just use the model name from "lsblk" since it will always be the full model for our usage.
-                                        //   (If other companies using QA Helper are still running Mint 19.X, then truncated model names will still be retrieved on those systems but since Mint 19.X is EOL April 2023 it shouldn't really be getting installed anymore anyways.)
+                                        //   (If other companies using Exec Helper are still running Mint 19.X, then truncated model names will still be retrieved on those systems but since Mint 19.X is EOL April 2023 it shouldn't really be getting installed anymore anyways.)
 
                                         thisDriveBrand = thisDriveBrand.trim().replace("_", " ").replace("(", "").replace(")", "").replaceAll("\\s{2,}", " ");
                                         if (!thisDriveBrand.isEmpty()) {
