@@ -4730,7 +4730,7 @@ public class QAHelper extends javax.swing.JFrame {
 
                 loadingWindow.closeWindow();
 
-                if (!themeUpdated) { // No need to show blocking error if only updating theme such as changing font size.
+                if (!themeUpdated && false) { // ExecHelper: suppress PCsCRM status history error — EU does not use status history
                     playAlertSound("error");
                     JOptionPane.showMessageDialog(qaHelperWindow, "<html><b>Failed to Connect to <i>PCsCRM</i> to <i>Get Status History</i></b></html>", "ExecHelper  -  Status History Error", JOptionPane.ERROR_MESSAGE);
                 }
