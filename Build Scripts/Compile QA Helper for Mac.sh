@@ -23,7 +23,9 @@ PATH='/usr/bin:/bin:/usr/sbin:/sbin:/usr/libexec' # Add "/usr/libexec" to PATH f
 TMPDIR="$([[ -d "${TMPDIR}" && -w "${TMPDIR}" ]] && echo "${TMPDIR%/}" || echo '/private/tmp')" # Make sure "TMPDIR" is always set and that it DOES NOT have a trailing slash for consistency regardless of the current environment.
 
 declare -a jdk_build_versions=(
-	'21' # JDK 21 LTS is the newest LTS that supports macOS 10.12 Sierra through macOS 10.15 Catalina and newer AND can also be build as Universal for Apple Silicon (JDK 25 LTS only supports macOS 11 Big Sur and newer).
+	# Only build the El Capitan version (JDK 16). It runs on 10.11+ which covers
+	# all Macs we service, and avoids maintaining two builds. The Universal build
+	# (JDK 21) can be re-enabled here if Apple Silicon app-bundle support is needed.
 	'16' # JDK 16 is the newest that still supports macOS 10.11 El Capitan.
 )
 
@@ -458,14 +460,28 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			osascript -e 'activate' -e "display dialog \"Successfully Notarized & Zipped\nExec Helper Version ${app_version_and_type_display}!\" with title \"Successfully Notarized Exec Helper\" buttons {\"OK\"} default button 1 with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null
 		fi
 
+		# Create ZIP (non-notarized ad-hoc signed build)
+		rm -f "${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
+		echo -e "\nZipping Exec Helper Version ${app_version_and_type_display}..."
+		ditto -ck --keepParent --sequesterRsrc --zlibCompressionLevel 9 \
+			"${PROJECT_PATH}/dist/ExecHelper.app" \
+			"${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
+		echo "  → ${PROJECT_PATH}/dist/${qa_helper_mac_zip_name}"
+
 		open -na "${PROJECT_PATH}/dist/ExecHelper.app"
 
 		if [[ "${app_version}" == *'-0' ]]; then # DO NOT offer to build for El Captian for testing builds (which have versions ending in "-0").
 			break
-		elif [[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && osascript -e 'activate' -e "display dialog \"Also build Exec Helper version ${app_version}\nfor El Capitan?\" buttons {\"Yes\", \"No\"} cancel button 1 default button 2 with title \"Build Exec Helper for El Capitan\" with icon (\"${PROJECT_PATH}/macOS Build Resources/Exec Helper.icns\" as POSIX file)" &> /dev/null; then
+		elif [[ "${qa_helper_mac_zip_name}" == 'QAHelper-mac-universal.zip' ]] && osascript -e 'activate' -e "display dialog \"Also build Exec Helper version ${app_version}\nfor El Capitan?\" buttons {\"Yes\", \"No\"} cancel button 1 default button 2 with title \"Build Exec Helper for El Capitan\" with icon (\"${PROJECT_PATH}/macOS Build Resources/ExecHelper.icns\" as POSIX file)" &> /dev/null; then
 			break
 		fi
 	done
 
 	rm -rf "${PROJECT_PATH}/dist/JAR for macOS"
+
+	# Skip auto-deploy for test builds (versions ending in "-0")
+	if [[ "${app_version}" != *'-0' ]]; then
+		echo -e "\nRunning deploy..."
+		bash "${PROJECT_PATH}/Build Scripts/Deploy to Update Server.sh" --yes
+	fi
 fi

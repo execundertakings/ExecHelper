@@ -4,21 +4,19 @@
 #
 # Deploy ExecHelper build to files.executiveundertakings.com
 #
-# Copies the built ZIPs and version file into the Public Files folder,
-# which is automatically deployed to Cloudflare Pages within ~2 minutes
-# by the com.executiveundertakings.publicfiles LaunchAgent.
+# 1. Uploads the Mac ZIP to the matching GitHub Release (creates the release
+#    if it doesn't already exist; --clobbers if it does).
+# 2. Copies ZIPs + latest-version.txt into the Public Files folder.
+# 3. Runs deploy-public-files.py to push to Cloudflare Pages immediately.
 #
-# Run this after a successful build from "Compile Exec Helper for Mac.sh".
-#
-# The LaunchAgent watches for ANY file change (including in qa-updates/)
-# and triggers a Wrangler deploy automatically. You can also force an
-# immediate deploy by running:
-#   python3 ~/Documents/deploy-public-files.py
+# Usage:
+#   bash "Deploy to Update Server.sh"          # interactive confirm
+#   bash "Deploy to Update Server.sh" --yes    # skip confirm (called from build script)
 #
 
-PATH='/usr/bin:/bin:/usr/sbin:/sbin'
+PATH='/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin'
 
-PUBLIC_FILES_DIR="${HOME}/Documents/public files"
+PUBLIC_FILES_DIR="${HOME}/Documents/Public Files"
 QA_UPDATES_DIR="${PUBLIC_FILES_DIR}/qa-updates"
 
 PROJECT_PATH="$(cd "${BASH_SOURCE[0]%/*}/.." &> /dev/null && pwd -P)"
@@ -26,70 +24,76 @@ readonly PROJECT_PATH
 
 DIST_PATH="${PROJECT_PATH}/dist"
 
-# ── Verify at least one ZIP was built ────────────────────────────────────────
+# ── Parse flags ──────────────────────────────────────────────────────────────
+YES=false
+for arg in "$@"; do
+    [[ "${arg}" == '--yes' || "${arg}" == '-y' ]] && YES=true
+done
+
+# ── Verify at least one Mac ZIP was built ────────────────────────────────────
 if [[ ! -f "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" && ! -f "${DIST_PATH}/QAHelper-mac-universal.zip" ]]; then
-    >&2 echo '!!! No built ZIPs found in dist/ — run "Compile Exec Helper for Mac.sh" first !!!'
+    >&2 echo '!!! No built ZIPs found in dist/ — run "Compile QA Helper for Mac.sh" first !!!'
     exit 1
 fi
 
-# ── Read version from the built ZIP ──────────────────────────────────────────
-zip_to_read="${DIST_PATH}/QAHelper-mac-ElCapitan.zip"
-[[ ! -f "${zip_to_read}" ]] && zip_to_read="${DIST_PATH}/QAHelper-mac-universal.zip"
-
-app_version="$(unzip -p "${zip_to_read}" 'ExecHelper.app/Contents/Java/QA_Helper.jar' 2>/dev/null \
-    | unzip -p /dev/stdin '*/qa-helper-version.txt' 2>/dev/null \
-    | head -1)"
-
-# Fallback: read from source
-if [[ -z "${app_version}" ]]; then
-    app_version="$(head -1 "${PROJECT_PATH}/src/Resources/qa-helper-version.txt" 2>/dev/null)"
-fi
+# ── Read version ──────────────────────────────────────────────────────────────
+app_version="$(head -1 "${PROJECT_PATH}/src/Resources/qa-helper-version.txt" 2>/dev/null)"
 
 if [[ -z "${app_version}" ]]; then
     >&2 echo '!!! Could not determine app version — aborting !!!'
     exit 2
 fi
 
-echo "Deploying ExecHelper version ${app_version} to files.executiveundertakings.com/qa-updates/"
+echo "Deploying ExecHelper ${app_version} to GitHub + files.executiveundertakings.com"
 echo ""
 
-read -rp "Confirm deploy? [y/N] " confirm
-if [[ "${confirm}" != 'y' && "${confirm}" != 'Y' ]]; then
-    echo 'Aborted.'
-    exit 0
+if ! $YES; then
+    read -rp "Confirm deploy? [y/N] " confirm
+    if [[ "${confirm}" != 'y' && "${confirm}" != 'Y' ]]; then
+        echo 'Aborted.'
+        exit 0
+    fi
 fi
 
-# ── Copy files into qa-updates folder ────────────────────────────────────────
+# ── GitHub Release ────────────────────────────────────────────────────────────
+if command -v gh &> /dev/null; then
+    echo "Uploading to GitHub Release v${app_version}..."
+    if ! gh release view "v${app_version}" --repo execundertakings/ExecHelper &> /dev/null; then
+        gh release create "v${app_version}" \
+            --title "ExecHelper ${app_version}" \
+            --repo execundertakings/ExecHelper \
+            "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" \
+            && echo "  ✓ Created GitHub Release v${app_version}"
+    else
+        for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
+            if [[ -f "${DIST_PATH}/${zip_name}" ]]; then
+                gh release upload "v${app_version}" "${DIST_PATH}/${zip_name}" \
+                    --repo execundertakings/ExecHelper --clobber \
+                    && echo "  ✓ Uploaded ${zip_name} to GitHub Release v${app_version}"
+            fi
+        done
+    fi
+else
+    >&2 echo '  ⚠ gh CLI not found — skipping GitHub Release upload'
+fi
+
+# ── Cloudflare Pages deploy ───────────────────────────────────────────────────
 mkdir -p "${QA_UPDATES_DIR}"
 
 echo "${app_version}" > "${QA_UPDATES_DIR}/latest-version.txt"
 echo "  ✓ latest-version.txt → ${app_version}"
 
-for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip' \
-                'QAHelper-windows-installer.zip' 'QAHelper-linux-installer.zip'; do
+for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
     if [[ -f "${DIST_PATH}/${zip_name}" ]]; then
         cp "${DIST_PATH}/${zip_name}" "${QA_UPDATES_DIR}/${zip_name}"
-        echo "  ✓ ${zip_name}"
+        echo "  ✓ Copied ${zip_name}"
     fi
 done
 
-# Extract app into qa-updates/ for direct access
-for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
-    if [[ -f "${QA_UPDATES_DIR}/${zip_name}" ]]; then
-        extracted_name="${zip_name%.zip}"
-        rm -rf "${QA_UPDATES_DIR}/${extracted_name}"
-        ditto -xk "${QA_UPDATES_DIR}/${zip_name}" "${QA_UPDATES_DIR}/${extracted_name}"
-        echo "  ✓ Extracted ${extracted_name}/ExecHelper.app"
-    fi
-done
-
+echo ""
+echo "Pushing to Cloudflare Pages..."
+python3 "${HOME}/Documents/deploy-public-files.py" && echo "  ✓ Deployed to files.executiveundertakings.com"
 
 echo ""
-echo "✓ Files copied to qa-updates/."
-echo "  The deploy agent will publish them to files.executiveundertakings.com within ~2 minutes."
-echo ""
-echo "  To deploy immediately, run:"
-echo "    python3 ~/Documents/deploy-public-files.py"
-echo ""
-echo "  Verify live at:"
-echo "    curl https://files.executiveundertakings.com/qa-updates/latest-version.txt"
+echo "✓ Done. Verify:"
+echo "  curl https://files.executiveundertakings.com/qa-updates/latest-version.txt"

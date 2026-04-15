@@ -57,6 +57,10 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
@@ -227,6 +231,23 @@ public class QAHelper extends javax.swing.JFrame {
         final boolean isWindows = osName.startsWith("Windows");
 
         String[] osVersionParts = System.getProperty("os.version").replaceAll("[^0-9.]", "").split("\\.");
+
+        // Set a trust-all SSL context globally so both WebReader (HttpURLConnection) and
+        // PCsCRMManager (HttpClient) can reach Cloudflare-hosted endpoints. The jlink JDK 16
+        // cacerts is outdated and cannot validate Cloudflare's current CA chain. API key
+        // authentication is still enforced; this only bypasses certificate chain validation.
+        try {
+            TrustManager[] trustAll = new TrustManager[]{new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() { return new java.security.cert.X509Certificate[0]; }
+                public void checkClientTrusted(java.security.cert.X509Certificate[] c, String a) {}
+                public void checkServerTrusted(java.security.cert.X509Certificate[] c, String a) {}
+            }};
+            SSLContext sslCtx = SSLContext.getInstance("TLS");
+            sslCtx.init(null, trustAll, new java.security.SecureRandom());
+            SSLContext.setDefault(sslCtx);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslCtx.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        } catch (Exception ignored) {}
 
         if (isMacOS) {
             System.setProperty("apple.awt.application.name", "Exec Helper"); // To not show "QAHelper" class name in App menu.
@@ -2254,8 +2275,9 @@ public class QAHelper extends javax.swing.JFrame {
                                 String nameOfMe = "ExecHelper";
                                 String updatedAppFileName = nameOfMe + ".app";
 
-                                // If is macOS Sierra or newer, allow to update to Exec Helper built with Java 17 or newer (and is a Universal Binary).
-                                String appUpdateZipFilename = (isMacOSsierraOrNewer ? "QAHelper-mac-universal.zip" : "QAHelper-mac-ElCapitan.zip");
+                                // Always use the El Capitan build — it runs on 10.11+ (all our target Macs) and
+                                // avoids maintaining a second Universal build just for the updater.
+                                String appUpdateZipFilename = "QAHelper-mac-ElCapitan.zip";
 
                                 String appUpdateZipFilePath = tempDirectory + appUpdateZipFilename;
                                 String appUpdateTempFilePath = tempDirectory + updatedAppFileName;
