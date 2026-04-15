@@ -65,11 +65,17 @@ if command -v gh &> /dev/null; then
             "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" \
             && echo "  ✓ Created GitHub Release v${app_version}"
     else
-        # Only upload ElCapitan — we don't maintain a Universal build
         if [[ -f "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" ]]; then
+            # Upload ElCapitan build
             gh release upload "v${app_version}" "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" \
                 --repo execundertakings/ExecHelper --clobber \
                 && echo "  ✓ Uploaded QAHelper-mac-ElCapitan.zip to GitHub Release v${app_version}"
+            # Also publish as QAHelper-mac-universal.zip so machines still on old code
+            # (which request the universal zip on Sierra+) can bootstrap to the new version.
+            cp "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" "${DIST_PATH}/QAHelper-mac-universal.zip"
+            gh release upload "v${app_version}" "${DIST_PATH}/QAHelper-mac-universal.zip" \
+                --repo execundertakings/ExecHelper --clobber \
+                && echo "  ✓ Uploaded QAHelper-mac-universal.zip alias to GitHub Release v${app_version}"
         fi
     fi
 else
