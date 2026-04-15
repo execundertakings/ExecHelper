@@ -116,7 +116,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		# jdeps="$("${this_jdk_path}/Contents/Home/bin/jdeps" --module-path "${PROJECT_PATH}/libs" --multi-release "${this_jdk_major_version}" --list-deps "${PROJECT_PATH}/dist/JAR for macOS/QA_Helper.jar" | tr -s '[:space:]' ',' | sed -E 's/^,|,$//g')"
 		# echo "JDEPS: ${jdeps}" # Should be "java.base,java.datatransfer,java.desktop,java.logging"
 		# java.datatransfer is actually included within java.desktop (along with java.prefs and java.xml) so it doesn't actually need to be listed, but that's what jdeps returns.
-		jdeps='java.base,java.desktop,java.logging'
+		jdeps='java.base,java.desktop,java.logging,java.net.http'
 
 		"${this_jdk_path}/Contents/Home/bin/jlink" \
 			--add-modules "${jdeps}" \
