@@ -101,8 +101,8 @@ echo -e '\nCREATING APP...'
 	--dest "${alternate_app_binaries_for_universal_binary_path}" || exit 1
 
 # Move "runtime" to "Frameworks/Java.runtime" to match actual Exec Helper structure changes.
-mkdir "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/Frameworks"
-mv "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/runtime" "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app/Contents/Frameworks/Java.runtime"
+mkdir "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app/Contents/Frameworks"
+mv "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app/Contents/runtime" "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app/Contents/Frameworks/Java.runtime"
 
 echo -e '\nREMOVING ALL EXCEPT BINARIES FROM APP...'
 
@@ -115,15 +115,15 @@ while IFS='' read -rd '' this_app_file_path; do
 			exit 1
 		fi
 	fi
-done < <(find "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app" -type f -print0)
+done < <(find "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app" -type f -print0)
 
-touch "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app"
+touch "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app"
 
 rm -rf "${alternate_app_binaries_for_universal_binary_path}/Exec Helper JAR"
 rm -rf "${jdk_path}"
 
 if [[ $1 != '--no-reveal' ]]; then
-	open -R "${alternate_app_binaries_for_universal_binary_path}/Exec Helper.app"
+	open -R "${alternate_app_binaries_for_universal_binary_path}/ExecHelper.app"
 fi
 
 echo -e "\nDONE ${script_title}\n"
