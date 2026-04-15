@@ -65,13 +65,12 @@ if command -v gh &> /dev/null; then
             "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" \
             && echo "  ✓ Created GitHub Release v${app_version}"
     else
-        for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
-            if [[ -f "${DIST_PATH}/${zip_name}" ]]; then
-                gh release upload "v${app_version}" "${DIST_PATH}/${zip_name}" \
-                    --repo execundertakings/ExecHelper --clobber \
-                    && echo "  ✓ Uploaded ${zip_name} to GitHub Release v${app_version}"
-            fi
-        done
+        # Only upload ElCapitan — we don't maintain a Universal build
+        if [[ -f "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" ]]; then
+            gh release upload "v${app_version}" "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" \
+                --repo execundertakings/ExecHelper --clobber \
+                && echo "  ✓ Uploaded QAHelper-mac-ElCapitan.zip to GitHub Release v${app_version}"
+        fi
     fi
 else
     >&2 echo '  ⚠ gh CLI not found — skipping GitHub Release upload'
@@ -83,12 +82,10 @@ mkdir -p "${QA_UPDATES_DIR}"
 echo "${app_version}" > "${QA_UPDATES_DIR}/latest-version.txt"
 echo "  ✓ latest-version.txt → ${app_version}"
 
-for zip_name in 'QAHelper-mac-ElCapitan.zip' 'QAHelper-mac-universal.zip'; do
-    if [[ -f "${DIST_PATH}/${zip_name}" ]]; then
-        cp "${DIST_PATH}/${zip_name}" "${QA_UPDATES_DIR}/${zip_name}"
-        echo "  ✓ Copied ${zip_name}"
-    fi
-done
+if [[ -f "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" ]]; then
+    cp "${DIST_PATH}/QAHelper-mac-ElCapitan.zip" "${QA_UPDATES_DIR}/QAHelper-mac-ElCapitan.zip"
+    echo "  ✓ Copied QAHelper-mac-ElCapitan.zip"
+fi
 
 echo ""
 echo "Pushing to Cloudflare Pages..."
