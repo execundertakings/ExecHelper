@@ -335,7 +335,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			if [[ "${this_java_bin_path}" == *'/java' ]]; then # Only need to keep the "java" binary, and can delete any others, such as "keytool".
 				if lipo -archs "${this_java_bin_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 					echo "  Code Signing: ${this_java_bin_path#*/dist/}"
-					codesign -fs - "${PROJECT_PATH}/dist/ExecHelper.app"
+					codesign -fs - "${this_java_bin_path}" # Sign the binary itself, not the whole app bundle.
 				fi
 			else
 				echo "  Deleting: ${this_java_bin_path#*/dist/}"
@@ -368,7 +368,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 			while IFS='' read -rd '' this_jar_lib_path; do
 				if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 					echo "  Code Signing: ExecHelper.app/Contents/Java/QA_Helper.jar/Resources/Keyboard_Test.jar/${this_jar_lib_path#*/Keyboard_Test-JAR/}"
-					codesign -fs - "${this_java_lib_path}"
+					codesign -fs - "${this_jar_lib_path}"
 					did_sign_jar_libs=true
 				fi
 			done < <(find "${TMPDIR}/Keyboard_Test-JAR" -type f -print0)
@@ -381,7 +381,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then # Can only compile macOS app when running 
 		while IFS='' read -rd '' this_jar_lib_path; do
 			if lipo -archs "${this_jar_lib_path}" &> /dev/null; then  # "lipo -archs" is used to locate all compiled code since it will not all be set as executable, like the "dylib" files.
 				echo "  Code Signing: ExecHelper.app/Contents/Java/QA_Helper.jar/${this_jar_lib_path#*/QA_Helper-JAR/}"
-				codesign -fs - "${this_java_lib_path}"
+				codesign -fs - "${this_jar_lib_path}"
 				did_sign_jar_libs=true
 			fi
 		done < <(find "${TMPDIR}/QA_Helper-JAR" -type f -print0)
