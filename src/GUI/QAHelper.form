@@ -461,6 +461,12 @@
                                           <Component id="txtPID" linkSize="12" min="-2" max="-2" attributes="0"/>
                                           <Component id="btnCheckPID" linkSize="12" min="-2" max="-2" attributes="0"/>
                                       </Group>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnNextLaptopSKU" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnNextIMacSKU" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="btnRandom5Digit" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="32767" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="btnLogIn" linkSize="34" min="-2" max="-2" attributes="0"/>
@@ -657,6 +663,9 @@
                           <Component id="btnTestMode" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnForgot" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnCheckPID" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnNextLaptopSKU" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnNextIMacSKU" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnRandom5Digit" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblVersion" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -923,6 +932,57 @@
                 <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="btnCheckPIDFocusGained"/>
                 <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="btnCheckPIDFocusLost"/>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCheckPIDActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnNextLaptopSKU">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="cc" green="66" red="0" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Next Laptop"/>
+                <Property name="toolTipText" type="java.lang.String" value="Asks Command Center for the next available Asset ID and fills the field above."/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
+                <Property name="borderPainted" type="boolean" value="false"/>
+                <Property name="contentAreaFilled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNextLaptopSKUActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnNextIMacSKU">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="cc" green="66" red="0" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Next iMac"/>
+                <Property name="toolTipText" type="java.lang.String" value="Asks Command Center for the next available Asset ID and fills the field above."/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
+                <Property name="borderPainted" type="boolean" value="false"/>
+                <Property name="contentAreaFilled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNextIMacSKUActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnRandom5Digit">
+              <Properties>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="cc" green="66" red="0" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Random 5-digit"/>
+                <Property name="toolTipText" type="java.lang.String" value="Asks Command Center for the next available Asset ID and fills the field above."/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
+                <Property name="borderPainted" type="boolean" value="false"/>
+                <Property name="contentAreaFilled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRandom5DigitActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="lblVersion">

@@ -178,6 +178,38 @@ public class PCsCRMManager {
     }
 
     /**
+     * Asks Command Center for the next available SKU number on a given prefix.
+     *   mode = "next"    → highest known + 1 (used by the Next Laptop / Next iMac buttons)
+     *   mode = "random5" → a random unused 5-digit number (used by the Random 5-digit button)
+     * Returns the next_sku string, or "" on failure / network error.
+     */
+    public String getNextAvailableSku(String prefix, String mode) {
+        String baseUrl = privateStrings.getCommandCenterURL();
+        String apiKey  = privateStrings.getCommandCenterAPIKey();
+        if (baseUrl.isEmpty() || apiKey.isEmpty()) return "";
+        try {
+            String url = baseUrl + "/api/inventory/next-sku?prefix="
+                + URLEncoder.encode(prefix == null ? "" : prefix, StandardCharsets.UTF_8)
+                + "&mode=" + URLEncoder.encode(mode == null ? "next" : mode, StandardCharsets.UTF_8);
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("X-ExecHelper-Key", apiKey)
+                    .timeout(java.time.Duration.ofSeconds(15))
+                    .GET()
+                    .build();
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 200) {
+                JSONObject obj = new JSONObject(resp.body());
+                JSONObject prefixObj = obj.optJSONObject("prefix");
+                if (prefixObj != null) return prefixObj.optString("next_sku", "");
+            }
+        } catch (Exception e) {
+            // Network / parse failure — caller will leave the field blank.
+        }
+        return "";
+    }
+
+    /**
      * Safe defaults for all keys QAHelper reads directly from getSpecsForPID.
      * Prevents NullPointerExceptions when no record exists yet.
      */

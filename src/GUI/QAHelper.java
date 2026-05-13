@@ -115,6 +115,7 @@ public class QAHelper extends javax.swing.JFrame {
     //VARIABLE DECLARATIONS
     boolean actionsEnabled = true;
     boolean isFirstLoad = true;
+    private boolean autoUpdateAlreadyTriggered = false;
     boolean isPeripheralTestMode = false;
     String username = "N/A";
     HashMap<String, String> loggedInUserInfo = new HashMap<>();
@@ -913,6 +914,21 @@ public class QAHelper extends javax.swing.JFrame {
 
         initComponents();
 
+        // --- ExecHelper: Auto-update check on app startup (not deferred until spec-load) ---
+        // Runs in a SwingWorker so the network call doesn't block the EDT. autoUpdateApp()
+        // is idempotent (no-op if already on latest version), so the existing spec-load
+        // trigger remains as a safety net for legacy builds.
+        if (!autoUpdateAlreadyTriggered) {
+            autoUpdateAlreadyTriggered = true;
+            (new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() {
+                    try { autoUpdateApp(); } catch (Exception ignored) {}
+                    return null;
+                }
+            }).execute();
+        }
+
         // --- ExecHelper: Login simplification ---
         {
             java.util.List<String> execTechNames = privateStrings.getTechNames();
@@ -1477,8 +1493,9 @@ public class QAHelper extends javax.swing.JFrame {
 
                         String possibleSudo = (isLinux && !adminPassword.equals("*UNKNOWN*") ? "printf '%s\\n' " + adminPasswordQuotedForShell + " | /usr/bin/sudo -Sk " : "");
 
-                        if (wasFirstLoad) {
-                            autoUpdateApp(); // Only check for updates on first load
+                        if (wasFirstLoad && !autoUpdateAlreadyTriggered) {
+                            autoUpdateAlreadyTriggered = true;
+                            autoUpdateApp(); // Fallback for legacy builds; startup hook normally runs first
 
                             if (isLinux) {
                                 new LinuxAutoScripts("Launch", adminPassword); // Only run launch auto scripts on first load
@@ -5891,6 +5908,9 @@ public class QAHelper extends javax.swing.JFrame {
         btnTestMode = new javax.swing.JButton();
         btnForgot = new javax.swing.JButton();
         btnCheckPID = new javax.swing.JButton();
+        btnNextLaptopSKU = new javax.swing.JButton();
+        btnNextIMacSKU = new javax.swing.JButton();
+        btnRandom5Digit = new javax.swing.JButton();
         lblVersion = new javax.swing.JLabel();
         topSeparator = new javax.swing.JSeparator();
         lblModelLabel = new javax.swing.JLabel();
@@ -6143,6 +6163,42 @@ public class QAHelper extends javax.swing.JFrame {
         btnCheckPID.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCheckPIDActionPerformed(evt);
+            }
+        });
+
+        btnNextLaptopSKU.setForeground(new java.awt.Color(0, 102, 204));
+        btnNextLaptopSKU.setText("Next Laptop");
+        btnNextLaptopSKU.setToolTipText("Asks Command Center for the next available Asset ID and fills the field above.");
+        btnNextLaptopSKU.setBorder(null);
+        btnNextLaptopSKU.setBorderPainted(false);
+        btnNextLaptopSKU.setContentAreaFilled(false);
+        btnNextLaptopSKU.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextLaptopSKUActionPerformed(evt);
+            }
+        });
+
+        btnNextIMacSKU.setForeground(new java.awt.Color(0, 102, 204));
+        btnNextIMacSKU.setText("Next iMac");
+        btnNextIMacSKU.setToolTipText("Asks Command Center for the next available Asset ID and fills the field above.");
+        btnNextIMacSKU.setBorder(null);
+        btnNextIMacSKU.setBorderPainted(false);
+        btnNextIMacSKU.setContentAreaFilled(false);
+        btnNextIMacSKU.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextIMacSKUActionPerformed(evt);
+            }
+        });
+
+        btnRandom5Digit.setForeground(new java.awt.Color(0, 102, 204));
+        btnRandom5Digit.setText("Random 5-digit");
+        btnRandom5Digit.setToolTipText("Asks Command Center for the next available Asset ID and fills the field above.");
+        btnRandom5Digit.setBorder(null);
+        btnRandom5Digit.setBorderPainted(false);
+        btnRandom5Digit.setContentAreaFilled(false);
+        btnRandom5Digit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRandom5DigitActionPerformed(evt);
             }
         });
 
@@ -6624,6 +6680,12 @@ public class QAHelper extends javax.swing.JFrame {
                                 .addGroup(contentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtPID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(btnCheckPID))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnNextLaptopSKU)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnNextIMacSKU)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnRandom5Digit)
                                 .addGap(UIScale.scale(18), UIScale.scale(18), Short.MAX_VALUE)
                                 .addGroup(contentPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(btnLogIn)
@@ -6823,6 +6885,9 @@ public class QAHelper extends javax.swing.JFrame {
                     .addComponent(btnTestMode)
                     .addComponent(btnForgot)
                     .addComponent(btnCheckPID)
+                    .addComponent(btnNextLaptopSKU)
+                    .addComponent(btnNextIMacSKU)
+                    .addComponent(btnRandom5Digit)
                     .addComponent(lblVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(topSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -7979,6 +8044,59 @@ public class QAHelper extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_btnCheckPIDActionPerformed
+
+    private void btnNextLaptopSKUActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextLaptopSKUActionPerformed
+        autoFillPidFromCommandCenter("LP", "next");
+    }//GEN-LAST:event_btnNextLaptopSKUActionPerformed
+
+    private void btnNextIMacSKUActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextIMacSKUActionPerformed
+        autoFillPidFromCommandCenter("IM", "next");
+    }//GEN-LAST:event_btnNextIMacSKUActionPerformed
+
+    private void btnRandom5DigitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRandom5DigitActionPerformed
+        autoFillPidFromCommandCenter("", "random5");
+    }//GEN-LAST:event_btnRandom5DigitActionPerformed
+
+    /**
+     * Asks Command Center for the next available Asset ID and fills txtPID with it.
+     * Runs off the EDT so a slow Command Center doesn't freeze the UI.
+     */
+    private void autoFillPidFromCommandCenter(final String prefix, final String mode) {
+        btnNextLaptopSKU.setEnabled(false);
+        btnNextIMacSKU.setEnabled(false);
+        btnRandom5Digit.setEnabled(false);
+        final String origText = txtPID.getText();
+        txtPID.setText("…");
+        (new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() {
+                return PCsCRMManager.getNextAvailableSku(prefix, mode);
+            }
+            @Override
+            protected void done() {
+                try {
+                    String result = get();
+                    if (result != null && !result.isEmpty()) {
+                        txtPID.setText(result);
+                        txtPID.requestFocusInWindow();
+                        txtPID.selectAll();
+                    } else {
+                        txtPID.setText(origText);
+                        JOptionPane.showMessageDialog(qaHelperWindow,
+                            "Could not reach Command Center to get a next SKU. Check the connection or enter an Asset ID manually.",
+                            "ExecHelper  -  Next SKU Error", JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    txtPID.setText(origText);
+                } finally {
+                    btnNextLaptopSKU.setEnabled(true);
+                    btnNextIMacSKU.setEnabled(true);
+                    btnRandom5Digit.setEnabled(true);
+                }
+            }
+        }).execute();
+    }
+
 
     private void btnCheckPIDFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_btnCheckPIDFocusGained
         JButton thisButton = (JButton) evt.getSource();
@@ -17342,6 +17460,9 @@ public class QAHelper extends javax.swing.JFrame {
     private javax.swing.JSeparator bottomSeparator;
     private javax.swing.JButton btnCheckDrivers;
     private javax.swing.JButton btnCheckPID;
+    private javax.swing.JButton btnNextLaptopSKU;
+    private javax.swing.JButton btnNextIMacSKU;
+    private javax.swing.JButton btnRandom5Digit;
     private javax.swing.JButton btnCheckPorts;
     private javax.swing.JButton btnCheckRemoteManagement;
     private javax.swing.JButton btnCheckWindowsLicense;
